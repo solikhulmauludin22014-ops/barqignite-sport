@@ -53,26 +53,46 @@
 @layer components {
   /* ===== BUTTONS ===== */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-renang hover:bg-renang-dark text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-md shadow-renang/20 hover:shadow-lg hover:shadow-renang/40 hover:-translate-y-0.5 active:translate-y-0 relative overflow-hidden;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-renang text-white text-sm font-bold rounded-2xl transition-all duration-300 relative overflow-hidden uppercase tracking-widest;
+    box-shadow: 0 4px 20px rgba(0, 194, 203, 0.3), 0 0 0 1px rgba(0, 194, 203, 0.2) inset;
   }
-  .btn-primary::after {
+  .btn-primary:hover {
+    @apply bg-renang-dark -translate-y-1;
+    box-shadow: 0 0 30px rgba(0, 194, 203, 0.5), 0 8px 32px rgba(0, 194, 203, 0.4);
+  }
+  .btn-primary:active { @apply translate-y-0; }
+  .btn-primary::before {
     content: '';
-    @apply absolute inset-0 bg-white/20 scale-x-0 origin-left transition-transform duration-300;
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transition: left 0.5s ease;
   }
-  .btn-primary:hover::after {
-    @apply scale-x-100;
-  }
+  .btn-primary:hover::before { left: 100%; }
 
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-basket hover:bg-basket-dark text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-md shadow-basket/20 hover:shadow-lg hover:shadow-basket/40 hover:-translate-y-0.5 active:translate-y-0 relative overflow-hidden;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-basket text-white text-sm font-bold rounded-2xl transition-all duration-300 relative overflow-hidden uppercase tracking-widest;
+    box-shadow: 0 4px 20px rgba(255, 107, 0, 0.3), 0 0 0 1px rgba(255, 107, 0, 0.2) inset;
   }
-  .btn-accent::after {
+  .btn-accent:hover {
+    @apply bg-basket-dark -translate-y-1;
+    box-shadow: 0 0 30px rgba(255, 107, 0, 0.5), 0 8px 32px rgba(255, 107, 0, 0.4);
+  }
+  .btn-accent:active { @apply translate-y-0; }
+  .btn-accent::before {
     content: '';
-    @apply absolute inset-0 bg-white/20 rounded-full scale-0 opacity-0 transition-all duration-500;
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transition: left 0.5s ease;
   }
-  .btn-accent:hover::after {
-    @apply scale-150 opacity-100 bg-transparent border-2 border-white/30;
-  }
+  .btn-accent:hover::before { left: 100%; }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-arena-600/30 hover:bg-arena-600/50 dark:bg-white/5 dark:hover:bg-white/10 text-neutral-light text-sm font-semibold rounded-xl transition-all duration-200 border border-arena-600/50 dark:border-white/10 hover:border-arena-600 hover:dark:border-white/20 hover:-translate-y-0.5 active:translate-y-0;

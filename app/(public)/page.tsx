@@ -59,23 +59,82 @@ export default async function BerandaPage() {
 
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-20">
-          <div className="text-center animate-slide-up mt-10">
-            <h1 className="font-display text-[4rem] sm:text-[5rem] md:text-[6rem] lg:text-[7rem] font-normal leading-[0.95] text-neutral-light tracking-widest uppercase mb-6 mix-blend-difference">
-              <span className="text-basket">Barqignite</span>
-              <br />
-              <span className="text-renang">Private Sport</span>
+          <div className="text-left animate-slide-up mt-4 max-w-5xl">
+
+            {/* Label pill */}
+            <div className="inline-flex items-center gap-2 mb-6">
+              <span className="block w-8 h-px bg-basket" />
+              <span className="text-basket text-[11px] font-bold uppercase tracking-[0.3em]">Private Sport · Sidoarjo</span>
+            </div>
+
+            {/* Main Heading - Stacked sporty typography */}
+            <h1 className="font-display leading-none uppercase mb-4 select-none">
+              {/* BARQIGNITE - giant, basket orange */}
+              <span
+                className="block text-basket"
+                style={{
+                  fontSize: 'clamp(4rem, 10vw, 9rem)',
+                  letterSpacing: '-0.02em',
+                  lineHeight: 0.92,
+                  textShadow: '0 0 60px rgba(255,107,0,0.25)',
+                }}
+              >
+                Barqignite
+              </span>
+
+              {/* PRIVATE SPORT - slightly smaller, renang cyan */}
+              <span
+                className="block text-renang"
+                style={{
+                  fontSize: 'clamp(3rem, 7.5vw, 6.5rem)',
+                  letterSpacing: '0.02em',
+                  lineHeight: 1.0,
+                  textShadow: '0 0 60px rgba(0,194,203,0.25)',
+                }}
+              >
+                Private Sport
+              </span>
+
+              {/* SIDOARJO - smaller, outline/ghost style */}
+              <span
+                className="block text-neutral-light/20"
+                style={{
+                  fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
+                  letterSpacing: '0.35em',
+                  lineHeight: 1.3,
+                  WebkitTextStroke: '1px rgba(244,246,248,0.15)',
+                }}
+              >
+                Sidoarjo
+              </span>
             </h1>
-            
-            <p className="text-lg md:text-xl text-neutral-light/70 max-w-2xl mx-auto tracking-wide mb-12 uppercase font-bold text-sm">
+
+            {/* Tagline */}
+            <p className="text-neutral-light/60 text-sm md:text-base max-w-xl mt-6 mb-10 uppercase font-semibold tracking-[0.15em]">
               {tagline}
             </p>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <Link href="/pendaftaran?cabang=Basket" className="btn-accent text-lg px-10 py-5">
-                Gabung Basket
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/pendaftaran?cabang=Basket"
+                className="btn-accent group relative text-sm px-8 py-4"
+              >
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <span className="text-lg">🏀</span>
+                  <span>Daftar Basket</span>
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                </span>
               </Link>
-              <Link href="/pendaftaran?cabang=Renang" className="btn-primary text-lg px-10 py-5">
-                Gabung Renang
+              <Link
+                href="/pendaftaran?cabang=Renang"
+                className="btn-primary group relative text-sm px-8 py-4"
+              >
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <span className="text-lg">🏊</span>
+                  <span>Daftar Renang</span>
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                </span>
               </Link>
             </div>
           </div>
