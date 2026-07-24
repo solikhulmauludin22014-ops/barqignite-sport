@@ -129,8 +129,8 @@ export default function AdminPembayaranPage() {
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-white">Pembayaran SPP</h1>
-          <p className="text-white/50 mt-1 flex items-center gap-2">
+          <h1 className="font-display text-3xl font-bold text-neutral-light">Pembayaran SPP</h1>
+          <p className="text-neutral-light/50 mt-1 flex items-center gap-2">
             <Zap className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-emerald-400 text-xs">Auto-refresh setiap 5 detik</span>
           </p>
@@ -166,15 +166,15 @@ export default function AdminPembayaranPage() {
       <div className="grid grid-cols-3 gap-4">
         <div className="glass-card border border-emerald-500/20 bg-emerald-500/5 p-5 text-center">
           <div className="font-display text-2xl font-black text-emerald-400">{lunas}</div>
-          <div className="text-white/50 text-sm">Lunas</div>
+          <div className="text-neutral-light/50 text-sm">Lunas</div>
         </div>
         <div className="glass-card border border-red-500/20 bg-red-500/5 p-5 text-center">
           <div className="font-display text-2xl font-black text-red-400">{belum}</div>
-          <div className="text-white/50 text-sm">Belum Bayar</div>
+          <div className="text-neutral-light/50 text-sm">Belum Bayar</div>
         </div>
         <div className="glass-card border border-primary-500/20 bg-primary-500/5 p-5 text-center">
           <div className="font-display text-lg font-black text-primary-400">{formatCurrency(totalNominal)}</div>
-          <div className="text-white/50 text-sm">Total Terkumpul</div>
+          <div className="text-neutral-light/50 text-sm">Total Terkumpul</div>
         </div>
       </div>
 
@@ -197,7 +197,7 @@ export default function AdminPembayaranPage() {
             <tbody>
               {pembayaranData.map((row) => (
                 <tr key={row.id} className={row.status_bayar !== 'Lunas' ? 'bg-red-500/[0.03]' : ''}>
-                  <td className="font-medium text-white">{row.nama_anggota}</td>
+                  <td className="font-medium text-neutral-light">{row.nama_anggota}</td>
                   <td>
                     <span className={`badge ${row.cabang_olahraga === 'Basket' ? 'bg-orange-500/20 border-orange-500/30 text-orange-400' : 'bg-blue-500/20 border-blue-500/30 text-blue-400'}`}>
                       {row.cabang_olahraga === 'Basket' ? '🏀' : '🏊'} {row.cabang_olahraga}
@@ -211,8 +211,8 @@ export default function AdminPembayaranPage() {
                       {row.status_bayar}
                     </span>
                   </td>
-                  <td className="text-white/50 text-sm">{row.metode_bayar || '—'}</td>
-                  <td className="text-white/50 text-sm">{row.tanggal_bayar || '—'}</td>
+                  <td className="text-neutral-light/50 text-sm">{row.metode_bayar || '—'}</td>
+                  <td className="text-neutral-light/50 text-sm">{row.tanggal_bayar || '—'}</td>
                   <td>
                     {row.status_bayar !== 'Lunas' && (
                       <div className="flex gap-1">
@@ -238,7 +238,7 @@ export default function AdminPembayaranPage() {
                 </tr>
               ))}
               {pembayaranData.length === 0 && (
-                <tr><td colSpan={8} className="text-center text-white/40 py-8">Belum ada data pembayaran — klik Generate untuk membuat entri</td></tr>
+                <tr><td colSpan={8} className="text-center text-neutral-light/40 py-8">Belum ada data pembayaran — klik Generate untuk membuat entri</td></tr>
               )}
             </tbody>
           </table>
@@ -250,10 +250,10 @@ export default function AdminPembayaranPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-8 w-full max-w-md animate-slide-up">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-white">Tandai Lunas Manual</h3>
-              <button onClick={() => setModalData(null)} className="p-2 text-white/40 hover:text-white rounded-xl hover:bg-white/10"><X className="w-4 h-4" /></button>
+              <h3 className="font-display text-xl font-bold text-neutral-light">Tandai Lunas Manual</h3>
+              <button onClick={() => setModalData(null)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10"><X className="w-4 h-4" /></button>
             </div>
-            <p className="text-white/60 mb-6">SPP <strong className="text-white">{modalData.nama}</strong> — {formatCurrency(modalData.nominal)}</p>
+            <p className="text-neutral-light/60 mb-6">SPP <strong className="text-neutral-light">{modalData.nama}</strong> — {formatCurrency(modalData.nominal)}</p>
             <div className="space-y-4">
               <div><label className="form-label">Tanggal Bayar</label>
                 <input type="date" value={modalData.tanggal} onChange={(e) => setModalData({ ...modalData, tanggal: e.target.value })} className="form-input" /></div>

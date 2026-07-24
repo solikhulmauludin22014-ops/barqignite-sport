@@ -83,6 +83,10 @@
   }
 
   /* ===== CARDS ===== */
+  .gradient-hero {
+    @apply bg-gradient-to-br from-arena-900 via-arena-800 to-arena-900;
+  }
+
   .glass-card {
     @apply bg-arena-900/90 dark:bg-arena-700/80 backdrop-blur-md border border-arena-600/30 dark:border-white/10 rounded-2xl shadow-sm dark:shadow-none;
   }
@@ -177,12 +181,12 @@
 
 /* Court Line Divider */
 .divider-court {
-  @apply w-full h-1 border-t-2 border-dashed border-white/20 my-8;
+  @apply w-full h-1 border-t-2 border-dashed border-neutral-light/20 my-8;
 }
 
 /* Lane Line Divider (Renang) */
 .divider-lane {
-  @apply w-full h-2 bg-white/10 my-8 flex relative;
+  @apply w-full h-2 bg-neutral-light/10 my-8 flex relative;
 }
 .divider-lane::after {
   content: '';
@@ -195,13 +199,13 @@
   @apply w-full text-left border-collapse;
 }
 .data-table th {
-  @apply bg-arena-900 px-6 py-4 text-xs font-bold text-neutral-light/50 uppercase tracking-wider whitespace-nowrap border-b border-white/5;
+  @apply bg-arena-900 px-6 py-4 text-xs font-bold text-neutral-light/50 uppercase tracking-wider whitespace-nowrap border-b border-neutral-light/10;
 }
 .data-table td {
-  @apply px-6 py-4 border-b border-white/5 whitespace-nowrap;
+  @apply px-6 py-4 border-b border-neutral-light/10 whitespace-nowrap;
 }
 .data-table tr:hover td {
-  @apply bg-white/5;
+  @apply bg-neutral-light/5;
 }
 
 /* Animations */

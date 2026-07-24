@@ -52,8 +52,8 @@ export default function AdminPelatihPage() {
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-white">Kelola Pelatih</h1>
-          <p className="text-white/50 mt-1">Tambah, edit data pelatih club</p>
+          <h1 className="font-display text-3xl font-bold text-neutral-light">Kelola Pelatih</h1>
+          <p className="text-neutral-light/50 mt-1">Tambah, edit data pelatih club</p>
         </div>
         <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" /> Tambah Pelatih</button>
       </div>
@@ -70,28 +70,28 @@ export default function AdminPelatihPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={pelatih.foto_url} alt={pelatih.nama} className="w-full h-full object-cover rounded-xl" />
                   ) : (
-                    <span className="text-white text-xl font-bold">{pelatih.nama.charAt(0)}</span>
+                    <span className="text-neutral-light text-xl font-bold">{pelatih.nama.charAt(0)}</span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold text-white truncate">{pelatih.nama}</h3>
+                  <h3 className="font-display font-bold text-neutral-light truncate">{pelatih.nama}</h3>
                   <span className="badge badge-info text-xs mt-1">{pelatih.spesialisasi}</span>
                 </div>
-                <button onClick={() => openEdit(pelatih)} className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-white/40 hover:text-white rounded-lg hover:bg-white/10">
+                <button onClick={() => openEdit(pelatih)} className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-neutral-light/10">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
               </div>
-              <div className="space-y-1 text-sm text-white/50">
-                <p><span className="text-white/30">Sertifikasi:</span> {pelatih.sertifikasi || '—'}</p>
-                <p><span className="text-white/30">Pengalaman:</span> {pelatih.pengalaman}</p>
+              <div className="space-y-1 text-sm text-neutral-light/50">
+                <p><span className="text-neutral-light/30">Sertifikasi:</span> {pelatih.sertifikasi || '—'}</p>
+                <p><span className="text-neutral-light/30">Pengalaman:</span> {pelatih.pengalaman}</p>
               </div>
             </div>
           ))}
 
           {data.length === 0 && (
             <div className="md:col-span-3 glass-card border rounded-2xl p-16 text-center">
-              <UserCheck className="w-12 h-12 text-white/20 mx-auto mb-3" />
-              <p className="text-white/40">Belum ada data pelatih</p>
+              <UserCheck className="w-12 h-12 text-neutral-light/20 mx-auto mb-3" />
+              <p className="text-neutral-light/40">Belum ada data pelatih</p>
               <button onClick={openAdd} className="btn-primary mt-4"><Plus className="w-4 h-4" /> Tambah Pelatih</button>
             </div>
           )}
@@ -103,8 +103,8 @@ export default function AdminPelatihPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-8 w-full max-w-lg animate-slide-up">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-white">{editing ? 'Edit Pelatih' : 'Tambah Pelatih'}</h3>
-              <button onClick={() => setShowForm(false)} className="p-2 text-white/40 hover:text-white rounded-xl hover:bg-white/10"><X className="w-4 h-4" /></button>
+              <h3 className="font-display text-xl font-bold text-neutral-light">{editing ? 'Edit Pelatih' : 'Tambah Pelatih'}</h3>
+              <button onClick={() => setShowForm(false)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">

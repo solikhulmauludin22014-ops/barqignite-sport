@@ -48,8 +48,8 @@ export default function AdminPendaftarPage() {
   return (
     <div className="space-y-6 animate-in">
       <div>
-        <h1 className="font-display text-3xl font-bold text-white">Pendaftar Baru</h1>
-        <p className="text-white/50 mt-1">Review dan kelola pendaftar anggota baru</p>
+        <h1 className="font-display text-3xl font-bold text-neutral-light">Pendaftar Baru</h1>
+        <p className="text-neutral-light/50 mt-1">Review dan kelola pendaftar anggota baru</p>
       </div>
 
       {/* Filter tabs */}
@@ -61,13 +61,13 @@ export default function AdminPendaftarPage() {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               filter === tab.key
                 ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                : 'text-white/50 hover:text-white hover:bg-white/10'
+                : 'text-neutral-light/50 hover:text-neutral-light hover:bg-neutral-light/10'
             }`}
           >
             {tab.label}
           </button>
         ))}
-        <button onClick={loadData} className="ml-auto text-white/40 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors">
+        <button onClick={loadData} className="ml-auto text-neutral-light/40 hover:text-neutral-light p-2 rounded-xl hover:bg-neutral-light/10 transition-colors">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
@@ -96,13 +96,13 @@ export default function AdminPendaftarPage() {
                   <tr key={row.id}>
                     <td>
                       <div>
-                        <p className="font-medium text-white">{row.nama}</p>
-                        {row.nama_wali && <p className="text-xs text-white/40">Wali: {row.nama_wali}</p>}
+                        <p className="font-medium text-neutral-light">{row.nama}</p>
+                        {row.nama_wali && <p className="text-xs text-neutral-light/40">Wali: {row.nama_wali}</p>}
                       </div>
                     </td>
                     <td><span className="badge badge-neutral">{row.kategori}</span></td>
-                    <td className="text-white/70">{row.no_hp}</td>
-                    <td className="text-white/50 text-sm">{formatDate(row.tanggal_daftar)}</td>
+                    <td className="text-neutral-light/70">{row.no_hp}</td>
+                    <td className="text-neutral-light/50 text-sm">{formatDate(row.tanggal_daftar)}</td>
                     <td>
                       <span className={`badge ${statusConfig[row.status_pendaftaran]?.class || 'badge-neutral'}`}>
                         {statusConfig[row.status_pendaftaran]?.label || row.status_pendaftaran}
@@ -138,7 +138,7 @@ export default function AdminPendaftarPage() {
                 ))}
                 {data.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="text-center text-white/40 py-12">
+                    <td colSpan={6} className="text-center text-neutral-light/40 py-12">
                       <UserPlus className="w-10 h-10 mx-auto mb-2 opacity-30" />
                       Tidak ada pendaftar {filter === 'Pending' ? 'yang menunggu' : ''}
                     </td>
@@ -156,12 +156,12 @@ export default function AdminPendaftarPage() {
           <div className="glass-card border rounded-3xl p-8 w-full max-w-lg animate-slide-up">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="font-display text-xl font-bold text-white">{selected.nama}</h3>
+                <h3 className="font-display text-xl font-bold text-neutral-light">{selected.nama}</h3>
                 <span className={`badge mt-1 ${statusConfig[selected.status_pendaftaran]?.class}`}>
                   {statusConfig[selected.status_pendaftaran]?.label}
                 </span>
               </div>
-              <button onClick={() => setSelected(null)} className="p-2 text-white/40 hover:text-white rounded-xl hover:bg-white/10">
+              <button onClick={() => setSelected(null)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10">
                 <XCircle className="w-4 h-4" />
               </button>
             </div>
@@ -177,13 +177,13 @@ export default function AdminPendaftarPage() {
                 { label: 'Tanggal Daftar', value: formatDate(selected.tanggal_daftar) },
               ].map((f) => (
                 <div key={f.label}>
-                  <p className="text-white/40 text-xs">{f.label}</p>
-                  <p className="text-white font-medium mt-0.5">{f.value}</p>
+                  <p className="text-neutral-light/40 text-xs">{f.label}</p>
+                  <p className="text-neutral-light font-medium mt-0.5">{f.value}</p>
                 </div>
               ))}
               <div className="col-span-2">
-                <p className="text-white/40 text-xs">Alamat</p>
-                <p className="text-white font-medium mt-0.5">{selected.alamat}</p>
+                <p className="text-neutral-light/40 text-xs">Alamat</p>
+                <p className="text-neutral-light font-medium mt-0.5">{selected.alamat}</p>
               </div>
             </div>
 

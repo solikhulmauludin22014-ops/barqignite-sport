@@ -50,13 +50,13 @@ function AdminLoginContent() {
           <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-primary-500/30">
             <Trophy className="w-8 h-8 text-white" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-white">Panel Admin</h1>
-          <p className="text-white/40 text-sm mt-1">Club Olahraga — Sistem Manajemen</p>
+          <h1 className="font-display text-2xl font-bold text-neutral-light">Panel Admin</h1>
+          <p className="text-neutral-light/40 text-sm mt-1">Club Olahraga — Sistem Manajemen</p>
         </div>
 
         {/* Form */}
         <div className="glass-card border rounded-3xl p-8">
-          <h2 className="font-display text-xl font-bold text-white mb-6">Masuk ke Akun</h2>
+          <h2 className="font-display text-xl font-bold text-neutral-light mb-6">Masuk ke Akun</h2>
 
           {error && (
             <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm mb-6">
@@ -69,7 +69,7 @@ function AdminLoginContent() {
             <div>
               <label htmlFor="username" className="form-label">Username</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-light/30" />
                 <input
                   id="username"
                   type="text"
@@ -86,7 +86,7 @@ function AdminLoginContent() {
             <div>
               <label htmlFor="password" className="form-label">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-light/30" />
                 <input
                   id="password"
                   type={showPass ? 'text' : 'password'}
@@ -100,7 +100,7 @@ function AdminLoginContent() {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-light/30 hover:text-neutral-light/60 transition-colors"
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -128,7 +128,7 @@ function AdminLoginContent() {
           </form>
         </div>
 
-        <p className="text-center text-white/20 text-xs mt-6">
+        <p className="text-center text-neutral-light/20 text-xs mt-6">
           Halaman ini hanya untuk administrator club
         </p>
       </div>
@@ -138,7 +138,7 @@ function AdminLoginContent() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen gradient-hero flex items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen gradient-hero flex items-center justify-center text-neutral-light"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
       <AdminLoginContent />
     </Suspense>
   );

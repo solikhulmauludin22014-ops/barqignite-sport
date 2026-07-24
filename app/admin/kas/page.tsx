@@ -75,8 +75,8 @@ export default function AdminKasPage() {
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-white">Kas Club</h1>
-          <p className="text-white/50 mt-1">Pemasukan, pengeluaran, dan saldo berjalan</p>
+          <h1 className="font-display text-3xl font-bold text-neutral-light">Kas Club</h1>
+          <p className="text-neutral-light/50 mt-1">Pemasukan, pengeluaran, dan saldo berjalan</p>
         </div>
         <button onClick={() => setShowForm(true)} className="btn-primary">
           <Plus className="w-4 h-4" /> Tambah Transaksi
@@ -88,21 +88,21 @@ export default function AdminKasPage() {
         <div className="glass-card border border-emerald-500/20 bg-emerald-500/5 p-6">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-emerald-400" />
-            <span className="text-white/50 text-sm">Total Masuk</span>
+            <span className="text-neutral-light/50 text-sm">Total Masuk</span>
           </div>
           <div className="font-display text-2xl font-black text-emerald-400">{formatCurrency(totalMasuk)}</div>
         </div>
         <div className="glass-card border border-red-500/20 bg-red-500/5 p-6">
           <div className="flex items-center gap-2 mb-2">
             <TrendingDown className="w-4 h-4 text-red-400" />
-            <span className="text-white/50 text-sm">Total Keluar</span>
+            <span className="text-neutral-light/50 text-sm">Total Keluar</span>
           </div>
           <div className="font-display text-2xl font-black text-red-400">{formatCurrency(totalKeluar)}</div>
         </div>
         <div className="glass-card border border-primary-500/20 bg-primary-500/5 p-6">
           <div className="flex items-center gap-2 mb-2">
             <Wallet className="w-4 h-4 text-primary-400" />
-            <span className="text-white/50 text-sm">Saldo Kas</span>
+            <span className="text-neutral-light/50 text-sm">Saldo Kas</span>
           </div>
           <div className="font-display text-2xl font-black text-primary-400">{formatCurrency(saldo)}</div>
         </div>
@@ -111,7 +111,7 @@ export default function AdminKasPage() {
       {/* Chart */}
       {chart.length > 1 && (
         <div className="glass-card border rounded-2xl p-6">
-          <h2 className="font-display text-lg font-bold text-white mb-4">Grafik Transaksi</h2>
+          <h2 className="font-display text-lg font-bold text-neutral-light mb-4">Grafik Transaksi</h2>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chart} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
@@ -180,11 +180,11 @@ export default function AdminKasPage() {
                     <td className={`font-semibold ${row.jenis === 'Masuk' ? 'text-emerald-400' : 'text-red-400'}`}>
                       {row.jenis === 'Masuk' ? '+' : '-'}{formatCurrency(row.nominal)}
                     </td>
-                    <td className="font-mono text-sm text-white/70">{formatCurrency(row.saldo_berjalan)}</td>
+                    <td className="font-mono text-sm text-neutral-light/70">{formatCurrency(row.saldo_berjalan)}</td>
                   </tr>
                 ))}
                 {data.length === 0 && (
-                  <tr><td colSpan={6} className="text-center text-white/40 py-8">Belum ada transaksi</td></tr>
+                  <tr><td colSpan={6} className="text-center text-neutral-light/40 py-8">Belum ada transaksi</td></tr>
                 )}
               </tbody>
             </table>
@@ -197,8 +197,8 @@ export default function AdminKasPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-8 w-full max-w-md animate-slide-up">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-white">Tambah Transaksi</h3>
-              <button onClick={() => setShowForm(false)} className="p-2 text-white/40 hover:text-white rounded-xl hover:bg-white/10">
+              <h3 className="font-display text-xl font-bold text-neutral-light">Tambah Transaksi</h3>
+              <button onClick={() => setShowForm(false)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10">
                 <X className="w-4 h-4" />
               </button>
             </div>

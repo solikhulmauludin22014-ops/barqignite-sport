@@ -107,15 +107,15 @@ export default function AdminBrandingPage() {
   return (
     <div className="space-y-6 animate-in">
       <div>
-        <h1 className="font-display text-3xl font-bold text-white">Branding & Konten</h1>
-        <p className="text-white/50 mt-1">Edit identitas, konten, dan informasi club</p>
+        <h1 className="font-display text-3xl font-bold text-neutral-light">Branding & Konten</h1>
+        <p className="text-neutral-light/50 mt-1">Edit identitas, konten, dan informasi club</p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-2 flex-wrap">
         {tabs.map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'text-white/50 hover:text-white hover:bg-white/10'}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'text-neutral-light/50 hover:text-neutral-light hover:bg-neutral-light/10'}`}>
             {tab.label}
           </button>
         ))}
@@ -127,7 +127,7 @@ export default function AdminBrandingPage() {
       <form onSubmit={handleSave} className="glass-card border rounded-2xl p-6">
         {activeTab === 'umum' && (
           <div className="space-y-4">
-            <h2 className="font-display font-bold text-white mb-4">Identitas Club</h2>
+            <h2 className="font-display font-bold text-neutral-light mb-4">Identitas Club</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               <div><label className="form-label">Nama Club *</label><input value={form.nama_club} onChange={set('nama_club')} placeholder="Club Olahraga Sidoarjo" className="form-input" /></div>
               <div><label className="form-label">Tagline</label><input value={form.tagline} onChange={set('tagline')} placeholder="Membentuk Atlet Berprestasi" className="form-input" /></div>
@@ -141,7 +141,7 @@ export default function AdminBrandingPage() {
 
         {activeTab === 'konten' && (
           <div className="space-y-4">
-            <h2 className="font-display font-bold text-white mb-4">Konten Profil</h2>
+            <h2 className="font-display font-bold text-neutral-light mb-4">Konten Profil</h2>
             <div><label className="form-label">Sejarah Club</label><textarea value={form.sejarah} onChange={set('sejarah')} rows={5} placeholder="Ceritakan sejarah berdirinya club..." className="form-input resize-none" /></div>
             <div><label className="form-label">Visi</label><textarea value={form.visi} onChange={set('visi')} rows={3} placeholder="Visi club..." className="form-input resize-none" /></div>
             <div><label className="form-label">Misi</label><textarea value={form.misi} onChange={set('misi')} rows={4} placeholder="Misi club..." className="form-input resize-none" /></div>
@@ -150,7 +150,7 @@ export default function AdminBrandingPage() {
 
         {activeTab === 'organisasi' && (
           <div className="space-y-4">
-            <h2 className="font-display font-bold text-white mb-4">Struktur Kepengurusan</h2>
+            <h2 className="font-display font-bold text-neutral-light mb-4">Struktur Kepengurusan</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               {(['org_ketua','org_sekretaris','org_bendahara','org_pelatih_kepala'] as const).map((key) => (
                 <div key={key}>
@@ -164,7 +164,7 @@ export default function AdminBrandingPage() {
 
         {activeTab === 'pembayaran' && (
           <div className="space-y-4">
-            <h2 className="font-display font-bold text-white mb-4">Informasi Pembayaran</h2>
+            <h2 className="font-display font-bold text-neutral-light mb-4">Informasi Pembayaran</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               <div><label className="form-label">SPP Mini (Rp)</label><input type="number" value={form.spp_mini} onChange={set('spp_mini')} className="form-input" /></div>
               <div><label className="form-label">SPP Pemula (Rp)</label><input type="number" value={form.spp_pemula} onChange={set('spp_pemula')} className="form-input" /></div>
@@ -180,7 +180,7 @@ export default function AdminBrandingPage() {
 
         {activeTab === 'galeri' && (
           <div className="space-y-4">
-            <h2 className="font-display font-bold text-white mb-4">URL Foto Galeri</h2>
+            <h2 className="font-display font-bold text-neutral-light mb-4">URL Foto Galeri</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               {(['galeri_1','galeri_2','galeri_3','galeri_4','galeri_5','galeri_6'] as const).map((key, i) => (
                 <div key={key}>
@@ -194,7 +194,7 @@ export default function AdminBrandingPage() {
 
         {activeTab === 'kontak' && (
           <div className="space-y-4">
-            <h2 className="font-display font-bold text-white mb-4">Kontak & Sosial Media</h2>
+            <h2 className="font-display font-bold text-neutral-light mb-4">Kontak & Sosial Media</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               <div><label className="form-label">No WhatsApp Admin</label><input value={form.no_wa_admin} onChange={set('no_wa_admin')} placeholder="628xxx" className="form-input" /></div>
               <div><label className="form-label">Email Club</label><input value={form.email_club} onChange={set('email_club')} placeholder="info@club.com" className="form-input" /></div>
@@ -204,7 +204,7 @@ export default function AdminBrandingPage() {
           </div>
         )}
 
-        <div className="flex justify-end mt-6 pt-6 border-t border-white/10">
+        <div className="flex justify-end mt-6 pt-6 border-t border-neutral-light/10">
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Menyimpan...</> : saved ? <><CheckCircle className="w-4 h-4" />Tersimpan!</> : <><Save className="w-4 h-4" />Simpan Perubahan</>}
           </button>

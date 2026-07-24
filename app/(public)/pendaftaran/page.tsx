@@ -67,12 +67,12 @@ function PendaftaranContent() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-slate-950 pt-20 flex items-center justify-center px-4">
+      <div className="min-h-screen pt-20 flex items-center justify-center px-4">
         <div className="glass-card border border-emerald-500/30 bg-emerald-500/5 rounded-3xl p-12 max-w-md w-full text-center animate-slide-up">
           <div className="text-5xl mb-4">{cabangColor.emoji}</div>
           <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-          <h2 className="font-display text-2xl font-bold text-white mb-3">Pendaftaran Berhasil!</h2>
-          <p className="text-white/60 mb-8">
+          <h2 className="font-display text-2xl font-bold text-neutral-light mb-3">Pendaftaran Berhasil!</h2>
+          <p className="text-neutral-light/60 mb-8">
             Pendaftaran cabang <strong className={cabangColor.text}>{selectedCabang}</strong> Anda telah kami terima.
             Admin akan menghubungi Anda segera untuk konfirmasi dan informasi selanjutnya.
           </p>
@@ -85,19 +85,19 @@ function PendaftaranContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-20">
+    <div className="min-h-screen pt-20">
       {/* Hero */}
       <section className="relative py-20 overflow-hidden">
-        <div className={`absolute inset-0 ${selectedCabang === 'Basket' ? 'bg-gradient-to-b from-orange-950/30' : 'bg-gradient-to-b from-blue-950/30'} to-transparent`} />
+        <div className={`absolute inset-0 ${selectedCabang === 'Basket' ? 'bg-gradient-to-b from-orange-900/10' : 'bg-gradient-to-b from-blue-900/10'} to-transparent pointer-events-none`} />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className={`inline-flex items-center gap-2 ${cabangColor.bg} border rounded-full px-4 py-2 text-sm ${cabangColor.text} font-medium mb-6`}>
             <UserPlus className="w-4 h-4" />
             <span>Bergabung dengan Barqignite</span>
           </div>
-          <h1 className="font-display text-4xl md:text-5xl font-black text-white mb-4">
+          <h1 className="font-display text-4xl md:text-5xl font-black text-neutral-light mb-4">
             Daftar <span className={cabangColor.text}>{selectedCabang === 'Basket' ? '🏀 Basket' : '🏊 Renang'}</span>
           </h1>
-          <p className="text-white/50 text-lg">
+          <p className="text-neutral-light/50 text-lg">
             Isi formulir pendaftaran anggota baru Barqignite Private Sport Sidoarjo
           </p>
         </div>
@@ -121,7 +121,7 @@ function PendaftaranContent() {
                   <label key={c} className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                     selectedCabang === c
                       ? (c === 'Basket' ? 'bg-orange-500/20 border-orange-500/50 text-orange-400' : 'bg-blue-500/20 border-blue-500/50 text-blue-400')
-                      : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                      : 'bg-neutral-light/5 border-neutral-light/10 text-neutral-light/60 hover:bg-neutral-light/10'
                   }`}>
                     <input {...register('cabang_olahraga')} type="radio" value={c} className="hidden" />
                     <span className="text-2xl">{c === 'Basket' ? '🏀' : '🏊'}</span>
@@ -175,7 +175,7 @@ function PendaftaranContent() {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="form-label">Nama Orang Tua / Wali <span className="text-white/30">(untuk peserta di bawah 17 tahun)</span></label>
+                <label className="form-label">Nama Orang Tua / Wali <span className="text-neutral-light/30">(untuk peserta di bawah 17 tahun)</span></label>
                 <input {...register('nama_wali')} placeholder="Nama orang tua atau wali" className="form-input" />
               </div>
 
@@ -198,7 +198,7 @@ function PendaftaranContent() {
               }
             </button>
 
-            <p className="text-white/30 text-xs text-center">
+            <p className="text-neutral-light/30 text-xs text-center">
               Dengan mendaftar, Anda menyetujui penggunaan data untuk keperluan administrasi Barqignite Private Sport Sidoarjo.
             </p>
           </form>
@@ -210,7 +210,7 @@ function PendaftaranContent() {
 
 export default function PendaftaranPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 pt-20 flex items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen pt-20 flex items-center justify-center text-neutral-light"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
       <PendaftaranContent />
     </Suspense>
   );

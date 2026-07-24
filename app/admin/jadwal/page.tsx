@@ -55,8 +55,8 @@ export default function AdminJadwalPage() {
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-white">Kelola Jadwal</h1>
-          <p className="text-white/50 mt-1">Jadwal latihan dan pertandingan</p>
+          <h1 className="font-display text-3xl font-bold text-neutral-light">Kelola Jadwal</h1>
+          <p className="text-neutral-light/50 mt-1">Jadwal latihan dan pertandingan</p>
         </div>
         <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" /> Tambah Jadwal</button>
       </div>
@@ -65,7 +65,7 @@ export default function AdminJadwalPage() {
       <div className="flex gap-2">
         {[{ key: '', label: 'Semua' }, { key: 'Latihan', label: 'Latihan' }, { key: 'Pertandingan', label: 'Pertandingan' }].map((f) => (
           <button key={f.key} onClick={() => setFilterJenis(f.key)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filterJenis === f.key ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'text-white/50 hover:text-white hover:bg-white/10'}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filterJenis === f.key ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'text-neutral-light/50 hover:text-neutral-light hover:bg-neutral-light/10'}`}>
             {f.label}
           </button>
         ))}
@@ -85,14 +85,14 @@ export default function AdminJadwalPage() {
                   <tr key={row.id}>
                     <td>
                       <span className={`badge ${hariColors[row.hari] || 'badge-neutral'}`}>{row.hari}</span>
-                      {row.tanggal && <p className="text-xs text-white/40 mt-1">{row.tanggal}</p>}
+                      {row.tanggal && <p className="text-xs text-neutral-light/40 mt-1">{row.tanggal}</p>}
                     </td>
                     <td>
-                      <div className="flex items-center gap-1 text-white/70"><Clock className="w-3.5 h-3.5 text-primary-400" />{row.jam_mulai}–{row.jam_selesai}</div>
+                      <div className="flex items-center gap-1 text-neutral-light/70"><Clock className="w-3.5 h-3.5 text-primary-400" />{row.jam_mulai}–{row.jam_selesai}</div>
                     </td>
                     <td><span className="badge badge-neutral">{row.kategori}</span></td>
                     <td>
-                      <div className="flex items-center gap-1 text-white/70"><MapPin className="w-3.5 h-3.5 text-accent-400" />{row.lokasi}</div>
+                      <div className="flex items-center gap-1 text-neutral-light/70"><MapPin className="w-3.5 h-3.5 text-accent-400" />{row.lokasi}</div>
                     </td>
                     <td>
                       <span className={`badge ${row.jenis === 'Latihan' ? 'badge-info' : 'badge-warning'}`}>
@@ -106,7 +106,7 @@ export default function AdminJadwalPage() {
                     </td>
                   </tr>
                 ))}
-                {data.length === 0 && <tr><td colSpan={6} className="text-center text-white/40 py-8">Belum ada jadwal</td></tr>}
+                {data.length === 0 && <tr><td colSpan={6} className="text-center text-neutral-light/40 py-8">Belum ada jadwal</td></tr>}
               </tbody>
             </table>
           </div>
@@ -118,8 +118,8 @@ export default function AdminJadwalPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-8 w-full max-w-lg animate-slide-up">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-white">{editing ? 'Edit Jadwal' : 'Tambah Jadwal'}</h3>
-              <button onClick={() => setShowForm(false)} className="p-2 text-white/40 hover:text-white rounded-xl hover:bg-white/10"><X className="w-4 h-4" /></button>
+              <h3 className="font-display text-xl font-bold text-neutral-light">{editing ? 'Edit Jadwal' : 'Tambah Jadwal'}</h3>
+              <button onClick={() => setShowForm(false)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">

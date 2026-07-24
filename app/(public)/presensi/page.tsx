@@ -66,7 +66,7 @@ export default function PresensiPage() {
         </div>
 
         {success ? (
-          <div className="glass-card bg-white/5 border border-white/10 rounded-3xl p-10 text-center animate-slide-up">
+          <div className="glass-card bg-neutral-light/5 border border-neutral-light/10 rounded-3xl p-10 text-center animate-slide-up">
             <div className="w-20 h-20 bg-status-success/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-status-success" />
             </div>
@@ -82,7 +82,7 @@ export default function PresensiPage() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="glass-card bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl animate-fade-in">
+          <form onSubmit={handleSubmit} className="glass-card bg-neutral-light/5 border border-neutral-light/10 rounded-3xl p-8 md:p-10 shadow-2xl animate-fade-in">
             
             {error && (
               <div className="bg-status-danger/10 border border-status-danger/20 rounded-xl p-4 mb-8 flex items-start gap-3">
@@ -104,7 +104,7 @@ export default function PresensiPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Masukkan email Anda..."
-                    className="w-full bg-arena-800/50 dark:bg-black/20 border border-white/10 focus:border-basket/50 focus:ring-1 focus:ring-basket/50 rounded-2xl pl-12 pr-4 py-4 text-neutral-light font-medium transition-all outline-none"
+                    className="w-full bg-arena-800/50 dark:bg-black/20 border border-neutral-light/10 focus:border-basket/50 focus:ring-1 focus:ring-basket/50 rounded-2xl pl-12 pr-4 py-4 text-neutral-light font-medium transition-all outline-none"
                     required
                   />
                 </div>
@@ -122,7 +122,7 @@ export default function PresensiPage() {
                     <select
                       value={sesi}
                       onChange={(e) => setSesi(e.target.value)}
-                      className="w-full bg-arena-800/50 dark:bg-black/20 border border-white/10 focus:border-basket/50 focus:ring-1 focus:ring-basket/50 rounded-2xl pl-12 pr-10 py-4 text-neutral-light font-medium transition-all outline-none appearance-none cursor-pointer"
+                      className="w-full bg-arena-800/50 dark:bg-black/20 border border-neutral-light/10 focus:border-basket/50 focus:ring-1 focus:ring-basket/50 rounded-2xl pl-12 pr-10 py-4 text-neutral-light font-medium transition-all outline-none appearance-none cursor-pointer"
                     >
                       <option value="Latihan Pagi">Latihan Pagi</option>
                       <option value="Latihan Sore">Latihan Sore</option>
@@ -142,7 +142,7 @@ export default function PresensiPage() {
                     <select
                       value={statusHadir}
                       onChange={(e) => setStatusHadir(e.target.value)}
-                      className="w-full bg-arena-800/50 dark:bg-black/20 border border-white/10 focus:border-basket/50 focus:ring-1 focus:ring-basket/50 rounded-2xl pl-12 pr-10 py-4 text-neutral-light font-medium transition-all outline-none appearance-none cursor-pointer"
+                      className="w-full bg-arena-800/50 dark:bg-black/20 border border-neutral-light/10 focus:border-basket/50 focus:ring-1 focus:ring-basket/50 rounded-2xl pl-12 pr-10 py-4 text-neutral-light font-medium transition-all outline-none appearance-none cursor-pointer"
                     >
                       <option value="Hadir">Hadir</option>
                       <option value="Izin">Izin</option>
