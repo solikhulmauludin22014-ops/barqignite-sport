@@ -95,14 +95,16 @@ export default async function BerandaPage() {
                 Private Sport
               </span>
 
-              {/* SIDOARJO - smaller, outline/ghost style */}
+              {/* SIDOARJO - smaller, clean white ghost */}
               <span
-                className="block text-neutral-light/20"
+                className="block"
                 style={{
-                  fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
-                  letterSpacing: '0.35em',
-                  lineHeight: 1.3,
-                  WebkitTextStroke: '1px rgba(244,246,248,0.15)',
+                  fontSize: 'clamp(1.6rem, 3.5vw, 3rem)',
+                  letterSpacing: '0.4em',
+                  lineHeight: 1.4,
+                  color: 'rgba(244,246,248,0.35)',
+                  WebkitTextStroke: '1px rgba(244,246,248,0.4)',
+                  fontWeight: 300,
                 }}
               >
                 Sidoarjo
