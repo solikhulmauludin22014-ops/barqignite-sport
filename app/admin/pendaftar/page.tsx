@@ -1,0 +1,214 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { UserPlus, CheckCircle, XCircle, Eye, Loader2, Filter, RefreshCw } from 'lucide-react';
+import type { Pendaftar } from '@/types';
+import { formatDate } from '@/lib/utils';
+
+export default function AdminPendaftarPage() {
+  const [data, setData] = useState<Pendaftar[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState('Pending');
+  const [processing, setProcessing] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Pendaftar | null>(null);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/pendaftar${filter ? `?status=${filter}` : ''}`);
+      const json = await res.json();
+      if (json.success) setData(json.data || []);
+    } finally { setLoading(false); }
+  }, [filter]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleAction = async (id: string, action: 'approve' | 'reject') => {
+    setProcessing(id);
+    try {
+      const res = await fetch('/api/pendaftar', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSelected(null);
+        loadData();
+      }
+    } finally { setProcessing(null); }
+  };
+
+  const statusConfig: Record<string, { class: string; label: string }> = {
+    Pending: { class: 'badge-warning', label: 'Menunggu' },
+    Diterima: { class: 'badge-success', label: 'Diterima' },
+    Ditolak: { class: 'badge-danger', label: 'Ditolak' },
+  };
+
+  return (
+    <div className="space-y-6 animate-in">
+      <div>
+        <h1 className="font-display text-3xl font-bold text-white">Pendaftar Baru</h1>
+        <p className="text-white/50 mt-1">Review dan kelola pendaftar anggota baru</p>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex gap-2 flex-wrap">
+        {[{ key: 'Pending', label: 'Menunggu' }, { key: 'Diterima', label: 'Diterima' }, { key: 'Ditolak', label: 'Ditolak' }, { key: '', label: 'Semua' }].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setFilter(tab.key)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              filter === tab.key
+                ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                : 'text-white/50 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+        <button onClick={loadData} className="ml-auto text-white/40 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors">
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div className="glass-card border rounded-2xl p-16 text-center">
+          <Loader2 className="w-8 h-8 text-primary-400 animate-spin mx-auto" />
+        </div>
+      ) : (
+        <div className="glass-card border rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Kategori</th>
+                  <th>No HP</th>
+                  <th>Tgl Daftar</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((row) => (
+                  <tr key={row.id}>
+                    <td>
+                      <div>
+                        <p className="font-medium text-white">{row.nama}</p>
+                        {row.nama_wali && <p className="text-xs text-white/40">Wali: {row.nama_wali}</p>}
+                      </div>
+                    </td>
+                    <td><span className="badge badge-neutral">{row.kategori}</span></td>
+                    <td className="text-white/70">{row.no_hp}</td>
+                    <td className="text-white/50 text-sm">{formatDate(row.tanggal_daftar)}</td>
+                    <td>
+                      <span className={`badge ${statusConfig[row.status_pendaftaran]?.class || 'badge-neutral'}`}>
+                        {statusConfig[row.status_pendaftaran]?.label || row.status_pendaftaran}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="flex gap-2">
+                        <button onClick={() => setSelected(row)} className="btn-secondary text-xs py-1 px-2">
+                          <Eye className="w-3 h-3" /> Detail
+                        </button>
+                        {row.status_pendaftaran === 'Pending' && (
+                          <>
+                            <button
+                              onClick={() => handleAction(row.id, 'approve')}
+                              disabled={processing === row.id}
+                              className="btn-success"
+                            >
+                              {processing === row.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                              Terima
+                            </button>
+                            <button
+                              onClick={() => handleAction(row.id, 'reject')}
+                              disabled={processing === row.id}
+                              className="btn-danger"
+                            >
+                              <XCircle className="w-3 h-3" /> Tolak
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {data.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-center text-white/40 py-12">
+                      <UserPlus className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                      Tidak ada pendaftar {filter === 'Pending' ? 'yang menunggu' : ''}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {selected && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card border rounded-3xl p-8 w-full max-w-lg animate-slide-up">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="font-display text-xl font-bold text-white">{selected.nama}</h3>
+                <span className={`badge mt-1 ${statusConfig[selected.status_pendaftaran]?.class}`}>
+                  {statusConfig[selected.status_pendaftaran]?.label}
+                </span>
+              </div>
+              <button onClick={() => setSelected(null)} className="p-2 text-white/40 hover:text-white rounded-xl hover:bg-white/10">
+                <XCircle className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {[
+                { label: 'Tanggal Lahir', value: formatDate(selected.tanggal_lahir) },
+                { label: 'Jenis Kelamin', value: selected.jenis_kelamin },
+                { label: 'Kategori', value: selected.kategori },
+                { label: 'No HP/WA', value: selected.no_hp },
+                { label: 'Email', value: selected.email || '—' },
+                { label: 'Nama Wali', value: selected.nama_wali || '—' },
+                { label: 'Tanggal Daftar', value: formatDate(selected.tanggal_daftar) },
+              ].map((f) => (
+                <div key={f.label}>
+                  <p className="text-white/40 text-xs">{f.label}</p>
+                  <p className="text-white font-medium mt-0.5">{f.value}</p>
+                </div>
+              ))}
+              <div className="col-span-2">
+                <p className="text-white/40 text-xs">Alamat</p>
+                <p className="text-white font-medium mt-0.5">{selected.alamat}</p>
+              </div>
+            </div>
+
+            {selected.status_pendaftaran === 'Pending' && (
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => handleAction(selected.id, 'reject')}
+                  disabled={!!processing}
+                  className="btn-danger flex-1 justify-center text-sm"
+                >
+                  <XCircle className="w-4 h-4" /> Tolak
+                </button>
+                <button
+                  onClick={() => handleAction(selected.id, 'approve')}
+                  disabled={!!processing}
+                  className="btn-success flex-1 justify-center text-sm"
+                >
+                  {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Terima & Jadikan Anggota
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
