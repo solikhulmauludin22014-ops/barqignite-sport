@@ -38,11 +38,15 @@
     @apply bg-arena-800 text-neutral-light antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1, h2 {
     font-family: var(--font-anton), system-ui, sans-serif;
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+  
+  h3, h4, h5, h6 {
+    font-weight: 700;
   }
 }
 

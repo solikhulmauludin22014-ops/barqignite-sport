@@ -103,8 +103,8 @@ export default function PembayaranPage() {
               {sppData[cabangFilter].map((item, i) => (
                 <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <span className="text-white/70 font-medium">{item.kategori}</span>
-                  <span className={`font-display text-xl font-bold ${cabangConfig[cabangFilter].color}`}>
-                    {formatCurrency(item.nominal)}<span className="text-sm font-normal text-white/40">/bln</span>
+                  <span className={`font-bold text-xl tracking-tight ${cabangConfig[cabangFilter].color}`}>
+                    {formatCurrency(item.nominal)}<span className="text-sm font-normal text-white/40 ml-1">/bln</span>
                   </span>
                 </div>
               ))}
