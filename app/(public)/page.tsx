@@ -3,31 +3,26 @@ import Link from 'next/link';
 import {
   Trophy, Users, Target, Waves, Calendar, Shield, Flame, Zap
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export const metadata: Metadata = {
   title: 'Beranda — Barqignite Private Sport Sidoarjo',
   description: 'Club olahraga Basket & Renang terbaik di Sidoarjo. Bergabunglah dan raih prestasi bersama Barqignite Private Sport.',
 };
 
-const BASE_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-
 async function getBranding() {
   try {
-    const res = await fetch(`${BASE_URL}/api/branding`, { next: { revalidate: 60 } });
-    if (!res.ok) return null;
-    return (await res.json()).data;
+    const { data, error } = await supabase.from('branding').select('*').single();
+    if (error) return null;
+    return data;
   } catch { return null; }
 }
 
 async function getStats() {
   try {
-    const [basketRes, renangRes] = await Promise.all([
-      fetch(`${BASE_URL}/api/anggota?status=Aktif&cabang=Basket`, { next: { revalidate: 60 } }),
-      fetch(`${BASE_URL}/api/anggota?status=Aktif&cabang=Renang`, { next: { revalidate: 60 } }),
-    ]);
-    const basket = basketRes.ok ? (await basketRes.json()).data?.length || 0 : 0;
-    const renang = renangRes.ok ? (await renangRes.json()).data?.length || 0 : 0;
-    return { basket, renang, total: basket + renang };
+    const { count: basket } = await supabase.from('anggota').select('*', { count: 'exact', head: true }).eq('status', 'Aktif').eq('cabang_olahraga', 'Basket');
+    const { count: renang } = await supabase.from('anggota').select('*', { count: 'exact', head: true }).eq('status', 'Aktif').eq('cabang_olahraga', 'Renang');
+    return { basket: basket || 0, renang: renang || 0, total: (basket || 0) + (renang || 0) };
   } catch { return { basket: 0, renang: 0, total: 0 }; }
 }
 

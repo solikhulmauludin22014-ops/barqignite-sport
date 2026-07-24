@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { UserCheck, Award, Briefcase, SlidersHorizontal } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import type { Pelatih } from '@/types';
 
 export const metadata: Metadata = {
@@ -9,9 +10,9 @@ export const metadata: Metadata = {
 
 async function getPelatih(): Promise<Pelatih[]> {
   try {
-    const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/pelatih`, { next: { revalidate: 60 } });
-    if (!res.ok) return [];
-    return (await res.json()).data || [];
+    const { data, error } = await supabase.from('pelatih').select('*').order('urutan', { ascending: true });
+    if (error) return [];
+    return data || [];
   } catch { return []; }
 }
 

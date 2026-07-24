@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Calendar, Clock, MapPin, Trophy, Filter, Target, Waves } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import type { Jadwal } from '@/types';
 import Link from 'next/link';
 
@@ -10,12 +11,9 @@ export const metadata: Metadata = {
 
 async function getJadwal(): Promise<Jadwal[]> {
   try {
-    const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/jadwal`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
+    const { data, error } = await supabase.from('jadwal').select('*');
+    if (error) return [];
+    return data || [];
   } catch { return []; }
 }
 

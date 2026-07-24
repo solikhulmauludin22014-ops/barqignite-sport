@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { BookOpen, Eye, Heart, Users, Award, Star, MessageCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export const metadata: Metadata = {
   title: 'Profil Club',
@@ -8,12 +9,9 @@ export const metadata: Metadata = {
 
 async function getBranding() {
   try {
-    const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/branding`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data;
+    const { data, error } = await supabase.from('branding').select('*').single();
+    if (error) return null;
+    return data;
   } catch { return null; }
 }
 
