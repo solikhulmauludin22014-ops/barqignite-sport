@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 async function getBranding() {
   try {
-    const { data, error } = await supabase.from('branding').select('*').single();
+    const { data, error } = await supabase.from('branding').select('*').eq('id', 'BRAND-001').single();
     if (error) return null;
     return data;
   } catch { return null; }

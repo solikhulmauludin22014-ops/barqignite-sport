@@ -1,20 +1,24 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import type { BrandingConfig } from '@/types';
 
+// GET: Ambil konfigurasi branding (single row)
 export async function GET() {
   try {
-    const { data: rows, error } = await supabase.from('branding').select('*');
-    if (error) throw error;
+    const { data, error } = await supabase
+      .from('branding')
+      .select('*')
+      .eq('id', 'BRAND-001')
+      .single();
 
-    const config: Record<string, string> = {};
-    if (rows) {
-      rows.forEach((row) => {
-        if (row.key) config[row.key] = row.value || '';
-      });
+    if (error) {
+      // Jika belum ada data, kembalikan default kosong
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ success: true, data: {} });
+      }
+      throw error;
     }
-    
-    return NextResponse.json({ success: true, data: config });
+
+    return NextResponse.json({ success: true, data: data || {} });
   } catch (error) {
     console.error('Branding GET error:', error);
     return NextResponse.json(
@@ -24,22 +28,20 @@ export async function GET() {
   }
 }
 
+// PUT: Update konfigurasi branding
 export async function PUT(request: Request) {
   try {
-    const body: Partial<BrandingConfig> = await request.json();
+    const body = await request.json();
 
-    const upsertData = Object.entries(body).map(([key, value]) => ({
-      key,
-      value: value as string,
-    }));
+    // Hapus field yang tidak perlu di-update
+    const { id, created_at, ...updateFields } = body;
 
-    if (upsertData.length > 0) {
-      const { error } = await supabase
-        .from('branding')
-        .upsert(upsertData, { onConflict: 'key' });
+    const { error } = await supabase
+      .from('branding')
+      .update({ ...updateFields, updated_at: new Date().toISOString() })
+      .eq('id', 'BRAND-001');
 
-      if (error) throw error;
-    }
+    if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Branding berhasil diperbarui' });
   } catch (error) {
