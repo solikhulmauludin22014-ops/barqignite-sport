@@ -39,8 +39,8 @@
   }
 
   h1, h2 {
-    font-family: var(--font-anton), system-ui, sans-serif;
-    font-weight: 400;
+    font-family: var(--font-oswald), system-ui, sans-serif;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }

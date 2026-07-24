@@ -24,10 +24,20 @@ const navItems = [
 
 export default function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const pathname = usePathname();
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ callbackUrl: '/admin/login', redirect: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+      window.location.href = '/admin/login';
+    }
+  };
 
   return (
     <>
@@ -116,7 +126,7 @@ export default function AdminSidebar() {
             Lihat Website
           </Link>
           <button
-            onClick={() => signOut({ callbackUrl: '/admin/login' })}
+            onClick={() => setShowLogoutConfirm(true)}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500/70 dark:text-red-400/70 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-all"
           >
             <LogOut className="w-4 h-4" />
@@ -124,6 +134,23 @@ export default function AdminSidebar() {
           </button>
         </div>
       </aside>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="glass-card border rounded-3xl p-6 w-full max-w-sm animate-slide-up text-center shadow-xl">
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <LogOut className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="font-display text-xl font-bold text-neutral-light mb-2">Konfirmasi Keluar</h3>
+            <p className="text-neutral-light/60 text-sm mb-6">Apakah Anda yakin ingin keluar dari panel admin?</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowLogoutConfirm(false)} className="btn-secondary flex-1 justify-center">Tidak</button>
+              <button onClick={handleLogout} className="flex-1 justify-center bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-all py-2.5 px-4 shadow-md shadow-red-500/20 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">Ya, Keluar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
