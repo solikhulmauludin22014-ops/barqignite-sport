@@ -57,8 +57,8 @@ export default function PresensiPage() {
       <div className="max-w-xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <div className="text-center mb-12">
-          <h1 className="font-display text-5xl md:text-6xl font-black text-neutral-light mb-4 tracking-tight">
-            Check-<span className="text-gradient">In</span>
+          <h1 className="font-display text-5xl md:text-6xl font-black text-neutral-light mb-4 uppercase tracking-wider">
+            PRE<span className="text-renang">SEN</span>SI
           </h1>
           <p className="text-neutral-light/60 text-lg md:text-xl font-light">
             Konfirmasi kehadiran latihan Anda hari ini.

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { Inter, Oswald, Space_Mono } from 'next/font/google';
+import { Inter, Outfit, Space_Mono } from 'next/font/google';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const oswald = Oswald({ subsets: ['latin'], variable: '--font-oswald' });
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 const spaceMono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-space-mono' });
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className="scroll-smooth" suppressHydrationWarning>
-      <body className={`${inter.variable} ${oswald.variable} ${spaceMono.variable} antialiased bg-arena-800 text-neutral-light`}>
+      <body className={`${inter.variable} ${outfit.variable} ${spaceMono.variable} antialiased bg-arena-800 text-neutral-light`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {children}
         </ThemeProvider>
