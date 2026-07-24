@@ -67,11 +67,23 @@ export default function Navbar() {
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <div className="hidden xl:flex gap-3">
-              <Link href="/pendaftaran?cabang=Basket" className="btn-accent">Daftar Basket</Link>
-              <Link href="/pendaftaran?cabang=Renang" className="btn-primary">Daftar Renang</Link>
-              <Link href="/admin/login" className="btn-secondary flex items-center gap-2">
-                <span className="hidden sm:inline">Admin</span>
+          <div className="hidden xl:flex items-center gap-2">
+              <Link
+                href="/pendaftaran?cabang=Basket"
+                className="group flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-basket/10 hover:bg-basket text-basket hover:text-white border border-basket/30 hover:border-basket text-[11px] font-semibold tracking-wide transition-all duration-200 hover:-translate-y-px"
+              >
+                <span>🏀</span>
+                <span>Daftar Basket</span>
+              </Link>
+              <Link
+                href="/pendaftaran?cabang=Renang"
+                className="group flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-renang/10 hover:bg-renang text-renang hover:text-white border border-renang/30 hover:border-renang text-[11px] font-semibold tracking-wide transition-all duration-200 hover:-translate-y-px"
+              >
+                <span>🏊</span>
+                <span>Daftar Renang</span>
+              </Link>
+              <Link href="/admin/login" className="px-3.5 py-1.5 rounded-lg text-[11px] font-semibold text-neutral-light/50 hover:text-neutral-light border border-neutral-light/10 hover:border-neutral-light/20 transition-all duration-200 tracking-wide">
+                Admin
               </Link>
             </div>
             <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 text-neutral-light/70 hover:text-neutral-light rounded-lg hover:bg-neutral-light/10 transition-colors">
