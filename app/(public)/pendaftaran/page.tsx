@@ -57,7 +57,7 @@ function PendaftaranContent() {
       });
       const json = await res.json();
       if (json.success) { setSubmitted(true); reset(); }
-      else setServerError(json.error || 'Terjadi kesalahan. Coba lagi.');
+      else setServerError(json.details || json.error || 'Terjadi kesalahan. Coba lagi.');
     } catch { setServerError('Koneksi bermasalah. Periksa internet Anda.'); }
   };
 

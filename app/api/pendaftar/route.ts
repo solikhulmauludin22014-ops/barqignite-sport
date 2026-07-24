@@ -56,7 +56,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data: data[0], message: 'Pendaftaran berhasil dikirim!' });
   } catch (error) {
     console.error('Pendaftar POST error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menyimpan pendaftaran' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Gagal menyimpan pendaftaran', 
+      details: error instanceof Error ? error.message : JSON.stringify(error) 
+    }, { status: 500 });
   }
 }
 
