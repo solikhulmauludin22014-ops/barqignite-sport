@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,7 +27,7 @@ const kategoriOptions: Record<CabangOlahraga, string[]> = {
   Renang: ['Beginner (5-8 tahun)', 'Intermediate (9-13 tahun)', 'Advanced (14-18 tahun)', 'Dewasa (18+ tahun)'],
 };
 
-export default function PendaftaranPage() {
+function PendaftaranContent() {
   const searchParams = useSearchParams();
   const defaultCabang = (searchParams.get('cabang') as CabangOlahraga) || 'Basket';
 
@@ -205,5 +205,13 @@ export default function PendaftaranPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function PendaftaranPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 pt-20 flex items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+      <PendaftaranContent />
+    </Suspense>
   );
 }

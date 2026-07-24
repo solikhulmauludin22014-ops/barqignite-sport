@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Lock, User, Loader2, AlertCircle, Trophy, Eye, EyeOff } from 'lucide-react';
 
-export default function AdminLoginPage() {
+function AdminLoginContent() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -133,5 +133,13 @@ export default function AdminLoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen gradient-hero flex items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+      <AdminLoginContent />
+    </Suspense>
   );
 }
