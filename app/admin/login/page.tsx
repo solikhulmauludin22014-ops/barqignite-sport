@@ -3,7 +3,8 @@
 import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Lock, User, Loader2, AlertCircle, Trophy, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+import { Lock, User, Loader2, AlertCircle, Trophy, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 function AdminLoginContent() {
   const [username, setUsername] = useState('');
@@ -45,6 +46,10 @@ function AdminLoginContent() {
       </div>
 
       <div className="w-full max-w-md relative z-10">
+        <Link href="/" className="inline-flex items-center gap-2 text-neutral-light/50 hover:text-neutral-light transition-colors mb-6 text-sm">
+          <ArrowLeft className="w-4 h-4" />
+          Kembali ke Beranda
+        </Link>
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-primary-500/30">

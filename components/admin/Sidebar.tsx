@@ -32,7 +32,8 @@ export default function AdminSidebar() {
 
   const handleLogout = async () => {
     try {
-      await signOut({ callbackUrl: '/admin/login', redirect: true });
+      await signOut({ redirect: false });
+      window.location.href = '/admin/login';
     } catch (error) {
       console.error('Logout error:', error);
       window.location.href = '/admin/login';
