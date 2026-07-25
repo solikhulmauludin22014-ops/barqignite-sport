@@ -16,10 +16,10 @@ const navItems = [
   { href: '/admin/presensi', label: 'Presensi', icon: ClipboardList },
   { href: '/admin/pembayaran', label: 'Pembayaran SPP', icon: CreditCard },
   { href: '/admin/kas', label: 'Kas Club', icon: Wallet },
+  { href: '/admin/anggota', label: 'Data Anggota', icon: UserCheck },
   { href: '/admin/pendaftar', label: 'Pendaftar Baru', icon: UserPlus },
   { href: '/admin/jadwal', label: 'Jadwal', icon: Calendar },
-  { href: '/admin/pelatih', label: 'Pelatih', icon: UserCheck },
-  { href: '/admin/branding', label: 'Branding & Konten', icon: Paintbrush },
+  { href: '/admin/pelatih', label: 'Pelatih', icon: ClipboardList },
 ];
 
 export default function AdminSidebar() {
