@@ -143,26 +143,26 @@ export default async function BerandaPage() {
 
           {/* Stats: Scoreboard Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-32 animate-fade-in relative z-20">
-            <div className="scoreboard-card text-center group">
+            <Link href="/atlet" className="scoreboard-card text-center group block cursor-pointer">
               <div className="scoreboard-glow-basket opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="text-neutral-light/50 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Total Anggota</div>
               <div className="scoreboard-value text-5xl md:text-6xl text-basket animate-count-up">{stats.total > 0 ? stats.total : '200'}</div>
-            </div>
-            <div className="scoreboard-card text-center group">
+            </Link>
+            <Link href="/atlet?filter=prestasi" className="scoreboard-card text-center group block cursor-pointer">
               <div className="scoreboard-glow-renang opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="text-neutral-light/50 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Prestasi Club</div>
               <div className="scoreboard-value text-5xl md:text-6xl text-renang animate-count-up">{jumlahPrestasi}</div>
-            </div>
-            <div className="scoreboard-card text-center group">
+            </Link>
+            <Link href="/atlet?cabang=Basket" className="scoreboard-card text-center group block cursor-pointer">
               <div className="scoreboard-glow-basket opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="text-neutral-light/50 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Atlet Basket</div>
               <div className="scoreboard-value text-5xl md:text-6xl text-basket animate-count-up">{stats.basket > 0 ? stats.basket : '120'}</div>
-            </div>
-            <div className="scoreboard-card text-center group">
+            </Link>
+            <Link href="/atlet?cabang=Renang" className="scoreboard-card text-center group block cursor-pointer">
               <div className="scoreboard-glow-renang opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="text-neutral-light/50 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Atlet Renang</div>
               <div className="scoreboard-value text-5xl md:text-6xl text-renang animate-count-up">{stats.renang > 0 ? stats.renang : '80'}</div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
