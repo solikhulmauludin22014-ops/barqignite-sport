@@ -14,10 +14,11 @@ export const revalidate = 0;
 export default async function AtletPage({
   searchParams,
 }: {
-  searchParams: { cabang?: string; filter?: string };
+  searchParams: Promise<{ cabang?: string; filter?: string }>;
 }) {
-  const cabang = searchParams.cabang;
-  const filter = searchParams.filter;
+  const resolvedSearchParams = await searchParams;
+  const cabang = resolvedSearchParams.cabang;
+  const filter = resolvedSearchParams.filter;
 
   let query = supabase.from('anggota').select('*').eq('status', 'Aktif');
 
