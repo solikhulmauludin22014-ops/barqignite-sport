@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Search, Download, Filter, UserCheck, RefreshCw, Trash2 } from 'lucide-react';
+import { Loader2, Search, Download, Filter, UserCheck, RefreshCw, Trash2, Pencil, X, CheckCircle, Plus } from 'lucide-react';
 import type { Anggota } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,25 @@ export default function AdminAnggotaPage() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCabang, setFilterCabang] = useState('');
+  const [filterCabang, setFilterCabang] = useState('');
   const [filterKategori, setFilterKategori] = useState('');
+
+  const emptyForm = {
+    nama: '',
+    cabang_olahraga: 'Basket',
+    kategori: '',
+    tanggal_lahir: '',
+    jenis_kelamin: 'Laki-laki',
+    alamat: '',
+    no_hp: '',
+    email: '',
+    status: 'Aktif',
+  };
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Anggota | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -25,6 +43,44 @@ export default function AdminAnggotaPage() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  const openEdit = (a: Anggota) => {
+    setEditing(a);
+    setForm({
+      nama: a.nama,
+      cabang_olahraga: a.cabang_olahraga,
+      kategori: a.kategori,
+      tanggal_lahir: a.tanggal_lahir,
+      jenis_kelamin: a.jenis_kelamin,
+      alamat: a.alamat,
+      no_hp: a.no_hp,
+      email: a.email || '',
+      status: a.status,
+    });
+    setShowForm(true);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/anggota', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, id: editing.id }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        setShowForm(false);
+        loadData();
+      } else {
+        alert(json.error || 'Gagal menyimpan');
+      }
+    } finally { setSaving(false); }
+  };
 
   // Derived unique categories
   const kategoriOptions = [...new Set(data.map((item) => item.kategori))];
@@ -190,9 +246,14 @@ export default function AdminAnggotaPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30">
-                        <Trash2 className="w-3 h-3" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(row)} className="btn-secondary text-xs py-1 px-2">
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -214,6 +275,78 @@ export default function AdminAnggotaPage() {
             <button onClick={loadData} className="btn-secondary h-8 px-3 text-xs">
               <RefreshCw className="w-3 h-3 mr-1.5" /> Refresh
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Form Edit Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card border rounded-3xl p-8 w-full max-w-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-display text-xl font-bold text-neutral-light">Edit Data Anggota</h3>
+              <button onClick={() => setShowForm(false)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="form-label">Nama Lengkap</label>
+                  <input type="text" value={form.nama} onChange={(e) => setForm({ ...form, nama: e.target.value })} className="form-input" required />
+                </div>
+                <div>
+                  <label className="form-label">No HP/WA</label>
+                  <input type="text" value={form.no_hp} onChange={(e) => setForm({ ...form, no_hp: e.target.value })} className="form-input" required />
+                </div>
+                <div>
+                  <label className="form-label">Email</label>
+                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="form-input" />
+                </div>
+                <div>
+                  <label className="form-label">Cabang Olahraga</label>
+                  <select value={form.cabang_olahraga} onChange={(e) => setForm({ ...form, cabang_olahraga: e.target.value })} className="form-select" required>
+                    <option value="Basket">Basket</option>
+                    <option value="Renang">Renang</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">Kategori</label>
+                  <select value={form.kategori} onChange={(e) => setForm({ ...form, kategori: e.target.value })} className="form-select" required>
+                    <option value="">Pilih Kategori</option>
+                    {kategoriOptions.map(k => <option key={k} value={k}>{k}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">Tanggal Lahir</label>
+                  <input type="date" value={form.tanggal_lahir} onChange={(e) => setForm({ ...form, tanggal_lahir: e.target.value })} className="form-input" required />
+                </div>
+                <div>
+                  <label className="form-label">Jenis Kelamin</label>
+                  <select value={form.jenis_kelamin} onChange={(e) => setForm({ ...form, jenis_kelamin: e.target.value })} className="form-select" required>
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">Status</label>
+                  <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as 'Aktif' | 'Non-aktif' })} className="form-select" required>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Non-aktif">Non-aktif</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="form-label">Alamat Lengkap</label>
+                  <textarea value={form.alamat} onChange={(e) => setForm({ ...form, alamat: e.target.value })} rows={3} className="form-input resize-none" required />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1 justify-center">Batal</button>
+                <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center">
+                  {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Menyimpan...</> : saved ? <><CheckCircle className="w-4 h-4" />Tersimpan!</> : <><Plus className="w-4 h-4" />Simpan Perubahan</>}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

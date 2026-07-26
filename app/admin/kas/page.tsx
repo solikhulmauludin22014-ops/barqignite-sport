@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, Trash2 } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, Trash2, Pencil } from 'lucide-react';
 import { formatCurrency, getMonthName } from '@/lib/utils';
 import type { Kas } from '@/types';
 import {
@@ -15,6 +15,7 @@ export default function AdminKasPage() {
   const [data, setData] = useState<Kas[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Kas | null>(null);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState({
     bulan: String(new Date().getMonth() + 1),
@@ -40,14 +41,34 @@ export default function AdminKasPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  const openAdd = () => {
+    setEditing(null);
+    setForm({ tanggal: new Date().toISOString().split('T')[0], jenis: 'Masuk', kategori: '', keterangan: '', nominal: '' });
+    setShowForm(true);
+  };
+
+  const openEdit = (k: Kas) => {
+    setEditing(k);
+    setForm({
+      tanggal: k.tanggal,
+      jenis: k.jenis as 'Masuk' | 'Keluar',
+      kategori: k.kategori,
+      keterangan: k.keterangan,
+      nominal: k.nominal,
+    });
+    setShowForm(true);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
+      const method = editing ? 'PUT' : 'POST';
+      const payload = editing ? { ...form, id: editing.id, nominal: parseFloat(form.nominal) } : { ...form, nominal: parseFloat(form.nominal) };
       const res = await fetch('/api/kas', {
-        method: 'POST',
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, nominal: parseFloat(form.nominal) }),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (json.success) {
@@ -93,7 +114,7 @@ export default function AdminKasPage() {
           <h1 className="font-display text-3xl font-bold text-neutral-light">Kas Club</h1>
           <p className="text-neutral-light/50 mt-1">Pemasukan, pengeluaran, dan saldo berjalan</p>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary">
+        <button onClick={openAdd} className="btn-primary">
           <Plus className="w-4 h-4" /> Tambah Transaksi
         </button>
       </div>
@@ -198,9 +219,14 @@ export default function AdminKasPage() {
                     </td>
                     <td className="font-mono text-sm text-neutral-light/70">{formatCurrency(row.saldo_berjalan)}</td>
                     <td>
-                      <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30">
-                        <Trash2 className="w-3 h-3" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(row)} className="btn-secondary text-xs py-1 px-2">
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -218,7 +244,7 @@ export default function AdminKasPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-8 w-full max-w-md animate-slide-up">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-neutral-light">Tambah Transaksi</h3>
+              <h3 className="font-display text-xl font-bold text-neutral-light">{editing ? 'Edit Transaksi' : 'Tambah Transaksi'}</h3>
               <button onClick={() => setShowForm(false)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10">
                 <X className="w-4 h-4" />
               </button>
