@@ -42,7 +42,7 @@ export default async function BerandaPage() {
   const cleanWa = noWa.replace(/\D/g, '');
   // Mengubah prefix '0' menjadi '62' agar valid untuk standar wa.me
   const finalWa = cleanWa.startsWith('0') ? '62' + cleanWa.slice(1) : cleanWa;
-  const waLink = `https://wa.me/6285606900934${finalWa}`;
+  const waLink = `https://wa.me/${finalWa}`;
 
   // Membersihkan tanda '@' jika ada dari username IG, lalu tambahkan param yang Anda mau
   const cleanIg = instagram.replace('@', '');
