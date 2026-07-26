@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Loader2, Calendar, Clock, MapPin, Trophy, X, CheckCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Calendar, Clock, MapPin, Trophy, X, CheckCircle, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { Jadwal } from '@/types';
 
 const HARI = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
@@ -57,8 +58,30 @@ export default function AdminJadwalPage() {
         alert(json.error || 'Gagal menghapus jadwal');
       }
     } catch (err) {
+    } catch (err) {
       alert('Terjadi kesalahan saat menghapus jadwal');
     }
+  };
+
+  const exportToExcel = () => {
+    if (data.length === 0) return;
+
+    const dataToExport = data.map((item, index) => ({
+      'No': index + 1,
+      'Hari': item.hari,
+      'Tanggal': item.tanggal || '-',
+      'Jam Mulai': item.jam_mulai,
+      'Jam Selesai': item.jam_selesai,
+      'Kategori': item.kategori,
+      'Lokasi': item.lokasi,
+      'Jenis': item.jenis,
+      'Keterangan': item.keterangan || '-'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Jadwal');
+    XLSX.writeFile(workbook, `Data_Jadwal_Barqignite_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const hariColors: Record<string, string> = {
@@ -73,7 +96,12 @@ export default function AdminJadwalPage() {
           <h1 className="font-display text-3xl font-bold text-neutral-light">Kelola Jadwal</h1>
           <p className="text-neutral-light/50 mt-1">Jadwal latihan dan pertandingan</p>
         </div>
-        <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" /> Tambah Jadwal</button>
+        <div className="flex gap-2">
+          <button onClick={exportToExcel} disabled={data.length === 0} className="btn-success h-10 px-4">
+            <Download className="w-4 h-4 mr-2" /> Export
+          </button>
+          <button onClick={openAdd} className="btn-primary h-10 px-4"><Plus className="w-4 h-4 mr-2" /> Tambah Jadwal</button>
+        </div>
       </div>
 
       {/* Filter */}

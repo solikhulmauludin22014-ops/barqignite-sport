@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Loader2, UserCheck, X, CheckCircle, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Loader2, UserCheck, X, CheckCircle, Trash2, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { Pelatih } from '@/types';
 
 const emptyForm = { nama: '', foto_url: '', spesialisasi: '', sertifikasi: '', pengalaman: '', urutan: '1' };
@@ -56,8 +57,26 @@ export default function AdminPelatihPage() {
         alert(json.error || 'Gagal menghapus pelatih');
       }
     } catch (err) {
+    } catch (err) {
       alert('Terjadi kesalahan saat menghapus pelatih');
     }
+  };
+
+  const exportToExcel = () => {
+    if (data.length === 0) return;
+
+    const dataToExport = data.map((item, index) => ({
+      'No': index + 1,
+      'Nama Pelatih': item.nama,
+      'Spesialisasi': item.spesialisasi,
+      'Sertifikasi': item.sertifikasi || '-',
+      'Pengalaman': item.pengalaman,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Pelatih');
+    XLSX.writeFile(workbook, `Data_Pelatih_Barqignite_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -70,7 +89,12 @@ export default function AdminPelatihPage() {
           <h1 className="font-display text-3xl font-bold text-neutral-light">Kelola Pelatih</h1>
           <p className="text-neutral-light/50 mt-1">Tambah, edit data pelatih club</p>
         </div>
-        <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" /> Tambah Pelatih</button>
+        <div className="flex gap-2">
+          <button onClick={exportToExcel} disabled={data.length === 0} className="btn-success h-10 px-4">
+            <Download className="w-4 h-4 mr-2" /> Export
+          </button>
+          <button onClick={openAdd} className="btn-primary h-10 px-4"><Plus className="w-4 h-4 mr-2" /> Tambah Pelatih</button>
+        </div>
       </div>
 
       {loading ? (

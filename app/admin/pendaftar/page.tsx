@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { UserPlus, CheckCircle, XCircle, Eye, Loader2, Filter, RefreshCw, Trash2 } from 'lucide-react';
+import { UserPlus, CheckCircle, XCircle, Eye, Loader2, Filter, RefreshCw, Trash2, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { Pendaftar } from '@/types';
 import { formatDate } from '@/lib/utils';
 
@@ -51,8 +52,32 @@ export default function AdminPendaftarPage() {
         alert(json.error || 'Gagal menghapus pendaftar');
       }
     } catch (err) {
+    } catch (err) {
       alert('Terjadi kesalahan saat menghapus pendaftar');
     }
+  };
+
+  const exportToExcel = () => {
+    if (data.length === 0) return;
+
+    const dataToExport = data.map((item, index) => ({
+      'No': index + 1,
+      'Nama Pendaftar': item.nama,
+      'Tanggal Lahir': formatDate(item.tanggal_lahir),
+      'Jenis Kelamin': item.jenis_kelamin,
+      'Kategori': item.kategori,
+      'No HP/WA': item.no_hp,
+      'Email': item.email || '-',
+      'Nama Wali': item.nama_wali || '-',
+      'Alamat': item.alamat,
+      'Tanggal Daftar': formatDate(item.tanggal_daftar),
+      'Status Pendaftaran': item.status_pendaftaran
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Pendaftar Baru');
+    XLSX.writeFile(workbook, `Data_Pendaftar_Barqignite_${filter || 'Semua'}_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const statusConfig: Record<string, { class: string; label: string }> = {
@@ -83,9 +108,14 @@ export default function AdminPendaftarPage() {
             {tab.label}
           </button>
         ))}
-        <button onClick={loadData} className="ml-auto text-neutral-light/40 hover:text-neutral-light p-2 rounded-xl hover:bg-neutral-light/10 transition-colors">
-          <RefreshCw className="w-4 h-4" />
-        </button>
+        <div className="ml-auto flex gap-2">
+          <button onClick={exportToExcel} disabled={data.length === 0} className="btn-success text-sm px-4">
+            <Download className="w-4 h-4 mr-2" /> Export
+          </button>
+          <button onClick={loadData} className="text-neutral-light/40 hover:text-neutral-light p-2 rounded-xl hover:bg-neutral-light/10 transition-colors">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Table */}

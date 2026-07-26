@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, Trash2, Pencil } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, Trash2, Pencil, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { formatCurrency, getMonthName } from '@/lib/utils';
 import type { Kas } from '@/types';
 import {
@@ -90,8 +91,28 @@ export default function AdminKasPage() {
         alert(json.error || 'Gagal menghapus transaksi');
       }
     } catch (err) {
+    } catch (err) {
       alert('Terjadi kesalahan saat menghapus transaksi');
     }
+  };
+
+  const exportToExcel = () => {
+    if (data.length === 0) return;
+
+    const dataToExport = data.map((item, index) => ({
+      'No': index + 1,
+      'Tanggal': item.tanggal,
+      'Jenis': item.jenis,
+      'Kategori': item.kategori,
+      'Keterangan': item.keterangan,
+      'Nominal (Rp)': item.nominal,
+      'Saldo Berjalan (Rp)': item.saldo_berjalan
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Kas Club');
+    XLSX.writeFile(workbook, `Data_Kas_Barqignite_${filter.bulan}_${filter.tahun}.xlsx`);
   };
 
   const totalMasuk = data.filter((d) => d.jenis === 'Masuk').reduce((acc, d) => acc + parseFloat(d.nominal || '0'), 0);
@@ -178,6 +199,9 @@ export default function AdminKasPage() {
           </select>
           <button onClick={loadData} className="btn-primary text-sm px-4">
             <Filter className="w-3.5 h-3.5" /> Filter
+          </button>
+          <button onClick={exportToExcel} disabled={data.length === 0} className="btn-success text-sm px-4 ml-auto">
+            <Download className="w-3.5 h-3.5 mr-1" /> Export
           </button>
         </div>
       </div>

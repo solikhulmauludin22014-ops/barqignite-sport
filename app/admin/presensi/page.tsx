@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, AlertCircle, Clock, Loader2, Plus, Filter, UserPlus, RefreshCw, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Clock, Loader2, Plus, Filter, UserPlus, RefreshCw, Trash2, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { Anggota, Presensi } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -131,6 +132,25 @@ export default function AdminPresensiPage() {
   const izin = items.filter((i) => i.status_hadir === 'Izin').length;
   const sakit = items.filter((i) => i.status_hadir === 'Sakit').length;
   const alpa = items.filter((i) => i.status_hadir === 'Alpa').length;
+
+  const exportToExcel = () => {
+    if (rekapData.length === 0) return;
+
+    const dataToExport = rekapData.map((item, index) => ({
+      'No': index + 1,
+      'Tanggal': item.tanggal,
+      'Sesi': item.sesi,
+      'Nama Anggota': item.nama_anggota,
+      'Cabang Olahraga': item.cabang_olahraga,
+      'Kategori': item.kategori,
+      'Status Hadir': item.status_hadir
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Rekap Presensi');
+    XLSX.writeFile(workbook, `Data_Rekap_Presensi_Barqignite_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
 
   return (
     <div className="space-y-6 animate-in">
@@ -283,9 +303,12 @@ export default function AdminPresensiPage() {
                   {kategoriList.map((k) => <option key={k} value={k}>{k}</option>)}
                 </select>
               </div>
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
                 <button onClick={loadRekap} className="btn-primary w-full justify-center">
                   <Filter className="w-4 h-4" /> Filter
+                </button>
+                <button onClick={exportToExcel} disabled={rekapData.length === 0} className="btn-success w-full justify-center">
+                  <Download className="w-4 h-4 mr-1" /> Export
                 </button>
               </div>
             </div>

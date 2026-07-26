@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Loader2, Search, Download, Filter, UserCheck, RefreshCw, Trash2, Pencil, X, CheckCircle, Plus } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { Anggota } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -94,41 +95,30 @@ export default function AdminAnggotaPage() {
     return matchSearch && matchCabang && matchKategori;
   });
 
-  // Export to CSV
-  const exportToCSV = () => {
+  // Export to Excel (XLSX)
+  const exportToExcel = () => {
     if (filteredData.length === 0) return;
 
-    // Headers
-    const headers = ['ID', 'Nama Lengkap', 'Cabang Olahraga', 'Kategori', 'Tanggal Lahir', 'Jenis Kelamin', 'No HP/WA', 'Email', 'Alamat', 'Tanggal Gabung', 'Status'];
-    
-    // Rows
-    const rows = filteredData.map(item => [
-      item.id,
-      `"${item.nama}"`,
-      item.cabang_olahraga,
-      `"${item.kategori}"`,
-      formatDate(item.tanggal_lahir),
-      item.jenis_kelamin,
-      `'${item.no_hp}`, // Escape phone number to prevent scientific notation in excel
-      item.email || '',
-      `"${item.alamat}"`,
-      formatDate(item.tanggal_gabung),
-      item.status
-    ]);
+    const dataToExport = filteredData.map((item, index) => ({
+      'No': index + 1,
+      'Nama Lengkap': item.nama,
+      'Cabang Olahraga': item.cabang_olahraga,
+      'Kategori': item.kategori,
+      'Tanggal Lahir': formatDate(item.tanggal_lahir),
+      'Jenis Kelamin': item.jenis_kelamin,
+      'No HP/WA': item.no_hp,
+      'Email': item.email || '-',
+      'Alamat': item.alamat,
+      'Tanggal Gabung': formatDate(item.tanggal_gabung),
+      'Status': item.status
+    }));
 
-    // CSV Content
-    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    
-    // Create Blob and download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `Data_Anggota_Barqignite_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Anggota');
+
+    // Generate buffer
+    XLSX.writeFile(workbook, `Data_Anggota_Barqignite_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleDelete = async (id: string) => {
@@ -153,9 +143,9 @@ export default function AdminAnggotaPage() {
           <h1 className="font-display text-3xl font-bold text-neutral-light">Data Anggota</h1>
           <p className="text-neutral-light/50 mt-1">Kelola seluruh data anggota aktif dan non-aktif</p>
         </div>
-        <button onClick={exportToCSV} disabled={filteredData.length === 0} className="btn-success h-10 px-4">
+        <button onClick={exportToExcel} disabled={filteredData.length === 0} className="btn-success h-10 px-4">
           <Download className="w-4 h-4 mr-2" />
-          Export ke Excel (CSV)
+          Export ke Excel
         </button>
       </div>
 

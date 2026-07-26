@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import useSWR from 'swr';
 import {
   CheckCircle, AlertTriangle, Loader2, Filter, DollarSign,
-  QrCode, Building2, RefreshCw, Zap, X, Trash2
+  QrCode, Building2, RefreshCw, Zap, X, Trash2, Download
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { PembayaranSPP } from '@/types';
 import { formatCurrency, getMonthName } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -134,6 +135,27 @@ export default function AdminPembayaranPage() {
     }
   };
 
+  const exportToExcel = () => {
+    if (pembayaranData.length === 0) return;
+
+    const dataToExport = pembayaranData.map((item, index) => ({
+      'No': index + 1,
+      'Nama Anggota': item.nama_anggota,
+      'Cabang Olahraga': item.cabang_olahraga,
+      'Periode (Bulan/Tahun)': `${getMonthName(item.bulan)} ${item.tahun}`,
+      'Nominal (Rp)': item.nominal,
+      'Status Bayar': item.status_bayar,
+      'Status Gateway': item.status_gateway || '-',
+      'Metode Bayar': item.metode_bayar || '-',
+      'Tanggal Bayar': item.tanggal_bayar || '-'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Pembayaran SPP');
+    XLSX.writeFile(workbook, `Data_Pembayaran_SPP_${filter.bulan}_${filter.tahun}.xlsx`);
+  };
+
   const lunas = pembayaranData.filter((d) => d.status_bayar === 'Lunas').length;
   const belum = pembayaranData.filter((d) => d.status_bayar !== 'Lunas').length;
   const totalNominal = pembayaranData
@@ -173,6 +195,10 @@ export default function AdminPembayaranPage() {
           </select>
           <button onClick={generateMonthEntries} className="btn-secondary justify-center" title="Buat entri SPP untuk semua anggota bulan ini">
             <RefreshCw className="w-4 h-4" /> Generate
+          </button>
+          <button disabled={!data} className="btn-primary px-6"><Filter className="w-4 h-4 mr-2" /> Terapkan Filter</button>
+          <button type="button" onClick={exportToExcel} disabled={pembayaranData.length === 0} className="btn-success px-4">
+            <Download className="w-4 h-4 mr-2" /> Export
           </button>
         </div>
       </div>
