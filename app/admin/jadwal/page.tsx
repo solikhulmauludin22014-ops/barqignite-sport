@@ -58,7 +58,6 @@ export default function AdminJadwalPage() {
         alert(json.error || 'Gagal menghapus jadwal');
       }
     } catch (err) {
-    } catch (err) {
       alert('Terjadi kesalahan saat menghapus jadwal');
     }
   };

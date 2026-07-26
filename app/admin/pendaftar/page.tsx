@@ -52,7 +52,6 @@ export default function AdminPendaftarPage() {
         alert(json.error || 'Gagal menghapus pendaftar');
       }
     } catch (err) {
-    } catch (err) {
       alert('Terjadi kesalahan saat menghapus pendaftar');
     }
   };

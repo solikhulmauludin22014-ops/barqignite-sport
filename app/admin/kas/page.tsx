@@ -91,7 +91,6 @@ export default function AdminKasPage() {
         alert(json.error || 'Gagal menghapus transaksi');
       }
     } catch (err) {
-    } catch (err) {
       alert('Terjadi kesalahan saat menghapus transaksi');
     }
   };

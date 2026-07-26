@@ -57,7 +57,6 @@ export default function AdminPelatihPage() {
         alert(json.error || 'Gagal menghapus pelatih');
       }
     } catch (err) {
-    } catch (err) {
       alert('Terjadi kesalahan saat menghapus pelatih');
     }
   };
