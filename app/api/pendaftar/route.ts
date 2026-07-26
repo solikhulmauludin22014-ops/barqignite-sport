@@ -117,3 +117,22 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: false, error: 'Gagal memperbarui status pendaftar' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID tidak ditemukan' }, { status: 400 });
+    }
+
+    const { error } = await supabase.from('pendaftar').delete().eq('id', id);
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Data pendaftar berhasil dihapus' });
+  } catch (error) {
+    console.error('Pendaftar DELETE error:', error);
+    return NextResponse.json({ success: false, error: 'Gagal menghapus pendaftar' }, { status: 500 });
+  }
+}

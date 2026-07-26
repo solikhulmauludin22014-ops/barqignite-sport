@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, AlertCircle, Clock, Loader2, Plus, Filter, UserPlus, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Clock, Loader2, Plus, Filter, UserPlus, RefreshCw, Trash2 } from 'lucide-react';
 import type { Anggota, Presensi } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -109,6 +109,21 @@ export default function AdminPresensiPage() {
       if (json.success) setRekapData(json.data || []);
     } finally {
       setRekapLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data presensi ini?')) return;
+    try {
+      const res = await fetch(`/api/presensi?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        loadRekap();
+      } else {
+        alert(json.error || 'Gagal menghapus presensi');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat menghapus presensi');
     }
   };
 
@@ -291,6 +306,7 @@ export default function AdminPresensiPage() {
                       <th>Kategori</th>
                       <th>Sesi</th>
                       <th>Status</th>
+                      <th>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -304,6 +320,11 @@ export default function AdminPresensiPage() {
                           <span className={`badge ${row.status_hadir === 'Hadir' ? 'badge-success' : row.status_hadir === 'Alpa' ? 'badge-danger' : row.status_hadir === 'Sakit' ? 'badge-info' : 'badge-warning'}`}>
                             {row.status_hadir}
                           </span>
+                        </td>
+                        <td>
+                          <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30">
+                            <Trash2 className="w-3 h-3" />
+                          </button>
                         </td>
                       </tr>
                     ))}

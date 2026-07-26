@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Search, Download, Filter, UserCheck, RefreshCw } from 'lucide-react';
+import { Loader2, Search, Download, Filter, UserCheck, RefreshCw, Trash2 } from 'lucide-react';
 import type { Anggota } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -76,6 +76,21 @@ export default function AdminAnggotaPage() {
     document.body.removeChild(link);
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data anggota ini secara permanen?')) return;
+    try {
+      const res = await fetch(`/api/anggota?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        loadData();
+      } else {
+        alert(json.error || 'Gagal menghapus anggota');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat menghapus anggota');
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -146,6 +161,7 @@ export default function AdminAnggotaPage() {
                   <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px]">Alamat</th>
                   <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px]">Tgl Gabung</th>
                   <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px]">Status</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px]">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-arena-600/20">
@@ -172,6 +188,11 @@ export default function AdminAnggotaPage() {
                       )}>
                         {row.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
                     </td>
                   </tr>
                 ))}

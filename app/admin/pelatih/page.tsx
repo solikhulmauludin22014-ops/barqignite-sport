@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Loader2, UserCheck, X, CheckCircle } from 'lucide-react';
+import { Plus, Pencil, Loader2, UserCheck, X, CheckCircle, Trash2 } from 'lucide-react';
 import type { Pelatih } from '@/types';
 
 const emptyForm = { nama: '', foto_url: '', spesialisasi: '', sertifikasi: '', pengalaman: '', urutan: '1' };
@@ -45,6 +45,21 @@ export default function AdminPelatihPage() {
     } finally { setSaving(false); }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data pelatih ini?')) return;
+    try {
+      const res = await fetch(`/api/pelatih?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        loadData();
+      } else {
+        alert(json.error || 'Gagal menghapus pelatih');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat menghapus pelatih');
+    }
+  };
+
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
@@ -77,9 +92,14 @@ export default function AdminPelatihPage() {
                   <h3 className="font-display font-bold text-neutral-light truncate">{pelatih.nama}</h3>
                   <span className="badge badge-info text-xs mt-1">{pelatih.spesialisasi}</span>
                 </div>
-                <button onClick={() => openEdit(pelatih)} className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-neutral-light/10">
-                  <Pencil className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => openEdit(pelatih)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-neutral-light/10">
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => handleDelete(pelatih.id!)} className="p-2 text-red-400/70 hover:text-red-400 rounded-lg hover:bg-red-500/10">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
               <div className="space-y-1 text-sm text-neutral-light/50">
                 <p><span className="text-neutral-light/30">Sertifikasi:</span> {pelatih.sertifikasi || '—'}</p>

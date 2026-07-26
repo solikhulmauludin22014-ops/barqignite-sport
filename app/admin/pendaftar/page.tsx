@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { UserPlus, CheckCircle, XCircle, Eye, Loader2, Filter, RefreshCw } from 'lucide-react';
+import { UserPlus, CheckCircle, XCircle, Eye, Loader2, Filter, RefreshCw, Trash2 } from 'lucide-react';
 import type { Pendaftar } from '@/types';
 import { formatDate } from '@/lib/utils';
 
@@ -37,6 +37,22 @@ export default function AdminPendaftarPage() {
         loadData();
       }
     } finally { setProcessing(null); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data pendaftar ini?')) return;
+    try {
+      const res = await fetch(`/api/pendaftar?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        setSelected(null);
+        loadData();
+      } else {
+        alert(json.error || 'Gagal menghapus pendaftar');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat menghapus pendaftar');
+    }
   };
 
   const statusConfig: Record<string, { class: string; label: string }> = {
@@ -132,6 +148,9 @@ export default function AdminPendaftarPage() {
                             </button>
                           </>
                         )}
+                        <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       </div>
                     </td>
                   </tr>

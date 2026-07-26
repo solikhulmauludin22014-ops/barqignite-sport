@@ -46,6 +46,21 @@ export default function AdminJadwalPage() {
     } finally { setSaving(false); }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) return;
+    try {
+      const res = await fetch(`/api/jadwal?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        loadData();
+      } else {
+        alert(json.error || 'Gagal menghapus jadwal');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat menghapus jadwal');
+    }
+  };
+
   const hariColors: Record<string, string> = {
     Senin: 'badge-info', Selasa: 'badge-success', Rabu: 'badge-warning',
     Kamis: 'badge-danger', Jumat: 'badge-neutral', Sabtu: 'badge-warning', Minggu: 'badge-danger',
@@ -102,6 +117,7 @@ export default function AdminJadwalPage() {
                     <td>
                       <div className="flex gap-2">
                         <button onClick={() => openEdit(row)} className="btn-secondary text-xs py-1 px-2"><Pencil className="w-3 h-3" /></button>
+                        <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30"><Trash2 className="w-3 h-3" /></button>
                       </div>
                     </td>
                   </tr>

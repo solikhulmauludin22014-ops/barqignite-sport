@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, Trash2 } from 'lucide-react';
 import { formatCurrency, getMonthName } from '@/lib/utils';
 import type { Kas } from '@/types';
 import {
@@ -56,6 +56,21 @@ export default function AdminKasPage() {
         loadData();
       }
     } finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus transaksi ini secara permanen?')) return;
+    try {
+      const res = await fetch(`/api/kas?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        loadData();
+      } else {
+        alert(json.error || 'Gagal menghapus transaksi');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat menghapus transaksi');
+    }
   };
 
   const totalMasuk = data.filter((d) => d.jenis === 'Masuk').reduce((acc, d) => acc + parseFloat(d.nominal || '0'), 0);
@@ -163,6 +178,7 @@ export default function AdminKasPage() {
                   <th>Keterangan</th>
                   <th>Nominal</th>
                   <th>Saldo</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,6 +197,11 @@ export default function AdminKasPage() {
                       {row.jenis === 'Masuk' ? '+' : '-'}{formatCurrency(row.nominal)}
                     </td>
                     <td className="font-mono text-sm text-neutral-light/70">{formatCurrency(row.saldo_berjalan)}</td>
+                    <td>
+                      <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {data.length === 0 && (

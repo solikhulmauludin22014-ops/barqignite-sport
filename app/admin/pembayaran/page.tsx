@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import useSWR from 'swr';
 import {
   CheckCircle, AlertTriangle, Loader2, Filter, DollarSign,
-  QrCode, Building2, RefreshCw, Zap, X,
+  QrCode, Building2, RefreshCw, Zap, X, Trash2
 } from 'lucide-react';
 import type { PembayaranSPP } from '@/types';
 import { formatCurrency, getMonthName } from '@/lib/utils';
@@ -119,6 +119,21 @@ export default function AdminPembayaranPage() {
     } finally { setGeneratingLink(null); }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data pembayaran ini?')) return;
+    try {
+      const res = await fetch(`/api/pembayaran?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        mutate();
+      } else {
+        alert(json.error || 'Gagal menghapus pembayaran');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat menghapus pembayaran');
+    }
+  };
+
   const lunas = pembayaranData.filter((d) => d.status_bayar === 'Lunas').length;
   const belum = pembayaranData.filter((d) => d.status_bayar !== 'Lunas').length;
   const totalNominal = pembayaranData
@@ -215,7 +230,7 @@ export default function AdminPembayaranPage() {
                   <td className="text-neutral-light/50 text-sm">{row.tanggal_bayar || '—'}</td>
                   <td>
                     {row.status_bayar !== 'Lunas' && (
-                      <div className="flex gap-1">
+                      <div className="flex flex-wrap gap-1">
                         <button
                           onClick={() => setModalData({ id: row.id, nama: row.nama_anggota, metode: 'Tunai', tanggal: new Date().toISOString().split('T')[0], nominal: row.nominal, cabang: row.cabang_olahraga })}
                           className="btn-success text-xs py-1 px-2"
@@ -231,9 +246,16 @@ export default function AdminPembayaranPage() {
                         >
                           {generatingLink === row.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <QrCode className="w-3 h-3" />}
                         </button>
+                        <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30" title="Hapus Pembayaran">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       </div>
+                    ) : (
+                      <button onClick={() => handleDelete(row.id!)} className="btn-secondary text-xs py-1 px-2 text-red-400 hover:bg-red-500/20 hover:border-red-500/30" title="Hapus Pembayaran">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
                     )}
-                    {row.status_gateway === 'Pending' && <span className="badge badge-warning text-xs">Pending Gateway</span>}
+                    {row.status_gateway === 'Pending' && <span className="badge badge-warning text-xs mt-1">Pending Gateway</span>}
                   </td>
                 </tr>
               ))}

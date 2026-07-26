@@ -169,3 +169,22 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: false, error: 'Gagal memperbarui pembayaran' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID tidak ditemukan' }, { status: 400 });
+    }
+
+    const { error } = await supabase.from('pembayaran_spp').delete().eq('id', id);
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Data pembayaran berhasil dihapus' });
+  } catch (error) {
+    console.error('Pembayaran DELETE error:', error);
+    return NextResponse.json({ success: false, error: 'Gagal menghapus pembayaran' }, { status: 500 });
+  }
+}
