@@ -67,43 +67,74 @@ export default async function AtletPage({
           ) : athletes.length === 0 ? (
             <div className="text-center text-neutral-light/50 py-12">Belum ada data atlet{cabang ? ` untuk cabang ${cabang}` : ''}.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {athletes.map((atlet) => (
-                <div key={atlet.id} className="glass-card border border-neutral-light/10 hover:border-neutral-light/30 transition-all duration-300 rounded-2xl overflow-hidden group">
-                  <div className={`h-24 ${atlet.cabang_olahraga === 'Basket' ? 'bg-basket/20' : 'bg-renang/20'} relative`}>
-                    <div className="absolute -bottom-10 left-6">
-                      <div className="w-20 h-20 bg-arena-700 border-4 border-arena-800 rounded-full flex items-center justify-center overflow-hidden">
-                        {/* Placeholder for Photo */}
-                        <User className="w-10 h-10 text-neutral-light/50" />
+            filter === 'prestasi' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {athletes.map((atlet) => (
+                  <div key={atlet.id} className="glass-card border border-neutral-light/10 hover:border-neutral-light/30 transition-all duration-300 rounded-2xl overflow-hidden group">
+                    <div className={`h-24 ${atlet.cabang_olahraga === 'Basket' ? 'bg-basket/20' : 'bg-renang/20'} relative`}>
+                      <div className="absolute -bottom-10 left-6">
+                        <div className="w-20 h-20 bg-arena-700 border-4 border-arena-800 rounded-full flex items-center justify-center overflow-hidden">
+                          {/* Placeholder for Photo */}
+                          <User className="w-10 h-10 text-neutral-light/50" />
+                        </div>
+                      </div>
+                      <div className="absolute top-4 right-4">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${atlet.cabang_olahraga === 'Basket' ? 'bg-basket/20 text-basket' : 'bg-renang/20 text-renang'}`}>
+                          {atlet.cabang_olahraga}
+                        </span>
                       </div>
                     </div>
-                    <div className="absolute top-4 right-4">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${atlet.cabang_olahraga === 'Basket' ? 'bg-basket/20 text-basket' : 'bg-renang/20 text-renang'}`}>
-                        {atlet.cabang_olahraga}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-14 pb-6 px-6">
-                    <h3 className="font-display text-xl font-bold text-neutral-light mb-1 text-center">{atlet.nama}</h3>
-                    <div className="flex items-center justify-center gap-2 text-sm text-neutral-light/70 mb-6">
-                      <GraduationCap className="w-4 h-4 text-neutral-light/40" />
-                      <span>{(atlet as any).asal_sekolah || '-'}</span>
-                    </div>
+                    
+                    <div className="pt-14 pb-6 px-6">
+                      <h3 className="font-display text-xl font-bold text-neutral-light mb-1 text-center">{atlet.nama}</h3>
+                      <div className="flex items-center justify-center gap-2 text-sm text-neutral-light/70 mb-6">
+                        <GraduationCap className="w-4 h-4 text-neutral-light/40" />
+                        <span>{(atlet as any).asal_sekolah || '-'}</span>
+                      </div>
 
-                    <div className="bg-arena-900/50 rounded-xl p-4 border border-white/5">
-                      <h4 className="text-xs font-bold uppercase text-neutral-light/50 mb-2 flex items-center gap-1.5">
-                        <Award className="w-3.5 h-3.5" />
-                        Biografi Singkat
-                      </h4>
-                      <p className="text-sm text-neutral-light/70 italic leading-relaxed">
-                        Atlet {atlet.cabang_olahraga} potensial dengan dedikasi tinggi. Terus mengasah kemampuan di kategori {atlet.kategori} untuk meraih prestasi terbaik.
-                      </p>
+                      <div className="bg-arena-900/50 rounded-xl p-4 border border-white/5">
+                        <h4 className="text-xs font-bold uppercase text-neutral-light/50 mb-2 flex items-center gap-1.5">
+                          <Award className="w-3.5 h-3.5" />
+                          Biografi Singkat
+                        </h4>
+                        <p className="text-sm text-neutral-light/70 italic leading-relaxed">
+                          Atlet {atlet.cabang_olahraga} potensial dengan dedikasi tinggi. Terus mengasah kemampuan di kategori {atlet.kategori} untuk meraih prestasi terbaik.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-arena-900/50">
+                <table className="w-full text-left text-sm text-neutral-light/70">
+                  <thead className="bg-arena-800 text-xs uppercase text-neutral-light/50 border-b border-white/10">
+                    <tr>
+                      <th className="px-6 py-4 font-bold">No</th>
+                      <th className="px-6 py-4 font-bold">Nama Atlet</th>
+                      <th className="px-6 py-4 font-bold">Cabang Olahraga</th>
+                      <th className="px-6 py-4 font-bold">Kategori</th>
+                      <th className="px-6 py-4 font-bold">Asal Sekolah</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {athletes.map((atlet, index) => (
+                      <tr key={atlet.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="px-6 py-4">{index + 1}</td>
+                        <td className="px-6 py-4 font-medium text-neutral-light">{atlet.nama}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${atlet.cabang_olahraga === 'Basket' ? 'bg-basket/10 text-basket' : 'bg-renang/10 text-renang'}`}>
+                            {atlet.cabang_olahraga}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">{atlet.kategori}</td>
+                        <td className="px-6 py-4">{(atlet as any).asal_sekolah || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
           )}
         </div>
       </section>
