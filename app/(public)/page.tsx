@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  Trophy, Users, Target, Waves, Calendar, Shield, Flame, Zap
+  Trophy, Users, Target, Waves, Calendar, Shield, Flame, Zap, Phone, Instagram, Mail, MapPin
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -32,6 +32,22 @@ export default async function BerandaPage() {
   const tagline = branding?.tagline || 'Membentuk Atlet Basket & Renang Berprestasi';
   const jumlahPrestasi = branding?.jumlah_prestasi || '30+';
 
+  // Gunakan data dari database, jika masih kosong gunakan default yang Anda tulis
+  const noWa = branding?.no_wa_admin || '6285606900934';
+  const instagram = branding?.instagram || 'barqignite.sportsda';
+  const email = branding?.email_club || '';
+  const alamat = branding?.alamat_club || '';
+
+  // Membersihkan spasi/tanda hubung dari nomor WA
+  const cleanWa = noWa.replace(/\D/g, '');
+  // Mengubah prefix '0' menjadi '62' agar valid untuk standar wa.me
+  const finalWa = cleanWa.startsWith('0') ? '62' + cleanWa.slice(1) : cleanWa;
+  const waLink = `https://wa.me/6285606900934${finalWa}`;
+
+  // Membersihkan tanda '@' jika ada dari username IG, lalu tambahkan param yang Anda mau
+  const cleanIg = instagram.replace('@', '');
+  const igLink = `https://www.instagram.com/${cleanIg}?igsh=MWI0bGhtMGc3Z25pOA==`;
+
   return (
     <>
       {/* ===== HERO: SPLIT DIAGONAL ===== */}
@@ -39,16 +55,16 @@ export default async function BerandaPage() {
         {/* Split Backgrounds */}
         <div className="absolute inset-0 flex">
           {/* Left: Basket (Diagonal Clip) */}
-          <div 
+          <div
             className="w-1/2 h-full bg-basket/10 relative overflow-hidden"
             style={{ clipPath: 'polygon(0 0, 100% 0, calc(100% - 20vw) 100%, 0 100%)' }}
           >
             <div className="absolute inset-0 texture-parquet opacity-20 mix-blend-overlay" />
             <div className="absolute inset-0 bg-gradient-to-r from-arena-900/80 via-transparent to-transparent" />
           </div>
-          
+
           {/* Right: Renang (Diagonal Clip) */}
-          <div 
+          <div
             className="absolute right-0 w-[60%] h-full bg-renang/5"
             style={{ clipPath: 'polygon(20vw 0, 100% 0, 100% 100%, 0 100%)', zIndex: 0 }}
           >
@@ -125,7 +141,7 @@ export default async function BerandaPage() {
                 <span className="relative z-10 flex items-center gap-2.5">
                   <span className="text-lg">🏀</span>
                   <span>Daftar Basket</span>
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </span>
               </Link>
               <Link
@@ -135,7 +151,7 @@ export default async function BerandaPage() {
                 <span className="relative z-10 flex items-center gap-2.5">
                   <span className="text-lg">🏊</span>
                   <span>Daftar Renang</span>
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </span>
               </Link>
             </div>
@@ -181,7 +197,7 @@ export default async function BerandaPage() {
             <div className="glass-card-hover border-transparent bg-arena-800 group relative overflow-hidden rounded-none cursor-pointer p-12 transition-all duration-500" style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}>
               <div className="absolute inset-0 texture-parquet opacity-5 group-hover:opacity-15 transition-opacity duration-500 mix-blend-overlay" />
               <div className="absolute inset-y-0 left-0 w-1 bg-basket" />
-              
+
               <div className="relative z-10 flex flex-col h-full transform group-hover:translate-z-10 group-hover:scale-[1.02] transition-transform duration-500">
                 <p className="text-basket text-[11px] font-bold uppercase tracking-[0.2em] mb-2">COURT</p>
                 <h3 className="font-display text-5xl text-neutral-light mb-6 uppercase tracking-wider">Basket</h3>
@@ -198,7 +214,7 @@ export default async function BerandaPage() {
             <div className="glass-card-hover border-transparent bg-arena-800 group relative overflow-hidden rounded-none cursor-pointer p-12 transition-all duration-500" style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}>
               <div className="absolute inset-0 texture-water opacity-5 group-hover:opacity-15 transition-opacity duration-500 mix-blend-overlay" />
               <div className="absolute inset-y-0 left-0 w-1 bg-renang" />
-              
+
               <div className="relative z-10 flex flex-col h-full transform group-hover:translate-z-10 group-hover:scale-[1.02] transition-transform duration-500">
                 <p className="text-renang text-[11px] font-bold uppercase tracking-[0.2em] mb-2">POOL</p>
                 <h3 className="font-display text-5xl text-neutral-light mb-6 uppercase tracking-wider">Renang</h3>
@@ -239,6 +255,71 @@ export default async function BerandaPage() {
           </div>
         </div>
       </section>
+
+      {/* ===== KONTAK & SOSIAL MEDIA ===== */}
+      <section className="py-24 bg-arena-900 border-t border-neutral-light/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-4xl md:text-5xl text-neutral-light tracking-wide uppercase">
+              Hubungi <span className="text-neutral-light/30">Kami</span>
+            </h2>
+            <p className="text-neutral-light/60 mt-4 max-w-2xl mx-auto">
+              Punya pertanyaan lebih lanjut atau butuh bantuan pendaftaran? Tim admin kami siap membantu Anda!
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* WhatsApp */}
+            <a href={waLink} target="_blank" rel="noreferrer" className="glass-card-hover bg-arena-800 p-8 flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Phone className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-light mb-2">WhatsApp / CP</h3>
+              <p className="text-neutral-light/60 text-sm">{noWa || 'Belum ada nomor'}</p>
+            </a>
+
+            {/* Instagram */}
+            <a href={igLink} target="_blank" rel="noreferrer" className="glass-card-hover bg-arena-800 p-8 flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-full bg-pink-500/10 text-pink-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Instagram className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-light mb-2">Instagram</h3>
+              <p className="text-neutral-light/60 text-sm">{instagram || 'Belum ada IG'}</p>
+            </a>
+
+            {/* Email */}
+            <a href={`mailto:${email}`} className="glass-card-hover bg-arena-800 p-8 flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-full bg-primary-500/10 text-primary-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Mail className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-light mb-2">Email</h3>
+              <p className="text-neutral-light/60 text-sm">{email || 'Belum ada email'}</p>
+            </a>
+
+            {/* Alamat */}
+            <div className="glass-card-hover bg-arena-800 p-8 flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-light mb-2">Alamat</h3>
+              <p className="text-neutral-light/60 text-sm">{alamat || 'Belum ada alamat'}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FLOATING WHATSAPP BUTTON */}
+      {noWa && (
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noreferrer"
+          className="fixed bottom-6 right-6 z-50 bg-emerald-500 hover:bg-emerald-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-transform hover:scale-110 animate-fade-in"
+          title="Hubungi Kami via WhatsApp"
+        >
+          <Phone className="w-6 h-6" />
+        </a>
+      )}
     </>
   );
 }
