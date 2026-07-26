@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { supabase } from '@/lib/supabase';
+import bcrypt from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -36,10 +37,10 @@ export const authOptions: NextAuthOptions = {
           if (admin.password_hash?.startsWith('$2b$') || admin.password_hash?.startsWith('$2a$')) {
             // Bcrypt comparison
             try {
-              const bcrypt = await import('bcryptjs');
               passwordValid = await bcrypt.compare(credentials.password, admin.password_hash);
-            } catch {
-              // bcryptjs tidak tersedia, fallback ke plain text
+            } catch (err) {
+              console.error('Bcrypt compare error:', err);
+              // Fallback to plain text if bcrypt fails unexpectedly
               passwordValid = credentials.password === admin.password_hash;
             }
           } else {
@@ -91,5 +92,3 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-barqignite-2026',
 };
-
-export default NextAuth(authOptions);
