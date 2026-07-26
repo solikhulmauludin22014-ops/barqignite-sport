@@ -229,7 +229,7 @@ export default function AdminPembayaranPage() {
                   <td className="text-neutral-light/50 text-sm">{row.metode_bayar || '—'}</td>
                   <td className="text-neutral-light/50 text-sm">{row.tanggal_bayar || '—'}</td>
                   <td>
-                    {row.status_bayar !== 'Lunas' && (
+                    {row.status_bayar !== 'Lunas' ? (
                       <div className="flex flex-wrap gap-1">
                         <button
                           onClick={() => setModalData({ id: row.id, nama: row.nama_anggota, metode: 'Tunai', tanggal: new Date().toISOString().split('T')[0], nominal: row.nominal, cabang: row.cabang_olahraga })}
