@@ -11,7 +11,6 @@ export default function AdminAnggotaPage() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCabang, setFilterCabang] = useState('');
-  const [filterCabang, setFilterCabang] = useState('');
   const [filterKategori, setFilterKategori] = useState('');
 
   const emptyForm = {
