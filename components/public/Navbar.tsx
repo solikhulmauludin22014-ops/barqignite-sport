@@ -37,12 +37,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center group">
-            <div className="relative bg-white rounded-xl p-2 shadow-lg flex items-center justify-center transform group-hover:scale-105 transition-all duration-300">
+          <Link href="/" className="flex items-center group mr-6 lg:mr-10">
+            <div className="relative bg-white/95 rounded-lg p-1.5 shadow-md flex items-center justify-center transform group-hover:scale-105 transition-all duration-300">
               <Image 
                 src={mainLogo} 
                 alt="Barqignite Logo" 
-                className="h-10 sm:h-12 w-auto object-contain relative z-10"
+                className="h-8 sm:h-10 w-auto object-contain relative z-10"
                 priority
               />
             </div>

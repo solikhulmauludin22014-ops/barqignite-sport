@@ -53,9 +53,9 @@ function AdminLoginContent() {
           Kembali ke Beranda
         </Link>
         {/* Logo */}
-        <div className="text-center mb-10 mt-4">
-          <div className="inline-flex relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_rgba(255,255,255,0.15)] items-center justify-center mx-auto mb-6">
-            <Image src={mainLogo} alt="Logo" className="w-28 md:w-32 h-auto object-contain relative z-10" />
+        <div className="text-center mb-8 mt-4">
+          <div className="inline-flex relative bg-white/95 rounded-xl p-2.5 shadow-lg items-center justify-center mx-auto mb-4">
+            <Image src={mainLogo} alt="Logo" className="w-20 md:w-24 h-auto object-contain relative z-10" />
           </div>
           <h1 className="font-display text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/60 tracking-wider">Panel Admin</h1>
           <p className="text-neutral-light/40 text-xs mt-2 uppercase tracking-[0.2em] font-medium">Sistem Manajemen Club</p>
