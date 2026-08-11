@@ -35,7 +35,6 @@ function AdminLoginContent() {
       setLoading(false);
     } else {
       router.push(callbackUrl);
-      router.refresh();
     }
   };
 

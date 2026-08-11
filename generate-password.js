@@ -7,7 +7,7 @@ if (!plaintextPassword) {
   process.exit(1);
 }
 
-const saltRounds = 10;
+const saltRounds = 8;
 const hash = bcrypt.hashSync(plaintextPassword, saltRounds);
 
 console.log('--- HASIL BCRYPT HASH ---');

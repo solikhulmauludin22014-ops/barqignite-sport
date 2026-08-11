@@ -17,12 +17,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          console.time('Supabase Query');
           // Cari admin berdasarkan username
           const { data: admin, error } = await supabase
             .from('admin')
             .select('id, username, password_hash, role')
             .eq('username', credentials.username)
             .single();
+          console.timeEnd('Supabase Query');
 
           if (error || !admin) {
             console.log('[Auth] Admin tidak ditemukan:', credentials.username);
@@ -34,6 +36,7 @@ export const authOptions: NextAuthOptions = {
           let passwordValid = false;
 
           // Cek apakah password_hash mengandung '$2b$' (format bcrypt)
+          console.time('Password Validation');
           if (admin.password_hash?.startsWith('$2b$') || admin.password_hash?.startsWith('$2a$')) {
             // Bcrypt comparison
             try {
@@ -47,14 +50,18 @@ export const authOptions: NextAuthOptions = {
             // Plain text comparison (untuk development)
             passwordValid = credentials.password === admin.password_hash;
           }
+          console.timeEnd('Password Validation');
 
           if (passwordValid) {
-            return {
+            console.time('Session Creation');
+            const userObj = {
               id: admin.id,
               name: admin.username,
               email: `${admin.username}@barqignite.com`,
               role: admin.role,
             };
+            console.timeEnd('Session Creation');
+            return userObj;
           }
 
           console.log('[Auth] Password salah untuk:', credentials.username);
