@@ -91,6 +91,8 @@ export interface Anggota {
   no_hp: string;
   email: string;
   kategori: string;
+  asal_sekolah?: string;
+  kelas?: string;
   status: 'Aktif' | 'Nonaktif';
   tanggal_gabung: string;
 }
@@ -105,6 +107,8 @@ export interface Pendaftar {
   no_hp: string;
   email: string;
   nama_wali: string;
+  asal_sekolah?: string;
+  kelas?: string;
   kategori: string;
   status_pendaftaran: 'Pending' | 'Diterima' | 'Ditolak';
   tanggal_daftar: string;
@@ -256,5 +260,7 @@ export interface PendaftaranForm {
   no_hp: string;
   email: string;
   nama_wali: string;
+  asal_sekolah?: string;
+  kelas?: string;
   kategori: string;
 }

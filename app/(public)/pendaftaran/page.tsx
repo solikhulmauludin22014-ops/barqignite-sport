@@ -17,6 +17,8 @@ const schema = z.object({
   no_hp: z.string().min(9, 'Nomor HP tidak valid').max(15),
   email: z.string().email('Format email tidak valid').or(z.literal('')),
   nama_wali: z.string().optional(),
+  asal_sekolah: z.string().min(2, 'Asal Sekolah wajib diisi'),
+  kelas: z.string().min(1, 'Kelas wajib diisi'),
   kategori: z.string().min(1, 'Pilih kategori'),
 });
 
@@ -177,6 +179,18 @@ function PendaftaranContent() {
               <div className="sm:col-span-2">
                 <label className="form-label">Nama Orang Tua / Wali <span className="text-neutral-light/30">(untuk peserta di bawah 17 tahun)</span></label>
                 <input {...register('nama_wali')} placeholder="Nama orang tua atau wali" className="form-input" />
+              </div>
+
+              <div>
+                <label className="form-label">Asal Sekolah *</label>
+                <input {...register('asal_sekolah')} placeholder="Masukkan nama sekolah" className="form-input" />
+                {errors.asal_sekolah && <p className="form-error">{errors.asal_sekolah.message}</p>}
+              </div>
+
+              <div>
+                <label className="form-label">Kelas *</label>
+                <input {...register('kelas')} placeholder="Contoh: 5 SD / VIII SMP / XI SMA" className="form-input" />
+                {errors.kelas && <p className="form-error">{errors.kelas.message}</p>}
               </div>
 
               <div className="sm:col-span-2">

@@ -68,6 +68,8 @@ export default function AdminPendaftarPage() {
       'No HP/WA': item.no_hp,
       'Email': item.email || '-',
       'Nama Wali': item.nama_wali || '-',
+      'Asal Sekolah': item.asal_sekolah || '-',
+      'Kelas': item.kelas || '-',
       'Alamat': item.alamat,
       'Tanggal Daftar': formatDate(item.tanggal_daftar),
       'Status Pendaftaran': item.status_pendaftaran
@@ -129,6 +131,7 @@ export default function AdminPendaftarPage() {
               <thead>
                 <tr>
                   <th>Nama</th>
+                  <th>Sekolah / Kelas</th>
                   <th>Kategori</th>
                   <th>No HP</th>
                   <th>Tgl Daftar</th>
@@ -143,6 +146,12 @@ export default function AdminPendaftarPage() {
                       <div>
                         <p className="font-medium text-neutral-light">{row.nama}</p>
                         {row.nama_wali && <p className="text-xs text-neutral-light/40">Wali: {row.nama_wali}</p>}
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        <p className="font-medium text-neutral-light">{row.asal_sekolah || '-'}</p>
+                        {row.kelas && <p className="text-xs text-neutral-light/40">Kelas: {row.kelas}</p>}
                       </div>
                     </td>
                     <td><span className="badge badge-neutral">{row.kategori}</span></td>
@@ -222,6 +231,8 @@ export default function AdminPendaftarPage() {
                 { label: 'No HP/WA', value: selected.no_hp },
                 { label: 'Email', value: selected.email || '—' },
                 { label: 'Nama Wali', value: selected.nama_wali || '—' },
+                { label: 'Asal Sekolah', value: selected.asal_sekolah || '—' },
+                { label: 'Kelas', value: selected.kelas || '—' },
                 { label: 'Tanggal Daftar', value: formatDate(selected.tanggal_daftar) },
               ].map((f) => (
                 <div key={f.label}>
