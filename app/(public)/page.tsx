@@ -4,6 +4,9 @@ import {
   Trophy, Users, Target, Waves, Calendar, Shield, Flame, Zap, Phone, Instagram, Mail, MapPin
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
+import basketLogo from '@/LOGO BARQIGNITE BASKETBALL.jpeg';
+import swimLogo from '@/LOGO BARQIGNITE SWIM.png';
 
 export const metadata: Metadata = {
   title: 'Beranda — Barqignite Private Sport Sidoarjo',
@@ -199,8 +202,15 @@ export default async function BerandaPage() {
               <div className="absolute inset-y-0 left-0 w-1 bg-basket" />
 
               <div className="relative z-10 flex flex-col h-full transform group-hover:translate-z-10 group-hover:scale-[1.02] transition-transform duration-500">
-                <p className="text-basket text-[11px] font-bold uppercase tracking-[0.2em] mb-2">COURT</p>
-                <h3 className="font-display text-5xl text-neutral-light mb-6 uppercase tracking-wider">Basket</h3>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <p className="text-basket text-[11px] font-bold uppercase tracking-[0.2em] mb-2">COURT</p>
+                    <h3 className="font-display text-5xl text-neutral-light uppercase tracking-wider">Basket</h3>
+                  </div>
+                  <div className="w-24 h-24 relative rounded-2xl overflow-hidden shadow-2xl shadow-basket/20 border border-white/5 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 bg-arena-900/50 flex items-center justify-center p-2 backdrop-blur-sm">
+                    <Image src={basketLogo} alt="Logo Basket" className="w-full h-full object-contain drop-shadow-md" />
+                  </div>
+                </div>
                 <p className="text-neutral-light/70 mb-12 text-lg leading-relaxed flex-grow">
                   Program latihan intensif dan komprehensif dari level pemula hingga profesional di lapangan indoor standar nasional.
                 </p>
@@ -216,8 +226,15 @@ export default async function BerandaPage() {
               <div className="absolute inset-y-0 left-0 w-1 bg-renang" />
 
               <div className="relative z-10 flex flex-col h-full transform group-hover:translate-z-10 group-hover:scale-[1.02] transition-transform duration-500">
-                <p className="text-renang text-[11px] font-bold uppercase tracking-[0.2em] mb-2">POOL</p>
-                <h3 className="font-display text-5xl text-neutral-light mb-6 uppercase tracking-wider">Renang</h3>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <p className="text-renang text-[11px] font-bold uppercase tracking-[0.2em] mb-2">POOL</p>
+                    <h3 className="font-display text-5xl text-neutral-light uppercase tracking-wider">Renang</h3>
+                  </div>
+                  <div className="w-24 h-24 relative rounded-2xl overflow-hidden shadow-2xl shadow-renang/20 border border-white/5 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 bg-arena-900/50 flex items-center justify-center p-2 backdrop-blur-sm">
+                    <Image src={swimLogo} alt="Logo Renang" className="w-full h-full object-contain drop-shadow-md" />
+                  </div>
+                </div>
                 <p className="text-neutral-light/70 mb-12 text-lg leading-relaxed flex-grow">
                   Fasilitas kolam renang modern dengan pelatih bersertifikat. Fokus pada teknik, stamina, dan pencapaian waktu terbaik.
                 </p>

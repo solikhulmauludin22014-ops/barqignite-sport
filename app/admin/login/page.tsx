@@ -5,6 +5,8 @@ import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, User, Loader2, AlertCircle, Trophy, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
+import mainLogo from '@/LOGO BARQIGNITE NEW.png';
 
 function AdminLoginContent() {
   const [username, setUsername] = useState('');
@@ -52,11 +54,12 @@ function AdminLoginContent() {
         </Link>
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-primary-500/30">
-            <Trophy className="w-8 h-8 text-white" />
+          <div className="w-24 h-24 relative flex items-center justify-center mx-auto mb-4">
+            <div className="absolute inset-0 bg-gradient-to-br from-basket/30 to-renang/30 opacity-70 blur-2xl rounded-full" />
+            <Image src={mainLogo} alt="Logo" className="w-full h-full object-contain relative z-10 drop-shadow-2xl" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-neutral-light">Panel Admin</h1>
-          <p className="text-neutral-light/40 text-sm mt-1">Club Olahraga — Sistem Manajemen</p>
+          <h1 className="font-display text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/60 uppercase tracking-widest">Panel Admin</h1>
+          <p className="text-basket text-[10px] font-bold uppercase tracking-[0.3em] mt-2">Sistem Manajemen Club</p>
         </div>
 
         {/* Form */}

@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ThemeToggle from '@/components/ThemeToggle';
-
+import Image from 'next/image';
+import mainLogo from '@/LOGO BARQIGNITE NEW.png';
 const navLinks = [
   { href: '/', label: 'Beranda' },
   { href: '/profile', label: 'Profil' },
@@ -35,13 +36,24 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-basket to-renang rounded-xl flex items-center justify-center shadow-md transform group-hover:rotate-12 transition-transform duration-300">
-              <span className="text-white text-xl font-black font-display uppercase tracking-widest">B</span>
+          <Link href="/" className="flex items-center gap-4 group">
+            <div className="relative w-12 h-12 flex items-center justify-center transform group-hover:scale-105 transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-br from-basket/40 to-renang/40 opacity-0 group-hover:opacity-100 blur-xl rounded-full transition-opacity duration-500" />
+              <Image 
+                src={mainLogo} 
+                alt="Barqignite Logo" 
+                className="w-full h-full object-contain relative z-10 drop-shadow-2xl"
+                priority
+              />
             </div>
-            <div className="hidden sm:block">
-              <span className="font-display font-black text-xl text-neutral-light leading-none uppercase tracking-wider">Barqignite</span>
-              <p className="text-neutral-light/60 text-[10px] font-bold uppercase tracking-widest mt-0.5">Private Sport</p>
+            <div className="hidden sm:flex flex-col justify-center">
+              <span className="font-display font-black text-xl bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/50 leading-none uppercase tracking-[0.2em] transform group-hover:translate-x-1 transition-transform duration-300">
+                Barqignite
+              </span>
+              <div className="flex items-center gap-2 mt-1 transform group-hover:translate-x-1 transition-transform duration-300 delay-75">
+                <span className="w-4 h-[1px] bg-basket"></span>
+                <p className="text-neutral-light/60 text-[9px] font-bold uppercase tracking-[0.4em]">Private Sport</p>
+              </div>
             </div>
           </Link>
 

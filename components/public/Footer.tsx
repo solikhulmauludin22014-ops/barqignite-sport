@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Instagram, Youtube, MapPin, Phone, Mail, MessageCircle, Trophy } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-
+import Image from 'next/image';
+import mainLogo from '@/LOGO BARQIGNITE NEW.png';
 async function getBranding() {
   try {
     const { data, error } = await supabase.from('branding').select('*').eq('id', 'BRAND-001').single();
@@ -31,13 +32,23 @@ export default async function Footer() {
 
           {/* Brand */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-basket to-renang rounded-xl flex items-center justify-center">
-                <Trophy className="w-5 h-5 text-white" />
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative w-12 h-12 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-basket/40 to-renang/40 opacity-50 blur-xl rounded-full" />
+                <Image 
+                  src={mainLogo} 
+                  alt="Barqignite Logo" 
+                  className="w-full h-full object-contain relative z-10 drop-shadow-xl"
+                />
               </div>
-              <span className="font-display font-bold text-xl text-neutral-light">
-                {namaClub}
-              </span>
+              <div className="flex flex-col">
+                <span className="font-display font-black text-2xl bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/50 leading-none uppercase tracking-[0.1em]">
+                  {namaClub.split(' ')[0]}
+                </span>
+                <span className="text-neutral-light/60 text-[10px] font-bold uppercase tracking-[0.3em] mt-1">
+                  {namaClub.split(' ').slice(1).join(' ')}
+                </span>
+              </div>
             </div>
             <p className="text-neutral-light/50 text-sm leading-relaxed mb-6 max-w-xs">
               Membentuk atlet berprestasi di cabang Basket &amp; Renang dengan semangat, disiplin, dan kerja keras bersama.
