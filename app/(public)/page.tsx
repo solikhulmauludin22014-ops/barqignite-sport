@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: 'Club olahraga Basket & Renang terbaik di Sidoarjo. Bergabunglah dan raih prestasi bersama Barqignite Private Sport.',
 };
 
+export const revalidate = 60;
+
 async function getBranding() {
   try {
     const { data, error } = await supabase.from('branding').select('*').eq('id', 'BRAND-001').single();
@@ -23,8 +25,8 @@ async function getBranding() {
 
 async function getStats() {
   try {
-    const { count: basket } = await supabase.from('anggota').select('*', { count: 'exact', head: true }).eq('status', 'Aktif').eq('cabang_olahraga', 'Basket');
-    const { count: renang } = await supabase.from('anggota').select('*', { count: 'exact', head: true }).eq('status', 'Aktif').eq('cabang_olahraga', 'Renang');
+    const { count: basket } = await supabase.from('pendaftar').select('*', { count: 'exact', head: true }).eq('status_pendaftaran', 'Diterima').eq('cabang_olahraga', 'Basket');
+    const { count: renang } = await supabase.from('pendaftar').select('*', { count: 'exact', head: true }).eq('status_pendaftaran', 'Diterima').eq('cabang_olahraga', 'Renang');
     return { basket: basket || 0, renang: renang || 0, total: (basket || 0) + (renang || 0) };
   } catch { return { basket: 0, renang: 0, total: 0 }; }
 }
@@ -53,8 +55,6 @@ export default async function BerandaPage() {
   const [branding, stats, prestasiCount, featuredPrestasi] = await Promise.all([getBranding(), getStats(), getPrestasiCount(), getFeaturedPrestasi()]);
 
   const tagline = branding?.tagline || 'Membentuk Atlet Basket & Renang Berprestasi';
-  // Jika database table prestasi ada, pakai count-nya. Jika 0, bisa fall back atau tampilkan 0 (tapi user request agar dinamis mengikuti data, jadi kita tampilkan prestasiCount).
-  const jumlahPrestasi = prestasiCount > 0 ? `${prestasiCount}` : (branding?.jumlah_prestasi || '0');
 
   // Gunakan data dari database, jika masih kosong gunakan default yang Anda tulis
   const noWa = branding?.no_wa_admin || '6285606900934';
@@ -186,22 +186,22 @@ export default async function BerandaPage() {
             <Link href="/atlet" className="scoreboard-card text-center group block cursor-pointer">
               <div className="scoreboard-glow-basket opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="text-neutral-light/50 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Total Anggota</div>
-              <div className="scoreboard-value text-5xl md:text-6xl text-basket animate-count-up">{stats.total > 0 ? stats.total : '200'}</div>
+              <div className="scoreboard-value text-5xl md:text-6xl text-basket animate-count-up">{stats.total}</div>
             </Link>
-            <Link href="/atlet?filter=prestasi" className="scoreboard-card text-center group block cursor-pointer">
+            <Link href="/prestasi" className="scoreboard-card text-center group block cursor-pointer">
               <div className="scoreboard-glow-renang opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="text-neutral-light/50 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Prestasi Club</div>
-              <div className="scoreboard-value text-5xl md:text-6xl text-renang animate-count-up">{jumlahPrestasi}</div>
+              <div className="scoreboard-value text-5xl md:text-6xl text-renang animate-count-up">{prestasiCount > 0 ? `${prestasiCount}+` : '0'}</div>
             </Link>
             <Link href="/atlet?cabang=Basket" className="scoreboard-card text-center group block cursor-pointer">
               <div className="scoreboard-glow-basket opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="text-neutral-light/50 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Atlet Basket</div>
-              <div className="scoreboard-value text-5xl md:text-6xl text-basket animate-count-up">{stats.basket > 0 ? stats.basket : '120'}</div>
+              <div className="scoreboard-value text-5xl md:text-6xl text-basket animate-count-up">{stats.basket}</div>
             </Link>
             <Link href="/atlet?cabang=Renang" className="scoreboard-card text-center group block cursor-pointer">
               <div className="scoreboard-glow-renang opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               <div className="text-neutral-light/50 text-[11px] font-bold uppercase tracking-[0.2em] mb-2">Atlet Renang</div>
-              <div className="scoreboard-value text-5xl md:text-6xl text-renang animate-count-up">{stats.renang > 0 ? stats.renang : '80'}</div>
+              <div className="scoreboard-value text-5xl md:text-6xl text-renang animate-count-up">{stats.renang}</div>
             </Link>
           </div>
         </div>

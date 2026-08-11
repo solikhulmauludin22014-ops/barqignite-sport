@@ -3,6 +3,8 @@ import { createSnapToken } from '@/lib/midtrans';
 import { supabase } from '@/lib/supabase';
 import { generateId, generateOrderId } from '@/lib/utils';
 import type { PembayaranSPP } from '@/types';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 // GET: ambil data pembayaran
 export async function GET(request: Request) {
@@ -36,6 +38,11 @@ export async function GET(request: Request) {
 // POST: buat tagihan baru atau generate link Midtrans
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { action } = body;
 
@@ -112,6 +119,11 @@ export async function POST(request: Request) {
 // PUT: update status manual
 export async function PUT(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     
     const { error: updateError } = await supabase
@@ -172,6 +184,11 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     

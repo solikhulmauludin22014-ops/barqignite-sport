@@ -33,17 +33,7 @@ export default async function JadwalPage(props: { searchParams: Promise<{ cabang
 
   const jadwalData = await getJadwal();
   
-  // Default data for preview
-  const defaultLatihan: Jadwal[] = [
-    { id: '1', cabang_olahraga: 'Basket', hari: 'Senin', jam_mulai: '16:00', jam_selesai: '18:00', kategori: 'Junior', lokasi: 'Lapangan Utama', jenis: 'Latihan' },
-    { id: '2', cabang_olahraga: 'Renang', hari: 'Selasa', jam_mulai: '15:00', jam_selesai: '17:00', kategori: 'Pemula', lokasi: 'Kolam B', jenis: 'Latihan' },
-    { id: '3', cabang_olahraga: 'Basket', hari: 'Rabu', jam_mulai: '16:00', jam_selesai: '18:00', kategori: 'Junior', lokasi: 'Lapangan Utama', jenis: 'Latihan' },
-    { id: '4', cabang_olahraga: 'Renang', hari: 'Kamis', jam_mulai: '15:00', jam_selesai: '17:00', kategori: 'Pemula', lokasi: 'Kolam B', jenis: 'Latihan' },
-    { id: '5', cabang_olahraga: 'Basket', hari: 'Sabtu', jam_mulai: '07:00', jam_selesai: '10:00', kategori: 'Senior', lokasi: 'Lapangan Utama', jenis: 'Latihan' },
-    { id: '6', cabang_olahraga: 'Basket', hari: 'Minggu', jam_mulai: '10:00', jam_selesai: '12:00', kategori: 'Pertandingan Persahabatan', lokasi: 'Arena C', jenis: 'Pertandingan', tanggal: '25 Agustus 2026', keterangan: 'Lawan Club A' },
-  ];
-
-  let rawData = jadwalData.length > 0 ? jadwalData : defaultLatihan;
+  let rawData = jadwalData;
   
   if (filterCabang && (filterCabang === 'Basket' || filterCabang === 'Renang')) {
     rawData = rawData.filter(j => j.cabang_olahraga === filterCabang);

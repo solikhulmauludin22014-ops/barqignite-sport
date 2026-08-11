@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 // GET: Ambil konfigurasi branding (single row)
 export async function GET() {
@@ -31,6 +33,11 @@ export async function GET() {
 // PUT: Update konfigurasi branding
 export async function PUT(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
 
     // Hapus field yang tidak perlu di-update

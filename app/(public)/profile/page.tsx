@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Sejarah, visi, misi, dan struktur organisasi club olahraga kami.',
 };
 
+export const revalidate = 60;
+
 async function getBranding() {
   try {
     const { data, error } = await supabase.from('branding').select('*').eq('id', 'BRAND-001').single();
@@ -15,8 +17,34 @@ async function getBranding() {
   } catch { return null; }
 }
 
+async function getStats() {
+  try {
+    const { count } = await supabase.from('pendaftar').select('*', { count: 'exact', head: true }).eq('status_pendaftaran', 'Diterima');
+    return count || 0;
+  } catch { return 0; }
+}
+
+async function getPrestasiCount() {
+  try {
+    const { count } = await supabase.from('prestasi').select('*', { count: 'exact', head: true });
+    return count || 0;
+  } catch { return 0; }
+}
+
+async function getPelatihCount() {
+  try {
+    const { count } = await supabase.from('pelatih').select('*', { count: 'exact', head: true });
+    return count || 0;
+  } catch { return 0; }
+}
+
 export default async function ProfilePage() {
-  const branding = await getBranding();
+  const [branding, anggotaCount, prestasiCount, pelatihCount] = await Promise.all([
+    getBranding(),
+    getStats(),
+    getPrestasiCount(),
+    getPelatihCount()
+  ]);
 
   const namaClub = branding?.nama_club || 'Club Olahraga';
   const sejarah = branding?.sejarah || 'Club olahraga ini didirikan dengan semangat membentuk generasi atlet berprestasi. Sejak awal berdirinya, kami telah berkomitmen untuk memberikan pelatihan berkualitas dengan pembinaan yang profesional.';
@@ -28,15 +56,25 @@ export default async function ProfilePage() {
     branding?.galeri_4, branding?.galeri_5, branding?.galeri_6,
   ].filter(Boolean);
 
-  const strukturOrg = [
-    { jabatan: 'Ketua', nama: branding?.org_ketua || 'Nama Ketua' },
-    { jabatan: 'Sekretaris', nama: branding?.org_sekretaris || 'Nama Sekretaris' },
-    { jabatan: 'Bendahara', nama: branding?.org_bendahara || 'Nama Bendahara' },
-    { jabatan: 'Pelatih Kepala', nama: branding?.org_pelatih_kepala || 'Nama Pelatih' },
+  const strukturOrgRaw = [
+    { jabatan: 'Ketua', nama: branding?.org_ketua },
+    { jabatan: 'Sekretaris', nama: branding?.org_sekretaris },
+    { jabatan: 'Bendahara', nama: branding?.org_bendahara },
+    { jabatan: 'Pelatih Kepala', nama: branding?.org_pelatih_kepala },
   ];
+  
+  // Filter out any positions that don't have a name
+  const strukturOrg = strukturOrgRaw.filter(org => org.nama && org.nama.trim() !== '');
 
   const noWa = branding?.no_wa_admin || '';
   const waUrl = noWa ? `https://wa.me/${noWa.replace(/\D/g, '')}` : '#';
+
+  const statsList = [
+    { label: 'Anggota Aktif', value: anggotaCount > 0 ? anggotaCount : '0', icon: Users },
+    { label: 'Prestasi', value: prestasiCount > 0 ? `${prestasiCount}+` : '0', icon: Trophy },
+    { label: 'Pelatih', value: pelatihCount > 0 ? pelatihCount : '0', icon: Star },
+    { label: 'Tahun Berdiri', value: branding?.tahun_berdiri || '2010', icon: Award },
+  ];
 
   return (
     <div className="min-h-screen pt-20">
@@ -81,12 +119,7 @@ export default async function ProfilePage() {
             </div>
             <div className="glass-card border border-basket/20 bg-basket/5 p-8 rounded-2xl">
               <div className="grid grid-cols-2 gap-6">
-                {[
-                  { label: 'Anggota Aktif', value: '100+', icon: Users },
-                  { label: 'Prestasi', value: '50+', icon: Trophy },
-                  { label: 'Pelatih', value: '5+', icon: Star },
-                  { label: 'Tahun Berdiri', value: branding?.tahun_berdiri || '2010', icon: Award },
-                ].map((s, i) => (
+                {statsList.map((s, i) => (
                   <div key={i} className="text-center">
                     <s.icon className="w-6 h-6 text-basket mx-auto mb-2" />
                     <div className="text-2xl font-display font-black text-neutral-light">{s.value}</div>
@@ -130,27 +163,29 @@ export default async function ProfilePage() {
       </section>
 
       {/* Struktur Organisasi */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="section-title mb-3">Struktur Kepengurusan</h2>
-            <p className="section-subtitle mx-auto">Tim yang mengelola dan memimpin club</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {strukturOrg.map((org, i) => (
-              <div key={i} className="glass-card-hover border p-6 rounded-2xl text-center group">
-                <div className="w-16 h-16 bg-gradient-to-br from-basket to-renang rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-basket/20">
-                  <span className="text-white text-xl font-bold font-display">
-                    {org.nama.charAt(0)}
-                  </span>
+      {strukturOrg.length > 0 && (
+        <section className="py-16">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="section-title mb-3">Struktur Kepengurusan</h2>
+              <p className="section-subtitle mx-auto">Tim yang mengelola dan memimpin club</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 justify-center">
+              {strukturOrg.map((org, i) => (
+                <div key={i} className="glass-card-hover border p-6 rounded-2xl text-center group">
+                  <div className="w-16 h-16 bg-gradient-to-br from-basket to-renang rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-basket/20">
+                    <span className="text-white text-xl font-bold font-display">
+                      {org.nama!.charAt(0)}
+                    </span>
+                  </div>
+                  <p className="text-basket text-xs font-semibold uppercase tracking-wider mb-1">{org.jabatan}</p>
+                  <p className="text-neutral-light font-semibold">{org.nama}</p>
                 </div>
-                <p className="text-basket text-xs font-semibold uppercase tracking-wider mb-1">{org.jabatan}</p>
-                <p className="text-neutral-light font-semibold">{org.nama}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Galeri */}
       {galeri.length > 0 && (

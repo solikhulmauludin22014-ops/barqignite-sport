@@ -16,21 +16,15 @@ async function getPelatih(): Promise<Pelatih[]> {
   } catch { return []; }
 }
 
-const defaultPelatih: Pelatih[] = [
-  { id: '1', nama: 'Ahmad Rizki', cabang_olahraga: 'Basket', foto_url: '', spesialisasi: 'Point Guard & Defense', sertifikasi: 'Lisensi Pelatih Basket PERBASI', pengalaman: '10 tahun melatih basket junior dan senior', urutan: 1 },
-  { id: '2', nama: 'Deni Prasetyo', cabang_olahraga: 'Basket', foto_url: '', spesialisasi: 'Shooting & Offense', sertifikasi: 'Lisensi C PERBASI', pengalaman: '7 tahun melatih teknik shooting dan offense', urutan: 2 },
-  { id: '3', nama: 'Sari Dewi', cabang_olahraga: 'Renang', foto_url: '', spesialisasi: 'Gaya Bebas & Kupu-kupu', sertifikasi: 'Lisensi Pelatih Renang PRSI', pengalaman: '12 tahun melatih renang kompetitif', urutan: 3 },
-  { id: '4', nama: 'Budi Hartono', cabang_olahraga: 'Renang', foto_url: '', spesialisasi: 'Gaya Dada & Punggung', sertifikasi: 'Lisensi B PRSI', pengalaman: '8 tahun melatih renang pemula dan intermediate', urutan: 4 },
-];
-
 const cabangConfig = {
   Basket: { emoji: '🏀', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20', badge: 'bg-orange-500/20 border-orange-500/30 text-orange-400' },
   Renang: { emoji: '🏊', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', badge: 'bg-blue-500/20 border-blue-500/30 text-blue-400' },
 };
 
+export const revalidate = 60;
+
 export default async function PelatihPage() {
-  const data = await getPelatih();
-  const pelatihList = data.length > 0 ? data : defaultPelatih;
+  const pelatihList = await getPelatih();
 
   const basketPelatih = pelatihList.filter((p) => p.cabang_olahraga === 'Basket');
   const renangPelatih = pelatihList.filter((p) => p.cabang_olahraga === 'Renang');
