@@ -10,6 +10,8 @@ import * as XLSX from 'xlsx';
 import type { PembayaranSPP } from '@/types';
 import { formatCurrency, getMonthName } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { Settings } from 'lucide-react';
 
 const BULAN_LIST = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
@@ -172,6 +174,10 @@ export default function AdminPembayaranPage() {
             <span className="text-emerald-400 text-xs">Auto-refresh setiap 5 detik</span>
           </p>
         </div>
+        <Link href="/admin/pembayaran/settings" className="btn-secondary">
+          <Settings className="w-4 h-4 mr-2" />
+          Pengaturan SPP & Metode
+        </Link>
       </div>
 
       {/* Filters */}

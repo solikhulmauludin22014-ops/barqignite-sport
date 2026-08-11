@@ -2,17 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import {
-  CreditCard, Smartphone, Banknote, AlertCircle, CheckCircle,
+  CreditCard, AlertCircle, CheckCircle,
   Calendar, Loader2, QrCode, Building2,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import type { CabangOlahraga } from '@/types';
+import useSWR from 'swr';
+import type { CabangOlahraga, SppKategori, PengaturanPembayaran, MetodePembayaran } from '@/types';
+
+const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 export default function PembayaranPage() {
   const [cabangFilter, setCabangFilter] = useState<CabangOlahraga>('Basket');
   const [branding, setBranding] = useState<Record<string, string>>({});
-  const [generating, setGenerating] = useState<string | null>(null);
-  const [paymentLink, setPaymentLink] = useState<{ token: string; url: string } | null>(null);
+
+  // Fetch Data
+  const { data: sppRes } = useSWR('/api/spp_kategori?is_active=true', fetcher);
+  const { data: pengRes } = useSWR('/api/pengaturan_pembayaran', fetcher);
+  const { data: metodeRes } = useSWR('/api/metode_pembayaran?is_active=true', fetcher);
+
+  const sppList: SppKategori[] = sppRes?.data || [];
+  const pengaturan: PengaturanPembayaran = pengRes?.data || { tanggal_jatuh_tempo: 'Tanggal 10 setiap bulan', catatan_keterlambatan: 'Keterlambatan pembayaran mempengaruhi status keaktifan anggota' };
+  const metodeList: MetodePembayaran[] = metodeRes?.data || [];
 
   // Cek Status Pembayaran
   const [checkId, setCheckId] = useState('');
@@ -23,22 +33,9 @@ export default function PembayaranPage() {
     fetch('/api/branding').then(r => r.json()).then(j => { if (j.success) setBranding(j.data || {}); });
   }, []);
 
-  const sppData = {
-    Basket: [
-      { kategori: 'Mini (5-8 tahun)', nominal: '200000' },
-      { kategori: 'Pemula (9-12 tahun)', nominal: '225000' },
-      { kategori: 'Junior (13-17 tahun)', nominal: '250000' },
-      { kategori: 'Senior (18+ tahun)', nominal: '275000' },
-    ],
-    Renang: [
-      { kategori: 'Beginner (5-8 tahun)', nominal: '250000' },
-      { kategori: 'Intermediate (9-13 tahun)', nominal: '275000' },
-      { kategori: 'Advanced (14-18 tahun)', nominal: '300000' },
-      { kategori: 'Dewasa (18+ tahun)', nominal: '325000' },
-    ],
-  };
-
-  const jatuhTempo = branding?.jatuh_tempo_spp || 'Tanggal 10 setiap bulan';
+  // SppData will be filtered in JSX
+  const jatuhTempo = pengaturan.tanggal_jatuh_tempo || branding?.jatuh_tempo_spp || 'Tanggal 10 setiap bulan';
+  const catatan = pengaturan.catatan_keterlambatan || 'Keterlambatan pembayaran mempengaruhi status keaktifan anggota';
 
   const handleCekStatus = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +68,7 @@ export default function PembayaranPage() {
             Info <span className="text-gradient">Pembayaran</span>
           </h1>
           <p className="text-neutral-light/50 text-lg">
-            Bayar SPP langsung via <strong className="text-emerald-400">QRIS atau Virtual Account</strong> — status otomatis tercatat!
+            Gunakan panduan berikut untuk melunasi iuran Anda. Hubungi admin untuk mendapatkan <strong className="text-emerald-400">Link Pembayaran QRIS/VA Otomatis</strong>!
           </p>
         </div>
       </section>
@@ -100,11 +97,17 @@ export default function PembayaranPage() {
               <h2 className="font-display text-xl font-bold text-neutral-light">SPP Cabang {cabangFilter}</h2>
             </div>
             <div className="divide-y divide-arena-600/30">
-              {sppData[cabangFilter].map((item, i) => (
-                <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-neutral-light/5 transition-colors">
-                  <span className="text-neutral-light/70 font-medium">{item.kategori}</span>
+              {!sppRes ? (
+                <div className="p-6 text-center text-neutral-light/50 flex justify-center"><Loader2 className="w-5 h-5 animate-spin" /></div>
+              ) : sppList.filter(s => s.cabang === cabangFilter).length === 0 ? (
+                <div className="p-6 text-center text-neutral-light/50">
+                  Informasi SPP untuk cabang ini belum tersedia, silakan hubungi admin.
+                </div>
+              ) : sppList.filter(s => s.cabang === cabangFilter).map((item) => (
+                <div key={item.id} className="px-6 py-4 flex items-center justify-between hover:bg-neutral-light/5 transition-colors">
+                  <span className="text-neutral-light/70 font-medium">{item.nama_kategori} {item.usia_min !== null || item.usia_max !== null ? `(${item.usia_min || 0}-${item.usia_max || '+'} tahun)` : ''}</span>
                   <span className={`font-bold text-xl tracking-tight ${cabangConfig[cabangFilter].color}`}>
-                    {formatCurrency(item.nominal)}<span className="text-sm font-normal text-neutral-light/40 ml-1">/bln</span>
+                    {formatCurrency(item.nominal.toString())}<span className="text-sm font-normal text-neutral-light/40 ml-1">/bln</span>
                   </span>
                 </div>
               ))}
@@ -117,7 +120,7 @@ export default function PembayaranPage() {
             <div>
               <h3 className="font-semibold text-neutral-light mb-1">Jadwal Jatuh Tempo</h3>
               <p className="text-neutral-light/60">{jatuhTempo}</p>
-              <p className="text-amber-400 text-sm mt-2">⚠️ Keterlambatan pembayaran mempengaruhi status keaktifan anggota</p>
+              <p className="text-amber-400 text-sm mt-2">⚠️ {catatan}</p>
             </div>
           </div>
 
@@ -125,61 +128,48 @@ export default function PembayaranPage() {
           <div>
             <h2 className="font-display text-2xl font-bold text-neutral-light mb-6">Metode Pembayaran</h2>
 
-            {/* Online Payment Highlight */}
-            <div className="glass-card border border-emerald-500/30 bg-emerald-500/5 rounded-2xl p-6 mb-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center">
-                  <QrCode className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-neutral-light">Bayar Online — Otomatis Tercatat ✨</h3>
-                  <p className="text-neutral-light/50 text-sm">QRIS · Virtual Account BCA/BNI/BRI/Mandiri</p>
-                </div>
-                <span className="ml-auto badge badge-success">Rekomendasi</span>
-              </div>
-              <p className="text-neutral-light/60 text-sm mb-4">
-                Bayar SPP langsung dari website via QRIS atau Virtual Account bank pilihan Anda.
-                Begitu pembayaran selesai, status otomatis tercatat di sistem — tidak perlu konfirmasi manual!
-              </p>
-              <div className="flex flex-wrap gap-2 text-xs text-neutral-light/40">
-                <span className="badge badge-neutral">🏦 BCA VA</span>
-                <span className="badge badge-neutral">🏦 BNI VA</span>
-                <span className="badge badge-neutral">🏦 BRI VA</span>
-                <span className="badge badge-neutral">🏦 Mandiri VA</span>
-                <span className="badge badge-neutral">📱 QRIS</span>
-                <span className="badge badge-neutral">💚 GoPay</span>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Transfer Bank Manual */}
-              {branding?.rek_bank_nomor && (
-                <div className="glass-card-hover border rounded-2xl p-6">
-                  <div className="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center mb-4">
-                    <Building2 className="w-5 h-5 text-blue-400" />
+            {!metodeRes ? (
+               <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-primary-400" /></div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {metodeList.map((metode) => (
+                  <div key={metode.id} className={`glass-card-hover border rounded-2xl p-6 ${metode.is_recommended ? 'border-emerald-500/30 bg-emerald-500/5 md:col-span-2' : ''}`}>
+                    <div className="flex items-start gap-4 mb-3">
+                      <div className={`w-10 h-10 shrink-0 border rounded-xl flex items-center justify-center ${metode.is_recommended ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-blue-500/20 border-blue-500/30'}`}>
+                        {metode.is_recommended ? <QrCode className="w-5 h-5 text-emerald-400" /> : <Building2 className="w-5 h-5 text-blue-400" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-neutral-light">{metode.nama}</h3>
+                          {metode.is_recommended && <span className="badge badge-success shrink-0">Rekomendasi</span>}
+                        </div>
+                        {metode.deskripsi && <p className="text-neutral-light/60 text-sm leading-relaxed mt-1">{metode.deskripsi}</p>}
+                        
+                        {/* Jika metode memiliki nomor rekening/VA */}
+                        {metode.nomor_rekening && (
+                          <div className="mt-3 p-3 bg-neutral-light/5 rounded-lg flex justify-between items-center">
+                            <span className="text-neutral-light/50 text-sm">Info / Rekening</span>
+                            <span className="text-neutral-light font-mono font-medium">{metode.nomor_rekening}</span>
+                          </div>
+                        )}
+                        
+                        {/* Jika admin payment link via WA dianjurkan */}
+                        {metode.is_recommended && (
+                          <div className="mt-4 flex flex-wrap items-center gap-3">
+                            <p className="text-emerald-400 text-xs flex items-center gap-1"><AlertCircle className="w-3 h-3" />Otomatis Tercatat jika menggunakan Link Pembayaran dari Admin.</p>
+                            {branding?.no_wa_admin && (
+                               <a href={`https://wa.me/${branding.no_wa_admin}?text=Halo%20Admin,%20saya%20ingin%20meminta%20link%20pembayaran%20SPP.`} target="_blank" rel="noopener noreferrer" className="btn-primary text-xs py-1.5 px-3">
+                                 Hubungi Admin
+                               </a>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-neutral-light mb-3">Transfer Bank Manual</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between"><span className="text-neutral-light/50">Bank</span><span className="text-neutral-light font-medium">{branding.rek_bank_nama}</span></div>
-                    <div className="flex justify-between"><span className="text-neutral-light/50">Rekening</span><span className="text-neutral-light font-mono font-medium">{branding.rek_bank_nomor}</span></div>
-                    <div className="flex justify-between"><span className="text-neutral-light/50">Atas Nama</span><span className="text-neutral-light font-medium">{branding.rek_bank_atas_nama}</span></div>
-                  </div>
-                  <p className="text-amber-400 text-xs mt-3 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Konfirmasi ke admin setelah transfer</p>
-                </div>
-              )}
-
-              {/* Tunai */}
-              <div className="glass-card-hover border rounded-2xl p-6">
-                <div className="w-10 h-10 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center mb-4">
-                  <Banknote className="w-5 h-5 text-purple-400" />
-                </div>
-                <h3 className="font-semibold text-neutral-light mb-3">Pembayaran Tunai</h3>
-                <p className="text-neutral-light/60 text-sm leading-relaxed">
-                  Pembayaran tunai dapat dilakukan langsung kepada pelatih atau admin saat jadwal latihan berlangsung.
-                </p>
-                <p className="text-amber-400 text-xs mt-3 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Minta kuitansi bukti pembayaran</p>
+                ))}
               </div>
-            </div>
+            )}
           </div>
 
           {/* Cek Status Pembayaran */}

@@ -178,6 +178,36 @@ export interface Admin {
   role: string;
 }
 
+export interface SppKategori {
+  id: string;
+  cabang: CabangOlahraga;
+  nama_kategori: string;
+  usia_min?: number;
+  usia_max?: number;
+  nominal: number;
+  urutan: number;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface PengaturanPembayaran {
+  id: string;
+  tanggal_jatuh_tempo: string;
+  catatan_keterlambatan: string;
+  updated_at?: string;
+}
+
+export interface MetodePembayaran {
+  id: string;
+  nama: string;
+  deskripsi?: string;
+  nomor_rekening?: string;
+  is_recommended: boolean;
+  is_active: boolean;
+  urutan: number;
+  created_at?: string;
+}
+
 // =====================
 // API Response Types
 // =====================
