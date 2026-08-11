@@ -20,6 +20,7 @@ const navItems = [
   { href: '/admin/pendaftar', label: 'Pendaftar Baru', icon: UserPlus },
   { href: '/admin/jadwal', label: 'Jadwal', icon: Calendar },
   { href: '/admin/pelatih', label: 'Pelatih', icon: ClipboardList },
+  { href: '/admin/prestasi', label: 'Prestasi Atlet', icon: Trophy },
 ];
 
 export default function AdminSidebar() {

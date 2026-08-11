@@ -11,6 +11,7 @@ import mainLogo from '@/LOGO BARQIGNITE NEW.png';
 const navLinks = [
   { href: '/', label: 'Beranda' },
   { href: '/profile', label: 'Profil' },
+  { href: '/prestasi', label: 'Prestasi' },
   { href: '/pelatih', label: 'Pelatih' },
   { href: '/jadwal', label: 'Jadwal' },
   { href: '/presensi', label: 'Presensi' },

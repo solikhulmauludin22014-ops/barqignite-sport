@@ -29,11 +29,32 @@ async function getStats() {
   } catch { return { basket: 0, renang: 0, total: 0 }; }
 }
 
+async function getPrestasiCount() {
+  try {
+    const { count } = await supabase.from('prestasi').select('*', { count: 'exact', head: true });
+    return count || 0;
+  } catch { return 0; }
+}
+
+async function getFeaturedPrestasi() {
+  try {
+    const { data } = await supabase
+      .from('prestasi')
+      .select('*')
+      .order('is_featured', { ascending: false })
+      .order('urutan', { ascending: true })
+      .order('tahun', { ascending: false })
+      .limit(4);
+    return data || [];
+  } catch { return []; }
+}
+
 export default async function BerandaPage() {
-  const [branding, stats] = await Promise.all([getBranding(), getStats()]);
+  const [branding, stats, prestasiCount, featuredPrestasi] = await Promise.all([getBranding(), getStats(), getPrestasiCount(), getFeaturedPrestasi()]);
 
   const tagline = branding?.tagline || 'Membentuk Atlet Basket & Renang Berprestasi';
-  const jumlahPrestasi = branding?.jumlah_prestasi || '30+';
+  // Jika database table prestasi ada, pakai count-nya. Jika 0, bisa fall back atau tampilkan 0 (tapi user request agar dinamis mengikuti data, jadi kita tampilkan prestasiCount).
+  const jumlahPrestasi = prestasiCount > 0 ? `${prestasiCount}` : (branding?.jumlah_prestasi || '0');
 
   // Gunakan data dari database, jika masih kosong gunakan default yang Anda tulis
   const noWa = branding?.no_wa_admin || '6285606900934';
@@ -246,6 +267,85 @@ export default async function BerandaPage() {
           </div>
         </div>
         <div className="divider-lane mt-32" />
+      </section>
+
+      {/* ===== PRESTASI TERBARU ===== */}
+      <section className="py-24 relative overflow-hidden bg-arena-900 border-t border-white/5">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+            <div>
+              <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/20">
+                <Trophy className="w-4 h-4 text-primary-400" />
+                <span className="text-primary-400 text-xs font-bold uppercase tracking-wider">Hall of Fame</span>
+              </div>
+              <h2 className="font-display text-4xl md:text-5xl text-neutral-light tracking-wide uppercase">Prestasi <span className="text-primary-400">Terbaru</span></h2>
+            </div>
+            <Link href="/prestasi" className="btn-secondary group">
+              Lihat Semua Prestasi 
+              <svg className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </Link>
+          </div>
+
+          {featuredPrestasi.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredPrestasi.map((p, i) => (
+                <div key={p.id} className="group glass-card border border-white/5 rounded-2xl overflow-hidden hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
+                  <div className="relative h-48 overflow-hidden bg-arena-800">
+                    <Image 
+                      src={p.foto_url} 
+                      alt={p.judul_prestasi}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-arena-900/90 to-transparent opacity-80" />
+                    
+                    <div className="absolute top-3 right-3 flex gap-1">
+                      {p.is_featured && (
+                        <span className="px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider bg-amber-500 text-white shadow-lg">
+                          Featured
+                        </span>
+                      )}
+                      <span className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider ${p.kategori === 'Basket' ? 'bg-basket/90 text-white' : 'bg-renang/90 text-white'}`}>
+                        {p.kategori}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-5 relative">
+                    <div className="absolute -top-5 left-5">
+                      <div className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border shadow-lg backdrop-blur-md bg-opacity-90 ${
+                        p.tingkat === 'kota' ? 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30' :
+                        p.tingkat === 'provinsi' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                        p.tingkat === 'nasional' ? 'bg-basket/20 text-basket border-basket/30' :
+                        'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                      }`}>
+                        Tingkat {p.tingkat}
+                      </div>
+                    </div>
+                    
+                    <h3 className="font-display font-bold text-lg text-white mt-3 mb-1 leading-snug line-clamp-2 group-hover:text-primary-400 transition-colors">
+                      {p.judul_prestasi}
+                    </h3>
+                    <div className="flex items-center justify-between mt-3">
+                      <p className="text-sm font-medium text-neutral-light/80 truncate pr-2">
+                        {p.nama_atlet}
+                      </p>
+                      <span className="text-xs font-bold text-primary-500/70 shrink-0">
+                        {p.tahun}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 glass-card rounded-2xl border border-white/5">
+              <Trophy className="w-12 h-12 text-neutral-light/20 mx-auto mb-3" />
+              <p className="text-neutral-light/50">Belum ada data prestasi yang dapat ditampilkan.</p>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ===== KEUNGGULAN ===== */}

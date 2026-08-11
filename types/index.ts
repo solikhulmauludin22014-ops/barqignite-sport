@@ -66,6 +66,21 @@ export interface Pelatih {
   urutan: number;
 }
 
+export interface Prestasi {
+  id: string;
+  nama_atlet: string;
+  kategori: CabangOlahraga;
+  judul_prestasi: string;
+  tingkat: 'kota' | 'provinsi' | 'nasional' | 'internasional';
+  tahun: number;
+  deskripsi?: string;
+  foto_url: string;
+  is_featured: boolean;
+  urutan: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Anggota {
   id: string;
   nama: string;

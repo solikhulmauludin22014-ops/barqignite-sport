@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
-import { User, Award, Calendar, MapPin, Activity, GraduationCap } from 'lucide-react';
-import type { Anggota } from '@/types';
+import { User, Award, Calendar, MapPin, Activity, GraduationCap, Trophy } from 'lucide-react';
+import type { Anggota, Prestasi } from '@/types';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -20,15 +20,32 @@ export default async function AtletPage({
   const cabang = resolvedSearchParams.cabang;
   const filter = resolvedSearchParams.filter;
 
-  let query = supabase.from('anggota').select('*').eq('status', 'Aktif');
+  let athletes: Anggota[] = [];
+  let achievements: Prestasi[] = [];
+  let hasError = false;
 
-  if (cabang) {
-    query = query.eq('cabang_olahraga', cabang);
+  try {
+    if (filter === 'prestasi') {
+      let query = supabase.from('prestasi').select('*');
+      if (cabang) {
+        query = query.eq('kategori', cabang);
+      }
+      const { data, error } = await query.order('urutan', { ascending: true });
+      if (error) throw error;
+      achievements = data || [];
+    } else {
+      let query = supabase.from('anggota').select('*').eq('status', 'Aktif');
+      if (cabang) {
+        query = query.eq('cabang_olahraga', cabang);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      athletes = data || [];
+    }
+  } catch (e) {
+    console.error('Error fetching data for atlet page:', e);
+    hasError = true;
   }
-
-  const { data: anggotaList, error } = await query;
-
-  const athletes = (anggotaList as Anggota[]) || [];
 
   return (
     <div className="min-h-screen pt-20">
@@ -50,11 +67,14 @@ export default async function AtletPage({
             <Link href="/atlet" className={`px-4 py-2 text-sm font-medium border border-neutral-light/20 rounded-full transition-colors ${!cabang && !filter ? 'bg-neutral-light text-arena-900' : 'text-neutral-light hover:bg-neutral-light/10'}`}>
               Semua Atlet
             </Link>
-            <Link href="/atlet?cabang=Basket" className={`px-4 py-2 text-sm font-medium border border-basket/20 rounded-full transition-colors ${cabang === 'Basket' ? 'bg-basket text-white' : 'text-basket hover:bg-basket/10'}`}>
+            <Link href="/atlet?cabang=Basket" className={`px-4 py-2 text-sm font-medium border border-basket/20 rounded-full transition-colors ${cabang === 'Basket' && !filter ? 'bg-basket text-white' : 'text-basket hover:bg-basket/10'}`}>
               Basket
             </Link>
-            <Link href="/atlet?cabang=Renang" className={`px-4 py-2 text-sm font-medium border border-renang/20 rounded-full transition-colors ${cabang === 'Renang' ? 'bg-renang text-white' : 'text-renang hover:bg-renang/10'}`}>
+            <Link href="/atlet?cabang=Renang" className={`px-4 py-2 text-sm font-medium border border-renang/20 rounded-full transition-colors ${cabang === 'Renang' && !filter ? 'bg-renang text-white' : 'text-renang hover:bg-renang/10'}`}>
               Renang
+            </Link>
+            <Link href="/atlet?filter=prestasi" className={`px-4 py-2 text-sm font-medium border border-primary-500/20 rounded-full transition-colors ${filter === 'prestasi' && !cabang ? 'bg-primary-500 text-white' : 'text-primary-400 hover:bg-primary-500/10'}`}>
+              Berprestasi
             </Link>
           </div>
         </div>
@@ -62,49 +82,61 @@ export default async function AtletPage({
 
       <section className="py-16 bg-arena-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {error ? (
+          {hasError ? (
             <div className="text-center text-red-500 bg-red-500/10 p-4 rounded-lg">Gagal memuat data atlet.</div>
-          ) : athletes.length === 0 ? (
-            <div className="text-center text-neutral-light/50 py-12">Belum ada data atlet{cabang ? ` untuk cabang ${cabang}` : ''}.</div>
-          ) : (
-            filter === 'prestasi' ? (
+          ) : filter === 'prestasi' ? (
+            achievements.length === 0 ? (
+              <div className="text-center text-neutral-light/50 py-12">Belum ada data atlet berprestasi{cabang ? ` untuk cabang ${cabang}` : ''}.</div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {athletes.map((atlet) => (
-                  <div key={atlet.id} className="glass-card border border-neutral-light/10 hover:border-neutral-light/30 transition-all duration-300 rounded-2xl overflow-hidden group">
-                    <div className={`h-24 ${atlet.cabang_olahraga === 'Basket' ? 'bg-basket/20' : 'bg-renang/20'} relative`}>
-                      <div className="absolute -bottom-10 left-6">
-                        <div className="w-20 h-20 bg-arena-700 border-4 border-arena-800 rounded-full flex items-center justify-center overflow-hidden">
-                          {/* Placeholder for Photo */}
-                          <User className="w-10 h-10 text-neutral-light/50" />
-                        </div>
-                      </div>
+                {achievements.map((prestasi) => (
+                  <div key={prestasi.id} className="glass-card border border-neutral-light/10 hover:border-neutral-light/30 transition-all duration-300 rounded-2xl overflow-hidden group">
+                    <div className="relative h-48 bg-arena-900">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img 
+                        src={prestasi.foto_url} 
+                        alt={prestasi.judul_prestasi}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-arena-900 via-transparent to-transparent opacity-90" />
+                      
                       <div className="absolute top-4 right-4">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${atlet.cabang_olahraga === 'Basket' ? 'bg-basket/20 text-basket' : 'bg-renang/20 text-renang'}`}>
-                          {atlet.cabang_olahraga}
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${prestasi.kategori === 'Basket' ? 'bg-basket text-white' : 'bg-renang text-white'}`}>
+                          {prestasi.kategori}
                         </span>
                       </div>
+                      
+                      {prestasi.is_featured && (
+                        <div className="absolute top-4 left-4 bg-amber-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
+                          <Trophy className="w-3 h-3" /> Featured
+                        </div>
+                      )}
                     </div>
                     
-                    <div className="pt-14 pb-6 px-6">
-                      <h3 className="font-display text-xl font-bold text-neutral-light mb-1 text-center">{atlet.nama}</h3>
-                      <div className="flex items-center justify-center gap-2 text-sm text-neutral-light/70 mb-6">
-                        <GraduationCap className="w-4 h-4 text-neutral-light/40" />
-                        <span>{(atlet as any).asal_sekolah || '-'}</span>
+                    <div className="relative pt-6 pb-6 px-6 bg-arena-800 -mt-8 rounded-t-3xl z-10">
+                      <h3 className="font-display text-xl font-bold text-neutral-light mb-1">{prestasi.nama_atlet}</h3>
+                      <div className="flex items-center gap-2 text-sm text-primary-400 font-medium mb-4">
+                        <Trophy className="w-4 h-4 text-primary-400" />
+                        <span>{prestasi.judul_prestasi} ({prestasi.tahun})</span>
                       </div>
 
                       <div className="bg-arena-900/50 rounded-xl p-4 border border-white/5">
                         <h4 className="text-xs font-bold uppercase text-neutral-light/50 mb-2 flex items-center gap-1.5">
                           <Award className="w-3.5 h-3.5" />
-                          Biografi Singkat
+                          Tingkat {prestasi.tingkat}
                         </h4>
-                        <p className="text-sm text-neutral-light/70 italic leading-relaxed">
-                          Atlet {atlet.cabang_olahraga} potensial dengan dedikasi tinggi. Terus mengasah kemampuan di kategori {atlet.kategori} untuk meraih prestasi terbaik.
+                        <p className="text-sm text-neutral-light/70 leading-relaxed">
+                          {prestasi.deskripsi || `Meraih prestasi tingkat ${prestasi.tingkat} pada cabang olahraga ${prestasi.kategori}.`}
                         </p>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
+            )
+          ) : (
+            athletes.length === 0 ? (
+              <div className="text-center text-neutral-light/50 py-12">Belum ada data atlet{cabang ? ` untuk cabang ${cabang}` : ''}.</div>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-white/10 bg-arena-900/50">
                 <table className="w-full text-left text-sm text-neutral-light/70">
