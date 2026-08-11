@@ -32,22 +32,13 @@ export default async function Footer() {
 
           {/* Brand */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="relative w-12 h-12 flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-basket/40 to-renang/40 opacity-50 blur-xl rounded-full" />
+            <div className="flex items-center gap-4 mb-6">
+              <div className="relative bg-white rounded-2xl px-4 py-2 shadow-lg shadow-white/5 flex items-center justify-center">
                 <Image 
                   src={mainLogo} 
                   alt="Barqignite Logo" 
-                  className="w-full h-full object-contain relative z-10 drop-shadow-xl"
+                  className="w-32 h-auto object-contain relative z-10"
                 />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-display font-black text-2xl bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/50 leading-none uppercase tracking-[0.1em]">
-                  {namaClub.split(' ')[0]}
-                </span>
-                <span className="text-neutral-light/60 text-[10px] font-bold uppercase tracking-[0.3em] mt-1">
-                  {namaClub.split(' ').slice(1).join(' ')}
-                </span>
               </div>
             </div>
             <p className="text-neutral-light/50 text-sm leading-relaxed mb-6 max-w-xs">

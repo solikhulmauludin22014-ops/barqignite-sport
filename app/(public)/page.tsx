@@ -207,8 +207,8 @@ export default async function BerandaPage() {
                     <p className="text-basket text-[11px] font-bold uppercase tracking-[0.2em] mb-2">COURT</p>
                     <h3 className="font-display text-5xl text-neutral-light uppercase tracking-wider">Basket</h3>
                   </div>
-                  <div className="w-24 h-24 relative rounded-2xl overflow-hidden shadow-2xl shadow-basket/20 border border-white/5 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 bg-arena-900/50 flex items-center justify-center p-2 backdrop-blur-sm">
-                    <Image src={basketLogo} alt="Logo Basket" className="w-full h-full object-contain drop-shadow-md" />
+                  <div className="w-32 md:w-40 relative rounded-2xl shadow-xl shadow-basket/10 border border-white/20 group-hover:scale-105 group-hover:-translate-y-2 group-hover:shadow-[0_10px_30px_rgba(255,107,0,0.3)] transition-all duration-500 bg-white px-4 py-3 flex items-center justify-center">
+                    <Image src={basketLogo} alt="Logo Basket" className="w-full h-auto object-contain drop-shadow-sm" />
                   </div>
                 </div>
                 <p className="text-neutral-light/70 mb-12 text-lg leading-relaxed flex-grow">
@@ -231,8 +231,8 @@ export default async function BerandaPage() {
                     <p className="text-renang text-[11px] font-bold uppercase tracking-[0.2em] mb-2">POOL</p>
                     <h3 className="font-display text-5xl text-neutral-light uppercase tracking-wider">Renang</h3>
                   </div>
-                  <div className="w-24 h-24 relative rounded-2xl overflow-hidden shadow-2xl shadow-renang/20 border border-white/5 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 bg-arena-900/50 flex items-center justify-center p-2 backdrop-blur-sm">
-                    <Image src={swimLogo} alt="Logo Renang" className="w-full h-full object-contain drop-shadow-md" />
+                  <div className="w-32 md:w-40 relative rounded-2xl shadow-xl shadow-renang/10 border border-white/20 group-hover:scale-105 group-hover:-translate-y-2 group-hover:shadow-[0_10px_30px_rgba(0,194,203,0.3)] transition-all duration-500 bg-white px-4 py-3 flex items-center justify-center">
+                    <Image src={swimLogo} alt="Logo Renang" className="w-full h-auto object-contain drop-shadow-sm" />
                   </div>
                 </div>
                 <p className="text-neutral-light/70 mb-12 text-lg leading-relaxed flex-grow">

@@ -53,13 +53,12 @@ function AdminLoginContent() {
           Kembali ke Beranda
         </Link>
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-24 h-24 relative flex items-center justify-center mx-auto mb-4">
-            <div className="absolute inset-0 bg-gradient-to-br from-basket/30 to-renang/30 opacity-70 blur-2xl rounded-full" />
-            <Image src={mainLogo} alt="Logo" className="w-full h-full object-contain relative z-10 drop-shadow-2xl" />
+        <div className="text-center mb-10 mt-4">
+          <div className="inline-flex relative bg-white rounded-2xl px-6 py-3 shadow-[0_10px_40px_rgba(255,255,255,0.15)] items-center justify-center mx-auto mb-6">
+            <Image src={mainLogo} alt="Logo" className="w-48 h-auto object-contain relative z-10" />
           </div>
-          <h1 className="font-display text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/60 uppercase tracking-widest">Panel Admin</h1>
-          <p className="text-basket text-[10px] font-bold uppercase tracking-[0.3em] mt-2">Sistem Manajemen Club</p>
+          <h1 className="font-display text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/60 tracking-wider">Panel Admin</h1>
+          <p className="text-neutral-light/40 text-xs mt-2 uppercase tracking-[0.2em] font-medium">Sistem Manajemen Club</p>
         </div>
 
         {/* Form */}
