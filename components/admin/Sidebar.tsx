@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard, ClipboardList, CreditCard, Wallet, UserPlus,
-  Paintbrush, Calendar, UserCheck, Menu, X, LogOut, Trophy, ChevronRight
+  Paintbrush, Calendar, UserCheck, Menu, X, LogOut, Trophy, ChevronRight, Camera
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -21,6 +21,7 @@ const navItems = [
   { href: '/admin/jadwal', label: 'Jadwal', icon: Calendar },
   { href: '/admin/pelatih', label: 'Pelatih', icon: ClipboardList },
   { href: '/admin/prestasi', label: 'Prestasi Atlet', icon: Trophy },
+  { href: '/admin/galeri', label: 'Galeri Dokumentasi', icon: Camera },
 ];
 
 export default function AdminSidebar() {

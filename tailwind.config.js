@@ -9,8 +9,11 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-outfit)', 'system-ui', 'sans-serif'],
+        // Athletic condensed display — headline, hero, section titles
+        display: ['var(--font-barlow)', 'system-ui', 'sans-serif'],
+        // Clean geometric body
+        sans: ['var(--font-jakarta)', 'system-ui', 'sans-serif'],
+        // Monospace for stats, scoreboard numbers
         mono: ['var(--font-space-mono)', 'monospace'],
       },
       colors: {
@@ -34,23 +37,37 @@ module.exports = {
           light: 'rgb(var(--color-neutral-light) / <alpha-value>)',
           dark: 'rgb(var(--color-neutral-dark) / <alpha-value>)',
         },
+        muted: {
+          DEFAULT: '#8B95A8',
+          warm: '#A89070',
+        },
         status: {
-          success: '#22C55E', // Lunas/Hadir
-          warning: '#F5B400', // Pending/Izin
-          danger: '#E5484D',  // Terlambat/Alpa
-        }
+          success: '#22C55E',
+          warning: '#F5B400',
+          danger: '#E5484D',
+        },
+        primary: {
+          400: '#FF8933',
+          500: '#FF6B00',
+        },
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.4s ease-out',
+        'fade-in': 'fadeIn 0.6s ease-out both',
+        'fade-in-up': 'fadeInUp 0.6s ease-out both',
+        'slide-up': 'slideUp 0.5s ease-out both',
         'slide-in-left': 'slideInLeft 0.4s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'float': 'float 6s ease-in-out infinite',
+        'shimmer': 'shimmer 1.8s infinite linear',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         slideUp: {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
@@ -63,11 +80,17 @@ module.exports = {
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' },
-        }
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% center' },
+          '100%': { backgroundPosition: '200% center' },
+        },
       },
       backgroundImage: {
         'split-hero': 'linear-gradient(110deg, var(--color-arena-800) 50%, var(--color-arena-900) 50%)',
-      }
+        'gradient-basket': 'linear-gradient(135deg, #FF6B00 0%, #FF8933 100%)',
+        'gradient-renang': 'linear-gradient(135deg, #00C2CB 0%, #33CED6 100%)',
+      },
     },
   },
   plugins: [],

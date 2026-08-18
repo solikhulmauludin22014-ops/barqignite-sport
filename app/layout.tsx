@@ -1,11 +1,31 @@
 import type { Metadata } from 'next';
-import { Inter, Outfit, Space_Mono } from 'next/font/google';
+import { Barlow_Condensed, Plus_Jakarta_Sans, Space_Mono } from 'next/font/google';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
-const spaceMono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-space-mono' });
+// Athletic display font — headline jersey/scoreboard feel
+const barlowCondensed = Barlow_Condensed({
+  weight: ['400', '600', '700', '800', '900'],
+  subsets: ['latin'],
+  variable: '--font-barlow',
+  display: 'swap',
+});
+
+// Clean geometric body font
+const plusJakartaSans = Plus_Jakarta_Sans({
+  weight: ['400', '500', '600', '700', '800'],
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+});
+
+// Monospace for stats / scoreboard numbers
+const spaceMono = Space_Mono({
+  weight: ['400', '700'],
+  subsets: ['latin'],
+  variable: '--font-space-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -27,7 +47,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className="scroll-smooth" suppressHydrationWarning>
-      <body className={`${inter.variable} ${outfit.variable} ${spaceMono.variable} antialiased bg-arena-800 text-neutral-light`}>
+      <body className={`${barlowCondensed.variable} ${plusJakartaSans.variable} ${spaceMono.variable} antialiased bg-arena-800 text-neutral-light`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {children}
         </ThemeProvider>
