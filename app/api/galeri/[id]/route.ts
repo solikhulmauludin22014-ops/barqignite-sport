@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+// Next.js 15: params adalah Promise
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Ambil foto_url untuk hapus dari Storage juga
     const { data: item } = await supabase
@@ -25,7 +29,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     // Hapus file dari Supabase Storage jika ada
     if (item?.foto_url) {
       const url = item.foto_url as string;
-      // Ekstrak path dari URL Supabase Storage
       const storagePrefix = '/storage/v1/object/public/galeri-dokumentasi/';
       const pathIndex = url.indexOf(storagePrefix);
       if (pathIndex !== -1) {
@@ -41,9 +44,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
 
     const { data, error } = await supabase
