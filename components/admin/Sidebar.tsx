@@ -78,7 +78,7 @@ export default function AdminSidebar() {
                 <Trophy className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-display font-black tracking-widest uppercase text-neutral-light text-sm">Barqignite</p>
+                <p className="font-ui font-bold tracking-widest uppercase text-neutral-light text-sm">Barqignite</p>
                 <p className="text-neutral-light/40 text-[10px] font-bold uppercase tracking-widest">Admin Panel</p>
               </div>
             </div>
@@ -145,7 +145,7 @@ export default function AdminSidebar() {
             <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <LogOut className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="font-display text-xl font-bold text-neutral-light mb-2">Konfirmasi Keluar</h3>
+            <h3 className="type-card-title text-neutral-light mb-2">Konfirmasi Keluar</h3>
             <p className="text-neutral-light/60 text-sm mb-6">Apakah Anda yakin ingin keluar dari panel admin?</p>
             <div className="flex gap-3">
               <button onClick={() => setShowLogoutConfirm(false)} className="btn-secondary flex-1 justify-center">Tidak</button>

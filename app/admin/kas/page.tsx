@@ -131,7 +131,7 @@ export default function AdminKasPage() {
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-neutral-light">Kas Club</h1>
+          <h1 className="type-page-title text-neutral-light">Kas Club</h1>
           <p className="text-neutral-light/50 mt-1">Pemasukan, pengeluaran, dan saldo berjalan</p>
         </div>
         <button onClick={openAdd} className="btn-primary">
@@ -146,28 +146,28 @@ export default function AdminKasPage() {
             <TrendingUp className="w-4 h-4 text-emerald-400" />
             <span className="text-neutral-light/50 text-sm">Total Masuk</span>
           </div>
-          <div className="font-display text-2xl font-black text-emerald-400">{formatCurrency(totalMasuk)}</div>
+          <div className="font-mono text-xl font-bold text-emerald-400">{formatCurrency(totalMasuk)}</div>
         </div>
         <div className="glass-card border border-red-500/20 bg-red-500/5 p-6">
           <div className="flex items-center gap-2 mb-2">
             <TrendingDown className="w-4 h-4 text-red-400" />
             <span className="text-neutral-light/50 text-sm">Total Keluar</span>
           </div>
-          <div className="font-display text-2xl font-black text-red-400">{formatCurrency(totalKeluar)}</div>
+          <div className="font-mono text-xl font-bold text-red-400">{formatCurrency(totalKeluar)}</div>
         </div>
         <div className="glass-card border border-primary-500/20 bg-primary-500/5 p-6">
           <div className="flex items-center gap-2 mb-2">
             <Wallet className="w-4 h-4 text-primary-400" />
             <span className="text-neutral-light/50 text-sm">Saldo Kas</span>
           </div>
-          <div className="font-display text-2xl font-black text-primary-400">{formatCurrency(saldo)}</div>
+          <div className="font-mono text-xl font-bold text-primary-400">{formatCurrency(saldo)}</div>
         </div>
       </div>
 
       {/* Chart */}
       {chart.length > 1 && (
         <div className="glass-card border rounded-2xl p-6">
-          <h2 className="font-display text-lg font-bold text-neutral-light mb-4">Grafik Transaksi</h2>
+          <h2 className="type-section-heading text-neutral-light mb-4">Grafik Transaksi</h2>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chart} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
@@ -267,7 +267,7 @@ export default function AdminKasPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-8 w-full max-w-md animate-slide-up">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-neutral-light">{editing ? 'Edit Transaksi' : 'Tambah Transaksi'}</h3>
+              <h3 className="type-section-heading text-neutral-light">{editing ? 'Edit Transaksi' : 'Tambah Transaksi'}</h3>
               <button onClick={() => setShowForm(false)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10">
                 <X className="w-4 h-4" />
               </button>

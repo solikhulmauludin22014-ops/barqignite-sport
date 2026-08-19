@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Anton, Plus_Jakarta_Sans, Space_Mono } from 'next/font/google';
+import { Anton, Plus_Jakarta_Sans, Space_Mono, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 
@@ -29,6 +29,16 @@ const spaceMono = Space_Mono({
   display: 'swap',
 });
 
+// UI Heading font — Space Grotesk: modern geometric, readable at small sizes
+// Dipakai untuk dashboard title, card heading, section label, kategori badge
+// (bukan hero — hero tetap Anton)
+const spaceGrotesk = Space_Grotesk({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-ui',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: {
     default: 'Barqignite Private Sport',
@@ -49,7 +59,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className="scroll-smooth" suppressHydrationWarning>
-      <body className={`${anton.variable} ${plusJakartaSans.variable} ${spaceMono.variable} antialiased bg-arena-800 text-neutral-light`}>
+      <body className={`${anton.variable} ${plusJakartaSans.variable} ${spaceMono.variable} ${spaceGrotesk.variable} antialiased bg-arena-800 text-neutral-light`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {children}
         </ThemeProvider>

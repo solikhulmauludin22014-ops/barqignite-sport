@@ -47,7 +47,7 @@ export default function AdminDashboard() {
     <div className="space-y-8 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-4xl font-black text-neutral-light uppercase tracking-wider">Dashboard</h1>
+          <h1 className="type-page-title text-neutral-light">Dashboard</h1>
           <p className="text-neutral-light/50 mt-1 flex items-center gap-2 font-bold uppercase tracking-widest text-xs">
             <Zap className="w-3.5 h-3.5 text-status-success" />
             <span className="text-status-success">Auto-refresh (5s)</span>
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-4">
                 <span className="text-4xl">{c.emoji}</span>
                 <div>
-                  <h3 className="font-display font-black text-neutral-light text-2xl uppercase tracking-wide">{c.cabang}</h3>
+                  <h3 className="type-scoreboard-label text-neutral-light">{c.cabang}</h3>
                   <p className="text-neutral-light/40 text-xs font-bold uppercase tracking-widest">Bulan {getMonthName(bulanIni)}</p>
                 </div>
               </div>
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
         <div className="glass-card border rounded-2xl p-6 relative overflow-hidden">
           <div className="flex items-center justify-between mb-6 border-b border-arena-600/30 dark:border-white/5 pb-4">
             <div className="flex items-center gap-3">
-              <h2 className="font-display text-xl font-black text-neutral-light uppercase tracking-wider">Pembayaran Terbaru</h2>
+              <h2 className="type-section-heading text-neutral-light">Pembayaran Terbaru</h2>
               <div className="w-2 h-2 bg-status-success rounded-full animate-pulse" title="Real-time" />
             </div>
             <Link href="/admin/pembayaran" className="text-neutral-light/40 hover:text-neutral-light text-xs font-bold uppercase tracking-widest">Semua <ArrowRight className="inline w-3 h-3 ml-1"/></Link>
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="glass-card border rounded-2xl p-6">
-          <h2 className="font-display text-xl font-black text-neutral-light uppercase tracking-wider mb-6 border-b border-arena-600/30 dark:border-white/5 pb-4">Aksi Cepat</h2>
+          <h2 className="type-section-heading text-neutral-light mb-6 border-b border-arena-600/30 dark:border-white/5 pb-4">Aksi Cepat</h2>
           <div className="grid gap-3">
             {[
               { href: '/admin/presensi', emoji: '📋', label: 'Input Presensi', desc: 'Catat kehadiran hari ini' },

@@ -155,7 +155,7 @@ export default function AdminPresensiPage() {
   return (
     <div className="space-y-6 animate-in">
       <div>
-        <h1 className="font-display text-3xl font-bold text-white">Kelola Presensi</h1>
+        <h1 className="type-page-title text-neutral-light">Kelola Presensi</h1>
         <p className="text-white/50 mt-1">Input dan rekap kehadiran anggota</p>
       </div>
 
@@ -222,7 +222,7 @@ export default function AdminPresensiPage() {
             ].map((s) => (
               <div key={s.label} className={`glass-card border ${s.bg} p-4 text-center`}>
                 <s.icon className={`w-5 h-5 ${s.color} mx-auto mb-1`} />
-                <div className={`font-display text-2xl font-black ${s.color}`}>{s.count}</div>
+                <div className={`font-mono text-2xl font-bold ${s.color}`}>{s.count}</div>
                 <div className="text-white/50 text-xs">{s.label}</div>
               </div>
             ))}

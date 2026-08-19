@@ -201,7 +201,7 @@ export default function AdminPrestasiPage() {
     <div className="space-y-6 animate-in">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div>
-          <h1 className="font-display text-3xl font-bold text-neutral-light">Prestasi Atlet</h1>
+          <h1 className="type-page-title text-neutral-light">Prestasi Atlet</h1>
           <p className="text-neutral-light/50 mt-1">Kelola data pencapaian atlet club</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -252,7 +252,7 @@ export default function AdminPrestasiPage() {
               </div>
               
               <div className="flex-1">
-                <h3 className="font-display font-bold text-neutral-light mb-1 leading-tight">{item.judul_prestasi}</h3>
+                <h3 className="font-ui font-semibold text-neutral-light mb-1 leading-tight text-base">{item.judul_prestasi}</h3>
                 <p className="text-primary-400 font-medium text-sm mb-2">{item.nama_atlet} • {item.tahun}</p>
                 {item.deskripsi && (
                   <p className="text-neutral-light/50 text-xs line-clamp-2 mb-4">{item.deskripsi}</p>
@@ -296,7 +296,7 @@ export default function AdminPrestasiPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-slide-up shadow-2xl">
             <div className="flex justify-between items-center p-6 border-b border-white/5 shrink-0">
-              <h3 className="font-display text-xl font-bold text-neutral-light flex items-center gap-2">
+              <h3 className="type-section-heading text-neutral-light flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-primary-400" />
                 {editing ? 'Edit Prestasi' : 'Tambah Prestasi'}
               </h3>

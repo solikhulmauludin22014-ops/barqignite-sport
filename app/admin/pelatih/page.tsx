@@ -85,7 +85,7 @@ export default function AdminPelatihPage() {
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-neutral-light">Kelola Pelatih</h1>
+          <h1 className="type-page-title text-neutral-light">Kelola Pelatih</h1>
           <p className="text-neutral-light/50 mt-1">Tambah, edit data pelatih club</p>
         </div>
         <div className="flex gap-2">
@@ -112,7 +112,7 @@ export default function AdminPelatihPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold text-neutral-light truncate">{pelatih.nama}</h3>
+                  <h3 className="font-ui font-semibold text-neutral-light truncate text-base">{pelatih.nama}</h3>
                   <span className="badge badge-info text-xs mt-1">{pelatih.spesialisasi}</span>
                 </div>
                 <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -146,7 +146,7 @@ export default function AdminPelatihPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-8 w-full max-w-lg animate-slide-up">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-neutral-light">{editing ? 'Edit Pelatih' : 'Tambah Pelatih'}</h3>
+              <h3 className="type-section-heading text-neutral-light">{editing ? 'Edit Pelatih' : 'Tambah Pelatih'}</h3>
               <button onClick={() => setShowForm(false)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleSave} className="space-y-4">

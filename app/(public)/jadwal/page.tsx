@@ -60,7 +60,7 @@ export default async function JadwalPage(props: { searchParams: Promise<{ cabang
             <Calendar className="w-4 h-4" />
             <span>Jadwal Kegiatan</span>
           </div>
-          <h1 className="font-display text-5xl md:text-6xl font-black text-neutral-light mb-6 uppercase tracking-wider">
+          <h1 className="type-page-title text-neutral-light mb-6">
             Jadwal <span className={`text-${filterColor}`}>{filterCabang ? filterCabang : 'Latihan'}</span>
           </h1>
           
@@ -82,7 +82,7 @@ export default async function JadwalPage(props: { searchParams: Promise<{ cabang
       <section className="py-12 z-10 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-10 border-b border-neutral-light/10 pb-4">
-            <h2 className="font-display text-3xl font-black text-neutral-light uppercase tracking-wider">Latihan Mingguan</h2>
+            <h2 className="type-section-heading text-neutral-light">Latihan Mingguan</h2>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -94,7 +94,7 @@ export default async function JadwalPage(props: { searchParams: Promise<{ cabang
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <span className={`badge border ${hariColors[j.hari] || 'badge-neutral'} mb-2`}>{j.hari}</span>
-                      <h3 className="font-display text-2xl font-bold text-neutral-light uppercase">{j.kategori}</h3>
+                      <h3 className="type-card-title text-neutral-light">{j.kategori}</h3>
                     </div>
                     <div className="text-3xl opacity-20">{j.cabang_olahraga === 'Basket' ? '🏀' : '🏊'}</div>
                   </div>
@@ -125,7 +125,7 @@ export default async function JadwalPage(props: { searchParams: Promise<{ cabang
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="divider-court" />
           <div className="flex items-center gap-3 mb-10 border-b border-neutral-light/10 pb-4">
-            <h2 className="font-display text-3xl font-black text-neutral-light uppercase tracking-wider">Pertandingan & Event</h2>
+            <h2 className="type-section-heading text-neutral-light">Pertandingan &amp; Event</h2>
           </div>
 
           {jadwalTanding.length === 0 ? (
@@ -147,7 +147,7 @@ export default async function JadwalPage(props: { searchParams: Promise<{ cabang
                           {j.cabang_olahraga}
                         </span>
                       </div>
-                      <h3 className="font-display text-3xl font-black text-neutral-light uppercase tracking-wide mb-1">{j.keterangan || 'Matchday'}</h3>
+                      <h3 className="type-section-heading text-neutral-light mb-1">{j.keterangan || 'Matchday'}</h3>
                       <p className="text-neutral-light/50 font-bold tracking-widest uppercase text-sm mb-6">{j.kategori}</p>
                       
                       <div className="space-y-2">

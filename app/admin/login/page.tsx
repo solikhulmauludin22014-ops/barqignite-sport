@@ -56,13 +56,13 @@ function AdminLoginContent() {
           <div className="inline-flex relative bg-white/95 rounded-xl p-2.5 shadow-lg items-center justify-center mx-auto mb-4">
             <Image src={mainLogo} alt="Logo" className="w-20 md:w-24 h-auto object-contain relative z-10" />
           </div>
-          <h1 className="font-display text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/60 tracking-wider">Panel Admin</h1>
+          <h1 className="font-ui text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-light to-neutral-light/60 tracking-wider">Panel Admin</h1>
           <p className="text-neutral-light/40 text-xs mt-2 uppercase tracking-[0.2em] font-medium">Sistem Manajemen Club</p>
         </div>
 
         {/* Form */}
         <div className="glass-card border rounded-3xl p-8">
-          <h2 className="font-display text-xl font-bold text-neutral-light mb-6">Masuk ke Akun</h2>
+          <h2 className="type-section-heading text-neutral-light mb-6">Masuk ke Akun</h2>
 
           {error && (
             <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm mb-6">

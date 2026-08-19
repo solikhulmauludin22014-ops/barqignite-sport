@@ -41,14 +41,19 @@
     font-feature-settings: 'kern' 1, 'liga' 1;
   }
 
-  h1, h2 {
+  /* ─── Heading: DISPLAY only (Anton) — hero headline saja ───────────────────
+   * Jangan tambahkan h2/h3 di sini. h1 HANYA di halaman beranda hero.
+   * Semua heading lain pakai .type-* class di bawah.
+   */
+  h1.hero-heading {
     font-family: var(--font-display);
-    font-weight: 400; /* Anton satu weight, tapi sudah sangat heavy */
+    font-weight: 400;
     text-transform: uppercase;
-    letter-spacing: -0.01em;
   }
 
-  h3, h4, h5, h6 {
+  /* Sub-heading default: Space Grotesk, bukan Anton */
+  h2, h3, h4, h5, h6 {
+    font-family: var(--font-ui), system-ui, sans-serif;
     font-weight: 700;
   }
 }
@@ -248,6 +253,81 @@
     color: transparent;
     -webkit-text-stroke: 1px rgb(var(--color-neutral-light) / 0.15);
     text-shadow: none;
+  }
+
+  /* ===================================================================
+     TYPE SCALE — Hierarki Tipografi Barqignite
+     Definisi tunggal, dipakai ulang di semua halaman & komponen.
+     Jangan override letter-spacing / font-family per-komponen.
+     ===================================================================
+
+     Level 1 — HERO (Anton / font-display)
+     Hanya untuk h1 utama beranda: "BARQIGNITE", "PRIVATE SPORT"
+     Ukuran: clamp(4.5rem, 12vw, 10.5rem) — diatur langsung di komponen
+     Class: .jersey-headline (sudah ada di atas)
+
+     Level 2 — SECTION DISPLAY (Anton / font-display)
+     Section title besar di halaman publik: "Cabang Olahraga", "Galeri"
+     Ukuran besar ~2.8–5.5rem, Anton masih oke karena ukuran besar cukup napas.
+     =================================================================== */
+
+  /* Level 3 — PAGE TITLE (Space Grotesk SemiBold)
+     Judul halaman level atas: "Dashboard", "Jadwal Latihan", "Pembayaran SPP"
+     Ukuran: 28–36px. Tracking sedikit lebih lebar karena tidak sebesar hero. */
+  .type-page-title {
+    font-family: var(--font-ui), system-ui, sans-serif;
+    font-size: clamp(1.75rem, 3vw, 2.25rem); /* 28–36px */
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+
+  /* Level 4 — SECTION HEADING (Space Grotesk SemiBold)
+     Judul section di dalam halaman: "Latihan Mingguan", "Pembayaran Terbaru", "Aksi Cepat"
+     Ukuran: 18–24px. Tracking lebih lebar dari page title (font lebih kecil). */
+  .type-section-heading {
+    font-family: var(--font-ui), system-ui, sans-serif;
+    font-size: clamp(1.125rem, 2vw, 1.375rem); /* 18–22px */
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  /* Level 5 — CARD TITLE (Space Grotesk Medium/SemiBold)
+     Judul kartu jadwal: kategori latihan (JUNIOR, PEMULA, SENIOR, LATIHAN MINGGUAN)
+     Nama cabang di scoreboard: BASKET, RENANG
+     Ukuran: 16–22px. Karena font makin kecil, tracking perlu lebih longgar lagi. */
+  .type-card-title {
+    font-family: var(--font-ui), system-ui, sans-serif;
+    font-size: clamp(1rem, 1.5vw, 1.25rem); /* 16–20px */
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  /* Level 6 — LABEL / BADGE (Space Grotesk Medium)
+     Label kecil: nama menu sidebar, metadata kartu, badge status
+     Ukuran: 11–13px. Tracking paling lebar karena paling kecil. */
+  .type-label {
+    font-family: var(--font-ui), system-ui, sans-serif;
+    font-size: 0.6875rem; /* 11px */
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  /* ─── Scoreboard cabang — tetap pakai font-ui bukan Anton ─── */
+  .type-scoreboard-label {
+    font-family: var(--font-ui), system-ui, sans-serif;
+    font-size: clamp(1.25rem, 2vw, 1.5rem); /* 20–24px */
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    text-transform: uppercase;
   }
 
   /* Gallery skeleton loader */

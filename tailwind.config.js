@@ -10,7 +10,11 @@ module.exports = {
     extend: {
       fontFamily: {
         // Sport jersey display — Anton: ultra-condensed, heavy block letters
+        // HANYA untuk hero headline (BARQIGNITE, PRIVATE SPORT) dan maks 1-2 section title besar
         display: ['var(--font-display)', 'system-ui', 'sans-serif'],
+        // UI heading — Space Grotesk: modern geometric, readable di ukuran kecil-menengah
+        // Untuk: dashboard title, card heading, section label, kategori badge, nama menu
+        ui: ['var(--font-ui)', 'system-ui', 'sans-serif'],
         // Clean geometric body
         sans: ['var(--font-jakarta)', 'system-ui', 'sans-serif'],
         // Monospace for stats, scoreboard numbers

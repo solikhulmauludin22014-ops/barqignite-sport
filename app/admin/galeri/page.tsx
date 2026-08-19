@@ -205,7 +205,7 @@ export default function AdminGaleriPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-black text-neutral-light uppercase tracking-wider">
+          <h1 className="type-page-title text-neutral-light">
             Galeri Dokumentasi
           </h1>
           <p className="text-neutral-light/40 mt-1 text-sm font-bold uppercase tracking-widest">
@@ -249,7 +249,7 @@ export default function AdminGaleriPage() {
           <div className="bg-arena-900 border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="font-display text-xl font-black text-neutral-light uppercase tracking-wider">Upload Foto</h2>
+                <h2 className="type-section-heading text-neutral-light">Upload Foto</h2>
                 {/* Hint kategori yang sedang aktif */}
                 <p className="text-[11px] text-neutral-light/30 mt-0.5 font-mono">
                   Kategori aktif: <span className={form.kategori === KATEGORI.BASKET ? 'text-basket' : 'text-renang'}>{form.kategori}</span>

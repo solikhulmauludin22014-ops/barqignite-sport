@@ -90,7 +90,7 @@ export default function AdminPendaftarPage() {
   return (
     <div className="space-y-6 animate-in">
       <div>
-        <h1 className="font-display text-3xl font-bold text-neutral-light">Pendaftar Baru</h1>
+        <h1 className="type-page-title text-neutral-light">Pendaftar Baru</h1>
         <p className="text-neutral-light/50 mt-1">Review dan kelola pendaftar anggota baru</p>
       </div>
 
@@ -213,7 +213,7 @@ export default function AdminPendaftarPage() {
           <div className="glass-card border rounded-3xl p-8 w-full max-w-lg animate-slide-up">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="font-display text-xl font-bold text-neutral-light">{selected.nama}</h3>
+                <h3 className="type-card-title text-neutral-light">{selected.nama}</h3>
                 <span className={`badge mt-1 ${statusConfig[selected.status_pendaftaran]?.class}`}>
                   {statusConfig[selected.status_pendaftaran]?.label}
                 </span>

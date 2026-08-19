@@ -86,7 +86,7 @@ export default function PengaturanPembayaranPage() {
             <ArrowLeft className="w-5 h-5 text-neutral-light/70" />
           </Link>
           <div>
-            <h1 className="font-display text-3xl font-bold text-neutral-light">Pengaturan Pembayaran</h1>
+            <h1 className="type-page-title text-neutral-light">Pengaturan Pembayaran</h1>
             <p className="text-neutral-light/50 mt-1">Kelola Kategori SPP, Jatuh Tempo, dan Metode Pembayaran</p>
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function PengaturanPembayaranPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-6 w-full max-w-md animate-slide-up max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-neutral-light">{sppForm.id ? 'Edit Kategori SPP' : 'Tambah Kategori SPP'}</h3>
+              <h3 className="type-section-heading text-neutral-light">{sppForm.id ? 'Edit Kategori SPP' : 'Tambah Kategori SPP'}</h3>
               <button onClick={() => setSppForm(null)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10"><X className="w-4 h-4" /></button>
             </div>
             <div className="space-y-4">
@@ -249,7 +249,7 @@ export default function PengaturanPembayaranPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-6 w-full max-w-md animate-slide-up max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-neutral-light">{metodeForm.id ? 'Edit Metode' : 'Tambah Metode'}</h3>
+              <h3 className="type-section-heading text-neutral-light">{metodeForm.id ? 'Edit Metode' : 'Tambah Metode'}</h3>
               <button onClick={() => setMetodeForm(null)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10"><X className="w-4 h-4" /></button>
             </div>
             <div className="space-y-4">

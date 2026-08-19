@@ -140,7 +140,7 @@ export default function AdminAnggotaPage() {
     <div className="space-y-6 animate-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-bold text-neutral-light">Data Anggota</h1>
+          <h1 className="type-page-title text-neutral-light">Data Anggota</h1>
           <p className="text-neutral-light/50 mt-1">Kelola seluruh data anggota aktif dan non-aktif</p>
         </div>
         <button onClick={exportToExcel} disabled={filteredData.length === 0} className="btn-success h-10 px-4">
@@ -273,7 +273,7 @@ export default function AdminAnggotaPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card border rounded-3xl p-8 w-full max-w-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="font-display text-xl font-bold text-neutral-light">Edit Data Anggota</h3>
+              <h3 className="type-section-heading text-neutral-light">Edit Data Anggota</h3>
               <button onClick={() => setShowForm(false)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-xl hover:bg-neutral-light/10">
                 <X className="w-4 h-4" />
               </button>
