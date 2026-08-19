@@ -40,7 +40,7 @@ export default async function PelatihPage() {
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className={`w-20 h-20 rounded-2xl ${cfg.bg} border flex items-center justify-center`}>
-                <span className="text-neutral-light text-3xl font-bold font-display">{pelatih.nama.charAt(0)}</span>
+                <span className="font-ui font-bold text-3xl text-neutral-light">{pelatih.nama.charAt(0)}</span>
               </div>
             </div>
           )}
@@ -52,12 +52,12 @@ export default async function PelatihPage() {
           </div>
           {pelatih.sertifikasi && (
             <div className="absolute top-3 left-3">
-              <span className="badge badge-warning"><Award className="w-3 h-3 mr-1" />{pelatih.sertifikasi.slice(0, 15)}...</span>
+              <span className="badge badge-warning"><Award className="w-3 h-3 mr-1 shrink-0" />{pelatih.sertifikasi}</span>
             </div>
           )}
         </div>
         <div className="p-5">
-          <h3 className="font-display text-lg font-bold text-neutral-light mb-1">{pelatih.nama}</h3>
+          <h3 className="type-card-title text-neutral-light mb-1">{pelatih.nama}</h3>
           <p className={`text-sm font-medium ${cfg.color} mb-3`}>{pelatih.spesialisasi}</p>
           <div className="flex items-start gap-2 text-neutral-light/50 text-sm">
             <Briefcase className={`w-4 h-4 shrink-0 mt-0.5 ${cfg.color}`} />
@@ -76,8 +76,8 @@ export default async function PelatihPage() {
             <UserCheck className="w-4 h-4" />
             <span>Tim Pelatih Barqignite</span>
           </div>
-          <h1 className="font-display text-4xl md:text-5xl font-black text-neutral-light mb-4">
-            Profil <span className="text-gradient">Pelatih</span>
+          <h1 className="type-page-title text-neutral-light mb-4">
+            Profil <span className="text-primary-400">Pelatih</span>
           </h1>
           <p className="text-neutral-light/60 text-lg max-w-2xl mx-auto">
             Dilatih oleh pelatih profesional bersertifikat — cabang <span className="text-orange-400 font-medium">Basket 🏀</span> dan <span className="text-blue-400 font-medium">Renang 🏊</span>
@@ -91,7 +91,7 @@ export default async function PelatihPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 bg-orange-500/20 border border-orange-500/30 rounded-xl flex items-center justify-center text-xl">🏀</div>
-              <h2 className="font-display text-2xl font-bold text-neutral-light">Pelatih <span className="text-orange-400">Basket</span></h2>
+              <h2 className="type-section-heading text-neutral-light">Pelatih <span className="text-orange-400">Basket</span></h2>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {basketPelatih.map((p) => <PelatihCard key={p.id} pelatih={p} />)}
@@ -106,7 +106,7 @@ export default async function PelatihPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center text-xl">🏊</div>
-              <h2 className="font-display text-2xl font-bold text-neutral-light">Pelatih <span className="text-blue-400">Renang</span></h2>
+              <h2 className="type-section-heading text-neutral-light">Pelatih <span className="text-blue-400">Renang</span></h2>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {renangPelatih.map((p) => <PelatihCard key={p.id} pelatih={p} />)}

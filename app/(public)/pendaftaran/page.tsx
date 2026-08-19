@@ -73,7 +73,7 @@ function PendaftaranContent() {
         <div className="glass-card border border-emerald-500/30 bg-emerald-500/5 rounded-3xl p-12 max-w-md w-full text-center animate-slide-up">
           <div className="text-5xl mb-4">{cabangColor.emoji}</div>
           <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-          <h2 className="font-display text-2xl font-bold text-neutral-light mb-3">Pendaftaran Berhasil!</h2>
+          <h2 className="type-section-heading text-neutral-light mb-3">Pendaftaran Berhasil!</h2>
           <p className="text-neutral-light/60 mb-8">
             Pendaftaran cabang <strong className={cabangColor.text}>{selectedCabang}</strong> Anda telah kami terima.
             Admin akan menghubungi Anda segera untuk konfirmasi dan informasi selanjutnya.
@@ -96,7 +96,7 @@ function PendaftaranContent() {
             <UserPlus className="w-4 h-4" />
             <span>Bergabung dengan Barqignite</span>
           </div>
-          <h1 className="font-display text-4xl md:text-5xl font-black text-neutral-light mb-4">
+          <h1 className="type-page-title text-neutral-light mb-4">
             Daftar <span className={cabangColor.text}>{selectedCabang === 'Basket' ? '🏀 Basket' : '🏊 Renang'}</span>
           </h1>
           <p className="text-neutral-light/50 text-lg">

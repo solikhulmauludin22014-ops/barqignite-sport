@@ -80,7 +80,7 @@ export default function PrestasiPage() {
             <Trophy className="w-4 h-4 text-primary-400" />
             <span className="text-primary-400 text-xs font-bold uppercase tracking-wider">Hall of Fame</span>
           </div>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-neutral-light mb-6 uppercase tracking-wide animate-slide-up">
+          <h1 className="type-page-title text-neutral-light mb-6 animate-slide-up">
             Prestasi <span className="text-primary-400">Kami</span>
           </h1>
           <p className="text-neutral-light/60 text-lg md:text-xl max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -176,7 +176,7 @@ export default function PrestasiPage() {
               <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Trophy className="w-10 h-10 text-neutral-light/20" />
               </div>
-              <h3 className="font-display text-2xl font-bold text-neutral-light mb-2">Belum Ada Prestasi</h3>
+              <h3 className="type-section-heading text-neutral-light mb-2">Belum Ada Prestasi</h3>
               <p className="text-neutral-light/50 max-w-md mx-auto">
                 Belum ada data prestasi yang cocok dengan filter yang Anda pilih. Coba sesuaikan filter kategori atau tahun.
               </p>
@@ -193,7 +193,7 @@ export default function PrestasiPage() {
               {/* Highlight / Featured Section */}
               {featured.length > 0 && (
                 <div>
-                  <h2 className="font-display text-3xl font-bold text-neutral-light mb-8 flex items-center gap-3">
+                  <h2 className="type-section-heading text-neutral-light mb-8 flex items-center gap-3">
                     <Medal className="w-8 h-8 text-yellow-400" /> Highlight Prestasi
                   </h2>
                   <div className="grid md:grid-cols-2 gap-8">
@@ -209,7 +209,7 @@ export default function PrestasiPage() {
                           <div className="absolute inset-0 bg-gradient-to-t from-arena-900 via-arena-900/40 to-transparent" />
                           
                           <div className="absolute top-4 right-4 flex gap-2">
-                            <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${p.kategori === 'Basket' ? 'bg-basket text-white' : 'bg-renang text-white'}`}>
+                            <span className={`type-label px-3 py-1.5 rounded-full ${p.kategori === 'Basket' ? 'bg-basket text-white' : 'bg-renang text-white'}`}>
                               {p.kategori}
                             </span>
                           </div>
@@ -217,7 +217,7 @@ export default function PrestasiPage() {
                         
                         <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
                           <div className="flex items-center gap-3 mb-3">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getBadgeConfig(p.tingkat).bg}`}>
+                            <span className={`type-label px-3 py-1 rounded-full border ${getBadgeConfig(p.tingkat).bg}`}>
                               {getBadgeConfig(p.tingkat).label}
                             </span>
                             <span className="flex items-center gap-1.5 text-xs font-bold text-primary-400 bg-primary-500/10 px-2 py-1 rounded-full">
@@ -225,7 +225,7 @@ export default function PrestasiPage() {
                             </span>
                           </div>
                           
-                          <h3 className="font-display text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
+                          <h3 className="type-card-title text-white mb-2">
                             {p.judul_prestasi}
                           </h3>
                           <p className="text-neutral-light/80 font-medium text-lg mb-3">
@@ -246,7 +246,7 @@ export default function PrestasiPage() {
               {/* Gallery Grid */}
               {reguler.length > 0 && (
                 <div>
-                  <h2 className="font-display text-2xl font-bold text-neutral-light mb-8 flex items-center gap-3">
+                  <h2 className="type-section-heading text-neutral-light mb-8 flex items-center gap-3">
                     <Award className="w-6 h-6 text-primary-400" /> {featured.length > 0 ? 'Prestasi Lainnya' : 'Semua Prestasi'}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -262,7 +262,7 @@ export default function PrestasiPage() {
                           <div className="absolute inset-0 bg-gradient-to-t from-arena-900/90 to-transparent opacity-80" />
                           
                           <div className="absolute top-3 right-3">
-                            <span className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider ${p.kategori === 'Basket' ? 'bg-basket/90 text-white' : 'bg-renang/90 text-white'}`}>
+                            <span className={`type-label px-2 py-1 rounded-md ${p.kategori === 'Basket' ? 'bg-basket/90 text-white' : 'bg-renang/90 text-white'}`}>
                               {p.kategori}
                             </span>
                           </div>
@@ -270,12 +270,12 @@ export default function PrestasiPage() {
                         
                         <div className="p-5 relative">
                           <div className="absolute -top-6 left-5">
-                            <div className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border shadow-lg backdrop-blur-md ${getBadgeConfig(p.tingkat).bg} bg-opacity-90`}>
+                            <div className={`type-label px-2.5 py-1 rounded-lg border shadow-lg backdrop-blur-md ${getBadgeConfig(p.tingkat).bg} bg-opacity-90`}>
                               {getBadgeConfig(p.tingkat).label}
                             </div>
                           </div>
                           
-                          <h3 className="font-display font-bold text-lg text-white mt-2 mb-1 leading-snug line-clamp-2 group-hover:text-primary-400 transition-colors">
+                          <h3 className="type-card-title text-white mt-2 mb-1 line-clamp-2 group-hover:text-primary-400 transition-colors">
                             {p.judul_prestasi}
                           </h3>
                           <div className="flex items-center justify-between mt-3">

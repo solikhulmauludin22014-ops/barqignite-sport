@@ -89,8 +89,8 @@ export default async function ProfilePage() {
             <BookOpen className="w-4 h-4" />
             <span>Tentang Kami</span>
           </div>
-          <h1 className="font-display text-4xl md:text-5xl font-black text-neutral-light mb-4">
-            Profil <span className="text-gradient">Club</span>
+          <h1 className="type-page-title text-neutral-light mb-4">
+            Profil <span className="text-primary-400">Club</span>
           </h1>
           <p className="text-neutral-light/60 text-lg mb-8">Kenali kami lebih dekat — sejarah, visi, dan nilai yang kami junjung</p>
           
@@ -112,8 +112,8 @@ export default async function ProfilePage() {
                 <Award className="w-3.5 h-3.5" />
                 <span>Sejarah</span>
               </div>
-              <h2 className="font-display text-3xl font-bold text-neutral-light mb-6">
-                Perjalanan <span className="text-gradient">{namaClub}</span>
+              <h2 className="type-section-heading text-neutral-light mb-6">
+                Perjalanan <span className="text-primary-400">{namaClub}</span>
               </h2>
               <p className="text-neutral-light/70 leading-relaxed">{sejarah}</p>
             </div>
@@ -122,7 +122,7 @@ export default async function ProfilePage() {
                 {statsList.map((s, i) => (
                   <div key={i} className="text-center">
                     <s.icon className="w-6 h-6 text-basket mx-auto mb-2" />
-                    <div className="text-2xl font-display font-black text-neutral-light">{s.value}</div>
+                    <div className="font-mono text-2xl font-bold text-neutral-light">{s.value}</div>
                     <div className="text-neutral-light/50 text-xs">{s.label}</div>
                   </div>
                 ))}
@@ -145,7 +145,7 @@ export default async function ProfilePage() {
                 <div className="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
                   <Eye className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 </div>
-                <h3 className="font-display text-xl font-bold text-neutral-light">Visi</h3>
+                <h3 className="type-card-title text-neutral-light">Visi</h3>
               </div>
               <p className="text-neutral-light/70 leading-relaxed">{visi}</p>
             </div>
@@ -154,7 +154,7 @@ export default async function ProfilePage() {
                 <div className="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center">
                   <Heart className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
                 </div>
-                <h3 className="font-display text-xl font-bold text-neutral-light">Misi</h3>
+                <h3 className="type-card-title text-neutral-light">Misi</h3>
               </div>
               <p className="text-neutral-light/70 leading-relaxed">{misi}</p>
             </div>
@@ -174,7 +174,7 @@ export default async function ProfilePage() {
               {strukturOrg.map((org, i) => (
                 <div key={i} className="glass-card-hover border p-6 rounded-2xl text-center group">
                   <div className="w-16 h-16 bg-gradient-to-br from-basket to-renang rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-basket/20">
-                    <span className="text-white text-xl font-bold font-display">
+                    <span className="font-ui font-bold text-xl text-white">
                       {org.nama!.charAt(0)}
                     </span>
                   </div>

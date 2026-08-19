@@ -64,8 +64,8 @@ export default function PembayaranPage() {
             <CreditCard className="w-4 h-4" />
             <span>Informasi Pembayaran SPP</span>
           </div>
-          <h1 className="font-display text-4xl md:text-5xl font-black text-neutral-light mb-4">
-            Info <span className="text-gradient">Pembayaran</span>
+          <h1 className="type-page-title text-neutral-light mb-4">
+            Info <span className="text-primary-400">Pembayaran</span>
           </h1>
           <p className="text-neutral-light/50 text-lg">
             Gunakan panduan berikut untuk melunasi iuran Anda. Hubungi admin untuk mendapatkan <strong className="text-emerald-400">Link Pembayaran QRIS/VA Otomatis</strong>!
@@ -94,7 +94,7 @@ export default function PembayaranPage() {
           <div className="glass-card border rounded-2xl overflow-hidden">
             <div className={`${cabangConfig[cabangFilter].bg} border-b border-arena-600/30 px-6 py-4 flex items-center gap-3`}>
               <span className="text-2xl">{cabangConfig[cabangFilter].emoji}</span>
-              <h2 className="font-display text-xl font-bold text-neutral-light">SPP Cabang {cabangFilter}</h2>
+              <h2 className="type-section-heading text-neutral-light">SPP Cabang {cabangFilter}</h2>
             </div>
             <div className="divide-y divide-arena-600/30">
               {!sppRes ? (
@@ -126,7 +126,7 @@ export default function PembayaranPage() {
 
           {/* Metode Pembayaran */}
           <div>
-            <h2 className="font-display text-2xl font-bold text-neutral-light mb-6">Metode Pembayaran</h2>
+            <h2 className="type-section-heading text-neutral-light mb-6">Metode Pembayaran</h2>
 
             {!metodeRes ? (
                <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-primary-400" /></div>
@@ -174,7 +174,7 @@ export default function PembayaranPage() {
 
           {/* Cek Status Pembayaran */}
           <div className="glass-card border rounded-2xl p-6">
-            <h2 className="font-display text-xl font-bold text-neutral-light mb-4">Cek Status Pembayaran Mandiri</h2>
+            <h2 className="type-section-heading text-neutral-light mb-4">Cek Status Pembayaran Mandiri</h2>
             <form onSubmit={handleCekStatus} className="flex gap-3 mb-4">
               <input value={checkId} onChange={(e) => setCheckId(e.target.value)}
                 placeholder="Masukkan ID Anggota (contoh: AGT-xxxxx)"

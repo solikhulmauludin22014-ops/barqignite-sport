@@ -52,8 +52,8 @@ export default async function AtletPage({
       <section className="relative py-20 overflow-hidden bg-arena-900">
         <div className="absolute inset-0 bg-gradient-to-b from-arena-600/20 to-transparent" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h1 className="font-display text-4xl md:text-5xl font-black text-neutral-light mb-4 uppercase tracking-wide">
-            Data <span className={cabang === 'Basket' ? 'text-basket' : cabang === 'Renang' ? 'text-renang' : 'text-gradient'}>Atlet</span>
+          <h1 className="type-page-title text-neutral-light mb-4">
+            Data <span className={cabang === 'Basket' ? 'text-basket' : cabang === 'Renang' ? 'text-renang' : 'text-primary-400'}>Atlet</span>
             {cabang && ` ${cabang}`}
             {filter === 'prestasi' && ' Berprestasi'}
           </h1>
@@ -101,20 +101,20 @@ export default async function AtletPage({
                       <div className="absolute inset-0 bg-gradient-to-t from-arena-900 via-transparent to-transparent opacity-90" />
                       
                       <div className="absolute top-4 right-4">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${prestasi.kategori === 'Basket' ? 'bg-basket text-white' : 'bg-renang text-white'}`}>
+                        <span className={`type-label px-2 py-1 rounded-full ${prestasi.kategori === 'Basket' ? 'bg-basket text-white' : 'bg-renang text-white'}`}>
                           {prestasi.kategori}
                         </span>
                       </div>
                       
                       {prestasi.is_featured && (
-                        <div className="absolute top-4 left-4 bg-amber-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
-                          <Trophy className="w-3 h-3" /> Featured
+                        <div className="absolute top-4 left-4 bg-amber-500/90 text-white type-label px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
+                          <Trophy className="w-3 h-3 shrink-0" /> Featured
                         </div>
                       )}
                     </div>
                     
                     <div className="relative pt-6 pb-6 px-6 bg-arena-800 -mt-8 rounded-t-3xl z-10">
-                      <h3 className="font-display text-xl font-bold text-neutral-light mb-1">{prestasi.nama_atlet}</h3>
+                      <h3 className="type-card-title text-neutral-light mb-1">{prestasi.nama_atlet}</h3>
                       <div className="flex items-center gap-2 text-sm text-primary-400 font-medium mb-4">
                         <Trophy className="w-4 h-4 text-primary-400" />
                         <span>{prestasi.judul_prestasi} ({prestasi.tahun})</span>

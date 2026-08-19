@@ -454,7 +454,7 @@ export default async function BerandaPage() {
                   <div className="p-5 relative">
                     {/* Level badge */}
                     <div className="mb-3">
-                      <span className={`inline-block px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider border ${
+                      <span className={`inline-block px-2.5 py-1 type-label border ${
                         p.tingkat === 'kota' ? 'text-neutral-light/50 border-white/10' :
                         p.tingkat === 'provinsi' ? 'text-blue-400 border-blue-500/30' :
                         p.tingkat === 'nasional' ? 'text-basket border-basket/30' :
@@ -464,7 +464,7 @@ export default async function BerandaPage() {
                       </span>
                     </div>
 
-                    <h3 className="font-display font-bold text-lg text-white mb-2 leading-snug line-clamp-2 group-hover:text-basket transition-colors" style={{ fontWeight: 700 }}>
+                    <h3 className="type-card-title text-white mb-2 line-clamp-2 group-hover:text-basket transition-colors">
                       {p.judul_prestasi}
                     </h3>
                     <div className="flex items-center justify-between mt-3">
@@ -536,10 +536,7 @@ export default async function BerandaPage() {
                   <f.icon className={`w-5 h-5 ${f.color}`} />
                 </div>
 
-                <h3
-                  className="font-display text-neutral-light uppercase mb-3"
-                  style={{ fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.03em' }}
-                >
+                <h3 className="type-card-title text-neutral-light mb-3">
                   {f.title}
                 </h3>
                 <p className="text-muted text-[15px] leading-relaxed font-sans">{f.desc}</p>

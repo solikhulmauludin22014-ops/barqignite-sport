@@ -57,7 +57,7 @@ export default function PresensiPage() {
       <div className="max-w-xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <div className="text-center mb-12">
-          <h1 className="font-display text-5xl md:text-6xl font-black text-neutral-light mb-4 uppercase tracking-wider">
+          <h1 className="type-page-title text-neutral-light mb-4">
             PRE<span className="text-renang">SEN</span>SI
           </h1>
           <p className="text-neutral-light/60 text-lg md:text-xl font-light">
@@ -70,7 +70,7 @@ export default function PresensiPage() {
             <div className="w-20 h-20 bg-status-success/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-status-success" />
             </div>
-            <h2 className="font-display text-3xl font-bold text-neutral-light mb-2">Presensi Berhasil!</h2>
+            <h2 className="type-section-heading text-neutral-light mb-2">Presensi Berhasil!</h2>
             <p className="text-neutral-light/60 mb-8">
               Terima kasih <strong className="text-neutral-light">{memberData?.nama}</strong>. Kehadiran Anda untuk <strong className="text-neutral-light">{memberData?.cabang}</strong> telah dicatat.
             </p>
