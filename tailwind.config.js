@@ -9,8 +9,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        // Athletic condensed display — headline, hero, section titles
-        display: ['var(--font-barlow)', 'system-ui', 'sans-serif'],
+        // Sport jersey display — Anton: ultra-condensed, heavy block letters
+        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
         // Clean geometric body
         sans: ['var(--font-jakarta)', 'system-ui', 'sans-serif'],
         // Monospace for stats, scoreboard numbers

@@ -40,8 +40,8 @@
   }
 
   h1, h2 {
-    font-family: var(--font-barlow), system-ui, sans-serif;
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-weight: 400; /* Anton satu weight, tapi sudah sangat heavy */
     text-transform: uppercase;
     letter-spacing: -0.01em;
   }
@@ -198,6 +198,54 @@
   }
   .gallery-item img {
     @apply transition-transform duration-500 group-hover:scale-105;
+  }
+
+  /* ===== JERSEY HEADLINE — efek sablon jersey ===== */
+  /*
+   * Dipakai di h1 hero utama SAJA (BARQIGNITE, PRIVATE SPORT)
+   * Jangan pakai di body text, angka, atau subheading kecil.
+   */
+  .jersey-headline {
+    /* Kemiringan ala tulisan jersey — agresif tapi terbaca */
+    transform: skewX(-6deg);
+    display: inline-block;
+    /* Letter spacing lebih rapat, khas jersey condensed */
+    letter-spacing: -0.03em;
+  }
+
+  /* Jersey headline versi orange (Barqignite) */
+  .jersey-headline-basket {
+    color: #FF6B00;
+    /* Stroke tipis warna gelap di belakang + glow depan */
+    -webkit-text-stroke: 1.5px rgba(180, 50, 0, 0.6);
+    text-shadow:
+      3px 3px 0px rgba(120, 30, 0, 0.5),
+      -1px -1px 0px rgba(0,0,0,0.3),
+      0 0 40px rgba(255,107,0,0.25);
+  }
+
+  /* Jersey headline versi teal (Private Sport) */
+  .jersey-headline-renang {
+    color: #00C2CB;
+    -webkit-text-stroke: 1.5px rgba(0, 80, 90, 0.6);
+    text-shadow:
+      3px 3px 0px rgba(0, 60, 70, 0.5),
+      -1px -1px 0px rgba(0,0,0,0.3),
+      0 0 40px rgba(0,194,203,0.2);
+  }
+
+  /* Section headline — miring ringan, shadow lebih subtle */
+  .jersey-section-title {
+    transform: skewX(-4deg);
+    display: inline-block;
+    letter-spacing: -0.02em;
+  }
+
+  /* Efek outline untuk kata ghost/faded dalam section title */
+  .jersey-ghost {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(230,236,244,0.15);
+    text-shadow: none;
   }
 
   /* Gallery skeleton loader */

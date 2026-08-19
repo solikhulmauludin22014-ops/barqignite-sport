@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
-import { Barlow_Condensed, Plus_Jakarta_Sans, Space_Mono } from 'next/font/google';
+import { Anton, Plus_Jakarta_Sans, Space_Mono } from 'next/font/google';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 
-// Athletic display font — headline jersey/scoreboard feel
-const barlowCondensed = Barlow_Condensed({
-  weight: ['400', '600', '700', '800', '900'],
+// ─── Sport Jersey Display Font — Anton ────────────────────────────────────────
+// Anton: ultra-condensed, heavy, all-caps — authentic jersey/varsity number feel
+// Single weight (700-equivalent black), subset latin saja biar ringan
+const anton = Anton({
+  weight: '400', // Anton hanya punya satu weight tapi sudah sangat heavy
   subsets: ['latin'],
-  variable: '--font-barlow',
+  variable: '--font-display',
   display: 'swap',
 });
 
@@ -47,7 +49,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className="scroll-smooth" suppressHydrationWarning>
-      <body className={`${barlowCondensed.variable} ${plusJakartaSans.variable} ${spaceMono.variable} antialiased bg-arena-800 text-neutral-light`}>
+      <body className={`${anton.variable} ${plusJakartaSans.variable} ${spaceMono.variable} antialiased bg-arena-800 text-neutral-light`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {children}
         </ThemeProvider>

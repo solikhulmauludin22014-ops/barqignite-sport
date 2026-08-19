@@ -166,35 +166,31 @@ export default async function BerandaPage() {
             {/* Main Heading */}
             <h1
               className="font-display leading-none uppercase mb-4 select-none"
-              style={{ fontWeight: 900 }}
             >
-              {/* BARQIGNITE — giant basket orange */}
+              {/* BARQIGNITE — jersey orange, skew, stroke + shadow */}
               <span
-                className="block text-basket"
+                className="block jersey-headline jersey-headline-basket"
                 style={{
                   fontSize: 'clamp(4.5rem, 12vw, 10.5rem)',
-                  letterSpacing: '-0.02em',
                   lineHeight: 0.87,
-                  textShadow: '0 0 80px rgba(255,107,0,0.2)',
                 }}
               >
                 Barqignite
               </span>
 
-              {/* PRIVATE SPORT — renang teal */}
+              {/* PRIVATE SPORT — jersey teal */}
               <span
-                className="block text-renang"
+                className="block jersey-headline jersey-headline-renang"
                 style={{
                   fontSize: 'clamp(2.8rem, 8vw, 7rem)',
-                  letterSpacing: '0.05em',
-                  lineHeight: 1.0,
-                  textShadow: '0 0 80px rgba(0,194,203,0.2)',
+                  lineHeight: 1.05,
+                  marginTop: '0.1em',
                 }}
               >
                 Private Sport
               </span>
 
-              {/* SIDOARJO — ghost outline */}
+              {/* SIDOARJO — ghost outline, tidak pakai jersey effect supaya tidak berlebihan */}
               <span
                 className="block font-sans font-light"
                 style={{
@@ -265,9 +261,12 @@ export default async function BerandaPage() {
             </p>
             <h2
               className="font-display text-neutral-light uppercase leading-none"
-              style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)', fontWeight: 900, letterSpacing: '0.02em' }}
+              style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)' }}
             >
-              Cabang <span className="text-neutral-light/20">Olahraga</span>
+              <span className="jersey-section-title">
+                Cabang{' '}
+                <span className="jersey-ghost">Olahraga</span>
+              </span>
             </h2>
           </div>
 
@@ -376,9 +375,12 @@ export default async function BerandaPage() {
               </p>
               <h2
                 className="font-display text-neutral-light uppercase leading-none"
-                style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)', fontWeight: 900, letterSpacing: '0.02em' }}
+                style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)' }}
               >
-                Momen <span className="text-neutral-light/20">di Lapangan</span>
+                <span className="jersey-section-title">
+                  Momen{' '}
+                  <span className="jersey-ghost">di Lapangan</span>
+                </span>
               </h2>
             </div>
             <p className="text-muted text-sm max-w-xs leading-relaxed">
@@ -409,9 +411,12 @@ export default async function BerandaPage() {
               </div>
               <h2
                 className="font-display text-neutral-light uppercase leading-none"
-                style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)', fontWeight: 900, letterSpacing: '0.02em' }}
+                style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)' }}
               >
-                Prestasi <span className="text-neutral-light/20">Terbaru</span>
+                <span className="jersey-section-title">
+                  Prestasi{' '}
+                  <span className="jersey-ghost">Terbaru</span>
+                </span>
               </h2>
             </div>
             <Link href="/prestasi" id="link-semua-prestasi" className="btn-secondary group shrink-0">
@@ -499,9 +504,12 @@ export default async function BerandaPage() {
             </p>
             <h2
               className="font-display text-neutral-light uppercase leading-none"
-              style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)', fontWeight: 900, letterSpacing: '0.02em' }}
+              style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)' }}
             >
-              Keunggulan <span className="text-neutral-light/20">Barqignite</span>
+              <span className="jersey-section-title">
+                Keunggulan{' '}
+                <span className="jersey-ghost">Barqignite</span>
+              </span>
             </h2>
           </div>
 
@@ -557,9 +565,12 @@ export default async function BerandaPage() {
             </p>
             <h2
               className="font-display text-neutral-light uppercase leading-none"
-              style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)', fontWeight: 900, letterSpacing: '0.02em' }}
+              style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)' }}
             >
-              Hubungi <span className="text-neutral-light/20">Kami</span>
+              <span className="jersey-section-title">
+                Hubungi{' '}
+                <span className="jersey-ghost">Kami</span>
+              </span>
             </h2>
             <p className="text-muted mt-4 text-base font-sans max-w-lg leading-relaxed">
               Punya pertanyaan atau butuh bantuan pendaftaran? Tim admin kami siap membantu.
