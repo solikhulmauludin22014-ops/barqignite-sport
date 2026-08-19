@@ -109,10 +109,10 @@ export default async function OwnerProfile() {
           <div className="absolute bottom-0 w-3/4 h-1/2 bg-gradient-to-t from-arena-900 to-transparent z-10 pointer-events-none blur-xl"></div>
           
           <Image 
-            src="/foto formal NAFIS BARQIGNITE.png" 
+            src="/fd0532d7-593a-43e9-a3e4-d7060080119c.png" 
             alt="Coach Barqiyyah Nafis"
             fill
-            className="object-contain object-bottom z-20 drop-shadow-2xl"
+            className="object-contain object-bottom z-20 drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]"
             priority
           />
         </div>

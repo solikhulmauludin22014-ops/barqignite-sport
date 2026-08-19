@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  Trophy, Shield, Target, Flame, Zap, Phone, Instagram, Mail, MapPin
+  Trophy, Shield, Target, Flame, Zap, Phone, Instagram, Mail, MapPin, Calendar, Play
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
@@ -9,7 +9,6 @@ import basketLogo from '@/LOGO BARQIGNITE BASKETBALL.jpeg';
 import swimLogo from '@/LOGO BARQIGNITE SWIM.png';
 import CounterStats from '@/components/public/CounterStats';
 import GallerySection from '@/components/public/GallerySection';
-import OwnerProfile from '@/components/public/OwnerProfile';
 export const metadata: Metadata = {
   title: 'Beranda — Barqignite Private Sport Sidoarjo',
   description: 'Club olahraga Basket & Renang terbaik di Sidoarjo. Bergabunglah dan raih prestasi bersama Barqignite Private Sport.',
@@ -68,6 +67,21 @@ async function getGaleri() {
   } catch { return []; }
 }
 
+async function getNextSchedule() {
+  try {
+    const { data, error } = await supabase
+      .from('jadwal')
+      .select('*')
+      .eq('jenis', 'Latihan')
+      .limit(1);
+    
+    if (error || !data || data.length === 0) return null;
+    return data[0];
+  } catch {
+    return null;
+  }
+}
+
 // ─── Local gallery photos (dari folder /public) ───────────────────────────────
 const localGalleryPhotos = [
   { id: 'local-1', judul: 'Sesi Latihan Kegiatan', kategori: 'Basket' as const, foto_url: '/WhatsApp Image 2026-08-18 at 15.12.15.jpeg', tanggal: '2026-08-18', is_featured: true, urutan: 1, created_at: '2026-08-18' },
@@ -85,8 +99,8 @@ const localGalleryPhotos = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function BerandaPage() {
-  const [branding, stats, prestasiCount, featuredPrestasi, dbGaleri] = await Promise.all([
-    getBranding(), getStats(), getPrestasiCount(), getFeaturedPrestasi(), getGaleri(),
+  const [branding, stats, prestasiCount, featuredPrestasi, dbGaleri, nextSchedule] = await Promise.all([
+    getBranding(), getStats(), getPrestasiCount(), getFeaturedPrestasi(), getGaleri(), getNextSchedule(),
   ]);
 
   const tagline = branding?.tagline || 'Membentuk Atlet Basket & Renang Berprestasi';
@@ -152,94 +166,140 @@ export default async function BerandaPage() {
 
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-24 pb-8">
-          <div className="animate-fade-in-up">
+          
+          <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-8 items-center lg:items-end">
+            
+            {/* 1) TEXT SECTION (Mobile: Order 1, Desktop: Left Column) */}
+            <div className="lg:col-span-6 xl:col-span-5 z-20 w-full mb-12 lg:mb-0 lg:pb-12 animate-fade-in-up flex flex-col justify-end h-full">
+              {/* Eyebrow */}
+              <div className="inline-flex items-center gap-3 mb-6 lg:mb-8">
+                <span className="block w-10 h-[1.5px] bg-basket" />
+                <span className="text-basket text-[10px] font-bold uppercase tracking-[0.4em] font-sans">
+                  Private Sport · Sidoarjo
+                </span>
+                <span className="block w-10 h-[1.5px] bg-renang" />
+              </div>
 
-            {/* Eyebrow */}
-            <div className="inline-flex items-center gap-3 mb-8">
-              <span className="block w-10 h-[1.5px] bg-basket" />
-              <span className="text-basket text-[10px] font-bold uppercase tracking-[0.4em] font-sans">
-                Private Sport · Sidoarjo
-              </span>
-              <span className="block w-10 h-[1.5px] bg-renang" />
+              {/* Main Heading */}
+              <h1 className="font-display leading-none uppercase mb-4 select-none">
+                <span
+                  className="block jersey-headline jersey-headline-basket"
+                  style={{ fontSize: 'clamp(4rem, 10vw, 10.5rem)', lineHeight: 0.87 }}
+                >
+                  Barqignite
+                </span>
+                <span
+                  className="block jersey-headline jersey-headline-renang"
+                  style={{ fontSize: 'clamp(2.5rem, 6vw, 7rem)', lineHeight: 1.05, marginTop: '0.1em' }}
+                >
+                  Private Sport
+                </span>
+                <span
+                  className="block font-sans font-light"
+                  style={{ fontSize: 'clamp(1.2rem, 2.8vw, 2.5rem)', letterSpacing: '0.45em', lineHeight: 1.6, color: 'rgb(var(--color-neutral-light) / 0.25)', WebkitTextStroke: '1px rgb(var(--color-neutral-light) / 0.3)', fontWeight: 300 }}
+                >
+                  Sidoarjo
+                </span>
+              </h1>
+
+              {/* Tagline */}
+              <p className="text-muted text-xs md:text-sm max-w-lg mt-6 lg:mt-8 mb-8 lg:mb-12 uppercase font-semibold tracking-[0.18em] leading-loose">
+                {tagline}
+              </p>
             </div>
 
-            {/* Main Heading */}
-            <h1
-              className="font-display leading-none uppercase mb-4 select-none"
-            >
-              {/* BARQIGNITE — jersey orange, skew, stroke + shadow */}
-              <span
-                className="block jersey-headline jersey-headline-basket"
-                style={{
-                  fontSize: 'clamp(4.5rem, 12vw, 10.5rem)',
-                  lineHeight: 0.87,
-                }}
-              >
-                Barqignite
-              </span>
+            {/* 2) PHOTO SECTION (Mobile: Order 2, Desktop: Right Column) */}
+            <div className="lg:col-span-6 xl:col-span-7 z-10 w-full relative mb-12 lg:mb-0 flex justify-center items-end lg:h-[750px]">
+              
+              {/* Glow Behind */}
+              <div className="absolute inset-0 bg-gradient-radial from-basket/20 via-renang/10 to-transparent blur-[80px] -z-10 rounded-full scale-110"></div>
+              
+              {/* Background Text "COACH NAFIS" */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 pointer-events-none w-full">
+                <h2 className="font-display font-black text-white/5 text-center leading-[0.8] tracking-tighter" style={{ fontSize: 'clamp(100px, 15vw, 180px)' }}>
+                  COACH<br/>NAFIS
+                </h2>
+              </div>
 
-              {/* PRIVATE SPORT — jersey teal */}
-              <span
-                className="block jersey-headline jersey-headline-renang"
-                style={{
-                  fontSize: 'clamp(2.8rem, 8vw, 7rem)',
-                  lineHeight: 1.05,
-                  marginTop: '0.1em',
-                }}
-              >
-                Private Sport
-              </span>
+              {/* Number "24" */}
+              <div className="absolute top-0 right-0 lg:right-10 -z-10 pointer-events-none opacity-20">
+                <span className="font-display font-black text-transparent" style={{ fontSize: 'clamp(80px, 10vw, 120px)', WebkitTextStroke: '2px white', lineHeight: 1 }}>24</span>
+              </div>
 
-              {/* SIDOARJO — ghost outline, tidak pakai jersey effect supaya tidak berlebihan */}
-              <span
-                className="block font-sans font-light"
-                style={{
-                  fontSize: 'clamp(1.2rem, 2.8vw, 2.5rem)',
-                  letterSpacing: '0.45em',
-                  lineHeight: 1.6,
-                  color: 'rgb(var(--color-neutral-light) / 0.25)',
-                  WebkitTextStroke: '1px rgb(var(--color-neutral-light) / 0.3)',
-                  fontWeight: 300,
-                }}
-              >
-                Sidoarjo
-              </span>
-            </h1>
+              {/* Cutout Image */}
+              <div className="relative w-[90%] max-w-[450px] lg:max-w-none lg:w-[85%] xl:w-[75%] aspect-[3/4] lg:h-full lg:aspect-auto">
+                 <Image src="/fd0532d7-593a-43e9-a3e4-d7060080119c.png" alt="Coach Nafis" fill className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" priority />
+              </div>
 
-            {/* Tagline */}
-            <p className="text-muted text-xs md:text-sm max-w-lg mt-8 mb-12 uppercase font-semibold tracking-[0.18em] leading-loose">
-              {tagline}
-            </p>
+              {/* Mini Name Badge */}
+              <div className="absolute top-4 left-4 lg:left-0 bg-arena-800/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xl">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20"><span className="font-display font-black text-white text-sm">B</span></div>
+                <div>
+                  <h3 className="type-card-title text-white leading-none text-sm">Barqiyyah Nafis</h3>
+                  <p className="text-primary-400 text-[9px] font-bold uppercase tracking-widest mt-1">Founder & Head Coach</p>
+                </div>
+              </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/pendaftaran?cabang=Basket"
-                id="cta-daftar-basket"
-                className="btn-accent group relative text-sm px-8 py-4"
-              >
-                <span className="relative z-10 flex items-center gap-2.5">
-                  <span className="text-lg">🏀</span>
-                  <span>Daftar Basket</span>
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </span>
-              </Link>
-              <Link
-                href="/pendaftaran?cabang=Renang"
-                id="cta-daftar-renang"
-                className="btn-primary group relative text-sm px-8 py-4"
-              >
-                <span className="relative z-10 flex items-center gap-2.5">
-                  <span className="text-lg">🏊</span>
-                  <span>Daftar Renang</span>
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </span>
-              </Link>
+              {/* Quote */}
+              <div className="absolute bottom-20 left-0 lg:-left-10 bg-arena-900/90 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-xl max-w-[200px] lg:max-w-[250px] hidden sm:block">
+                <p className="text-neutral-light/90 text-xs lg:text-sm font-medium leading-relaxed font-sans mb-2">"Membentuk karakter pemenang tidak hanya di lapangan, tapi dalam setiap aspek kehidupan."</p>
+                <span className="type-label text-primary-400">— Coach Nafis</span>
+              </div>
+
+              {/* Small Cards */}
+              <div className="absolute -bottom-6 lg:bottom-10 right-0 lg:-right-10 flex flex-col gap-3">
+                {/* Next Schedule */}
+                {nextSchedule && (
+                  <Link href="/jadwal" className="glass-card-hover border border-white/10 bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-renang transition-colors">
+                      <Calendar className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="type-label text-renang mb-0.5">Latihan Berikutnya</p>
+                      <h4 className="font-bold text-white text-[11px] leading-tight group-hover:text-renang transition-colors">{nextSchedule.cabang_olahraga} — {nextSchedule.hari}</h4>
+                    </div>
+                  </Link>
+                )}
+                
+                {/* Gallery */}
+                <Link href="/galeri" className="glass-card-hover border border-white/10 bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
+                  <div className="w-10 h-10 rounded-xl bg-arena-700 relative overflow-hidden shrink-0 border border-white/5 group-hover:border-basket transition-colors">
+                    <Image src="/LOGO BARQIGNITE BASKETBALL.jpeg" alt="Thumb" fill className="object-cover" />
+                  </div>
+                  <div>
+                    <p className="type-label text-primary-400 mb-0.5">Dokumentasi</p>
+                    <h4 className="font-bold text-white text-[11px] leading-tight group-hover:text-basket transition-colors">Lihat Galeri</h4>
+                  </div>
+                </Link>
+              </div>
             </div>
+
+            {/* 3) CTA BUTTONS (Mobile: Order 3, Desktop: Left Column below text) */}
+            <div className="lg:col-span-6 xl:col-span-5 z-20 w-full lg:row-start-2 lg:col-start-1 lg:-mt-24">
+              <div className="flex flex-wrap gap-4">
+                <Link href="/pendaftaran?cabang=Basket" id="cta-daftar-basket" className="btn-accent group relative text-sm px-8 py-4">
+                  <span className="relative z-10 flex items-center gap-2.5">
+                    <span className="text-lg">🏀</span>
+                    <span>Daftar Basket</span>
+                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </span>
+                </Link>
+                <Link href="/pendaftaran?cabang=Renang" id="cta-daftar-renang" className="btn-primary group relative text-sm px-8 py-4">
+                  <span className="relative z-10 flex items-center gap-2.5">
+                    <span className="text-lg">🏊</span>
+                    <span>Daftar Renang</span>
+                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </span>
+                </Link>
+              </div>
+            </div>
+
           </div>
 
           {/* Scoreboard Stats — counter animation */}
-          <CounterStats stats={counterStats} />
+          <div className="mt-20 lg:mt-32">
+            <CounterStats stats={counterStats} />
+          </div>
         </div>
       </section>
 
@@ -550,11 +610,6 @@ export default async function BerandaPage() {
           DUAL DIVIDER
       ════════════════════════════════════════════════════ */}
       <div className="divider-dual" />
-
-      {/* ═══════════════════════════════════════════════════
-          PROFIL OWNER (POSTER LAYOUT)
-      ════════════════════════════════════════════════════ */}
-      <OwnerProfile />
 
       {/* ═══════════════════════════════════════════════════
           KONTAK & SOSIAL MEDIA
