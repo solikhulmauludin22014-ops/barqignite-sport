@@ -281,3 +281,23 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Carousel progress bar animation */
+@keyframes slideProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* Transition duration 350ms utility (for lightbox slides) */
+.duration-350 {
+  transition-duration: 350ms;
+}
+.duration-400 {
+  transition-duration: 400ms;
+}
+
+/* Lightbox scrollbar hidden */
+.lightbox-scroll {
+  overflow: hidden;
+}
+

@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Camera, Upload, Trash2, Star, StarOff, ArrowUp, ArrowDown, X, Loader2, Plus } from 'lucide-react';
-import { supabasePublic } from '@/lib/supabase';
 
 interface GaleriItem {
   id: string;
@@ -57,57 +56,73 @@ export default function AdminGaleriPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validasi ukuran file (maks 10 MB)
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+      setError(`Ukuran file (${sizeMB} MB) melebihi batas maksimum 10 MB. Pilih file yang lebih kecil.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    // Validasi format
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      setError(`Format file tidak didukung (${file.type}). Gunakan JPEG, PNG, atau WebP.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setError('');
     const reader = new FileReader();
     reader.onload = (ev) => setForm(f => ({ ...f, file, preview: ev.target?.result as string }));
     reader.readAsDataURL(file);
   };
 
+  const resetForm = () => {
+    setForm({ judul: '', kategori: 'Basket', tanggal: '', is_featured: false, preview: '', file: null });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.file || !form.judul) {
-      setError('Judul dan foto wajib diisi.');
+    if (!form.file) {
+      setError('Foto wajib dipilih terlebih dahulu.');
       return;
     }
+    if (!form.judul.trim()) {
+      setError('Judul foto wajib diisi.');
+      return;
+    }
+
     setUploading(true);
     setError('');
+    setSuccess('');
 
     try {
-      // 1. Upload ke Supabase Storage
-      const ext = form.file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      // Upload via server-side API route (pakai service role key — bypass RLS)
+      const formData = new FormData();
+      formData.append('file', form.file);
+      formData.append('judul', form.judul.trim());
+      formData.append('kategori', form.kategori);
+      formData.append('tanggal', form.tanggal || '');
+      formData.append('is_featured', String(form.is_featured));
+      formData.append('urutan', String(items.length + 1));
 
-      const { data: uploadData, error: uploadError } = await supabasePublic.storage
-        .from('galeri-dokumentasi')
-        .upload(fileName, form.file, { contentType: form.file.type, upsert: false });
-
-      if (uploadError) throw new Error(`Upload gagal: ${uploadError.message}`);
-
-      // 2. Ambil public URL
-      const { data: urlData } = supabasePublic.storage
-        .from('galeri-dokumentasi')
-        .getPublicUrl(uploadData.path);
-
-      const foto_url = urlData.publicUrl;
-
-      // 3. Simpan ke database via API
-      const res = await fetch('/api/galeri', {
+      const res = await fetch('/api/galeri/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          judul: form.judul,
-          kategori: form.kategori,
-          foto_url,
-          tanggal: form.tanggal || null,
-          is_featured: form.is_featured,
-          urutan: items.length + 1,
-        }),
+        body: formData,
       });
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Gagal menyimpan data.');
 
-      setSuccess('Foto berhasil diunggah!');
-      setForm({ judul: '', kategori: 'Basket', tanggal: '', is_featured: false, preview: '', file: null });
+      if (!res.ok) {
+        throw new Error(json.error || `Upload gagal (HTTP ${res.status}). Silakan coba lagi.`);
+      }
+
+      setSuccess('✅ Foto berhasil diunggah dan ditambahkan ke galeri!');
+      resetForm();
       setShowUploadForm(false);
       fetchItems();
     } catch (err) {
@@ -118,11 +133,14 @@ export default function AdminGaleriPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Hapus foto ini?')) return;
+    if (!confirm('Hapus foto ini? Tindakan ini tidak dapat dibatalkan.')) return;
     try {
       const res = await fetch(`/api/galeri/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Gagal menghapus.');
-      setSuccess('Foto dihapus.');
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || 'Gagal menghapus foto.');
+      }
+      setSuccess('Foto berhasil dihapus.');
       fetchItems();
     } catch (err) {
       setError((err as Error).message);
@@ -131,11 +149,12 @@ export default function AdminGaleriPage() {
 
   const handleToggleFeatured = async (item: GaleriItem) => {
     try {
-      await fetch(`/api/galeri/${item.id}`, {
+      const res = await fetch(`/api/galeri/${item.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_featured: !item.is_featured }),
       });
+      if (!res.ok) throw new Error('Gagal mengubah status unggulan.');
       fetchItems();
     } catch {
       setError('Gagal mengubah status unggulan.');
@@ -145,14 +164,15 @@ export default function AdminGaleriPage() {
   const handleMoveOrder = async (item: GaleriItem, direction: 'up' | 'down') => {
     const newUrutan = direction === 'up' ? Math.max(0, item.urutan - 1) : item.urutan + 1;
     try {
-      await fetch(`/api/galeri/${item.id}`, {
+      const res = await fetch(`/api/galeri/${item.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ urutan: newUrutan }),
       });
+      if (!res.ok) throw new Error('Gagal mengubah urutan.');
       fetchItems();
     } catch {
-      setError('Gagal mengubah urutan.');
+      setError('Gagal mengubah urutan foto.');
     }
   };
 
@@ -169,12 +189,12 @@ export default function AdminGaleriPage() {
             Galeri Dokumentasi
           </h1>
           <p className="text-neutral-light/40 mt-1 text-sm font-bold uppercase tracking-widest">
-            Kelola foto kegiatan latihan & kompetisi
+            Kelola foto kegiatan latihan &amp; kompetisi
           </p>
         </div>
         <button
           id="btn-tambah-foto"
-          onClick={() => setShowUploadForm(true)}
+          onClick={() => { setError(''); setSuccess(''); setShowUploadForm(true); }}
           className="btn-accent flex items-center gap-2 shrink-0"
         >
           <Plus className="w-4 h-4" />
@@ -184,9 +204,9 @@ export default function AdminGaleriPage() {
 
       {/* Alerts */}
       {error && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-status-danger/10 border border-status-danger/30 rounded-xl text-status-danger text-sm">
-          <span className="flex-1">{error}</span>
-          <button onClick={() => setError('')}><X className="w-4 h-4" /></button>
+        <div className="flex items-start gap-3 px-4 py-3 bg-status-danger/10 border border-status-danger/30 rounded-xl text-status-danger text-sm">
+          <span className="flex-1 leading-relaxed">{error}</span>
+          <button onClick={() => setError('')} className="shrink-0 mt-0.5"><X className="w-4 h-4" /></button>
         </div>
       )}
       {success && (
@@ -202,29 +222,44 @@ export default function AdminGaleriPage() {
           <div className="bg-arena-900 border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-xl font-black text-neutral-light uppercase tracking-wider">Upload Foto</h2>
-              <button onClick={() => setShowUploadForm(false)} className="p-1.5 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-white/5 transition-colors">
+              <button
+                onClick={() => { setShowUploadForm(false); resetForm(); setError(''); }}
+                className="p-1.5 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-white/5 transition-colors"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleUpload} className="space-y-4">
+              {/* Error in modal */}
+              {error && (
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-status-danger/10 border border-status-danger/30 rounded-lg text-status-danger text-xs leading-relaxed">
+                  <span>{error}</span>
+                </div>
+              )}
+
               {/* File drop area */}
               <div
                 className="border-2 border-dashed border-white/10 hover:border-basket/40 rounded-xl p-6 flex flex-col items-center gap-3 cursor-pointer transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {form.preview ? (
-                  <Image src={form.preview} alt="Preview" width={200} height={120} className="rounded-lg object-cover w-full h-32" />
+                  <div className="relative w-full h-32 rounded-lg overflow-hidden">
+                    <Image src={form.preview} alt="Preview" fill className="object-cover" />
+                  </div>
                 ) : (
                   <>
                     <Camera className="w-8 h-8 text-neutral-light/20" />
-                    <p className="text-neutral-light/40 text-sm text-center">Klik untuk pilih foto<br /><span className="text-[11px]">JPEG, PNG, WebP — maks. 10MB</span></p>
+                    <p className="text-neutral-light/40 text-sm text-center">
+                      Klik untuk pilih foto<br />
+                      <span className="text-[11px]">JPEG, PNG, WebP — maks. 10MB</span>
+                    </p>
                   </>
                 )}
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
                   className="hidden"
                   onChange={handleFileChange}
                 />
@@ -289,13 +324,17 @@ export default function AdminGaleriPage() {
                 />
                 <div>
                   <p className="text-sm font-semibold text-neutral-light">Foto Unggulan</p>
-                  <p className="text-xs text-neutral-light/40">Akan ditampilkan pertama dan lebih besar</p>
+                  <p className="text-xs text-neutral-light/40">Akan ditampilkan di carousel showcase utama</p>
                 </div>
               </label>
 
               {/* Submit */}
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowUploadForm(false)} className="btn-secondary flex-1 justify-center">
+                <button
+                  type="button"
+                  onClick={() => { setShowUploadForm(false); resetForm(); setError(''); }}
+                  className="btn-secondary flex-1 justify-center"
+                >
                   Batal
                 </button>
                 <button type="submit" disabled={uploading} className="btn-accent flex-1 justify-center gap-2">
@@ -336,7 +375,7 @@ export default function AdminGaleriPage() {
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="skeleton-pulse aspect-[4/3]" />
+            <div key={i} className="skeleton-pulse aspect-[4/5]" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -353,25 +392,25 @@ export default function AdminGaleriPage() {
           {filtered.map((item) => (
             <div key={item.id} className="group relative bg-arena-900 border border-white/5 overflow-hidden rounded-xl hover:border-white/15 transition-all duration-300">
               {/* Photo */}
-              <div className="relative aspect-[4/3] overflow-hidden">
+              <div className="relative aspect-[4/5] overflow-hidden">
                 <Image
                   src={item.foto_url}
                   alt={item.judul}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-arena-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {/* Featured badge */}
                 {item.is_featured && (
-                  <div className="absolute top-2 left-2 px-2 py-0.5 bg-basket text-white text-[9px] font-bold uppercase tracking-wider">
+                  <div className="absolute top-2 left-2 px-2 py-0.5 bg-basket text-white text-[9px] font-bold uppercase tracking-wider rounded">
                     Unggulan
                   </div>
                 )}
 
                 {/* Category badge */}
-                <div className={`absolute top-2 right-2 px-2 py-0.5 text-white text-[9px] font-bold uppercase tracking-wider ${item.kategori === 'Basket' ? 'bg-basket' : 'bg-renang'}`}>
+                <div className={`absolute top-2 right-2 px-2 py-0.5 text-white text-[9px] font-bold uppercase tracking-wider rounded ${item.kategori === 'Basket' ? 'bg-basket' : 'bg-renang'}`}>
                   {item.kategori}
                 </div>
 
