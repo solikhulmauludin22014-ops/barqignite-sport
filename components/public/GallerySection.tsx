@@ -94,9 +94,9 @@ function FeaturedCarousel({ items }: { items: GaleriItem[] }) {
           />
         </div>
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-arena-900/90 via-arena-900/20 to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-arena-900/40 to-transparent pointer-events-none" />
+        {/* Gradient overlay - selalu gelap untuk kontras teks putih */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent pointer-events-none" />
 
         {/* Caption */}
         <div className={`absolute bottom-0 left-0 right-0 p-6 sm:p-8 transition-all duration-400 ease-out ${slideClass}`}>
@@ -383,7 +383,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-arena-700 border border-white/5 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-2xl bg-arena-700 dark:bg-arena-800 border border-neutral-light/5 flex items-center justify-center">
           <Camera className="w-7 h-7 text-neutral-light/20" />
         </div>
         <p className="text-neutral-light/30 text-sm font-medium tracking-wide">

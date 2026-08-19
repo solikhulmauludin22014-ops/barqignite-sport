@@ -38,7 +38,7 @@ module.exports = {
           dark: 'rgb(var(--color-neutral-dark) / <alpha-value>)',
         },
         muted: {
-          DEFAULT: '#8B95A8',
+          DEFAULT: 'rgb(var(--color-muted) / <alpha-value>)',
           warm: '#A89070',
         },
         status: {

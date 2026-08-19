@@ -197,8 +197,8 @@ export default async function BerandaPage() {
                   fontSize: 'clamp(1.2rem, 2.8vw, 2.5rem)',
                   letterSpacing: '0.45em',
                   lineHeight: 1.6,
-                  color: 'rgba(230,236,244,0.25)',
-                  WebkitTextStroke: '1px rgba(230,236,244,0.3)',
+                  color: 'rgb(var(--color-neutral-light) / 0.25)',
+                  WebkitTextStroke: '1px rgb(var(--color-neutral-light) / 0.3)',
                   fontWeight: 300,
                 }}
               >
@@ -285,7 +285,7 @@ export default async function BerandaPage() {
               <div className="relative z-10 p-10 lg:p-12 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-8">
                   <div>
-                    <p className="text-basket text-[10px] font-bold uppercase tracking-[0.35em] mb-3 font-sans">Court</p>
+                    <p className="text-basket-dark dark:text-basket text-[10px] font-bold uppercase tracking-[0.35em] mb-3 font-sans">Court</p>
                     <h3
                       className="font-display text-neutral-light uppercase leading-none"
                       style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', fontWeight: 900, letterSpacing: '0.02em' }}
@@ -326,7 +326,7 @@ export default async function BerandaPage() {
               <div className="relative z-10 p-10 lg:p-12 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-8">
                   <div>
-                    <p className="text-renang text-[10px] font-bold uppercase tracking-[0.35em] mb-3 font-sans">Pool</p>
+                    <p className="text-renang-dark dark:text-renang text-[10px] font-bold uppercase tracking-[0.35em] mb-3 font-sans">Pool</p>
                     <h3
                       className="font-display text-neutral-light uppercase leading-none"
                       style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', fontWeight: 900, letterSpacing: '0.02em' }}
@@ -406,8 +406,8 @@ export default async function BerandaPage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
             <div>
               <div className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
-                <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-amber-400 text-[10px] font-bold uppercase tracking-[0.25em] font-sans">Hall of Fame</span>
+                <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span className="text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-[0.25em] font-sans">Hall of Fame</span>
               </div>
               <h2
                 className="font-display text-neutral-light uppercase leading-none"
@@ -532,7 +532,7 @@ export default async function BerandaPage() {
                 </div>
 
                 {/* Icon */}
-                <div className={`inline-flex items-center justify-center w-12 h-12 bg-arena-900 border border-white/5 mb-5 group-hover:border-white/15 transition-all duration-300`}>
+                <div className={`inline-flex items-center justify-center w-12 h-12 bg-arena-900 border border-neutral-light/5 dark:border-white/5 mb-5 group-hover:border-white/15 transition-all duration-300`}>
                   <f.icon className={`w-5 h-5 ${f.color}`} />
                 </div>
 
@@ -579,36 +579,36 @@ export default async function BerandaPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* WhatsApp */}
-            <a href={waLink} target="_blank" rel="noreferrer" id="kontak-whatsapp" className="group bg-arena-800 border border-white/5 p-8 flex flex-col items-center text-center hover:border-emerald-500/30 hover:-translate-y-1 transition-all duration-300">
+            <a href={waLink} target="_blank" rel="noreferrer" id="kontak-whatsapp" className="group bg-arena-800 border border-neutral-light/5 dark:border-white/5 p-8 flex flex-col items-center text-center hover:border-emerald-500/30 hover:-translate-y-1 transition-all duration-300">
               <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/15 group-hover:border-emerald-500/40 group-hover:bg-emerald-500/15 flex items-center justify-center mb-5 transition-all duration-300">
-                <Phone className="w-6 h-6 text-emerald-400" />
+                <Phone className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <h3 className="text-base font-bold text-neutral-light mb-1.5 font-sans">WhatsApp / CP</h3>
               <p className="text-muted text-sm font-sans">{noWa || 'Belum ada nomor'}</p>
             </a>
 
             {/* Instagram */}
-            <a href={igLink} target="_blank" rel="noreferrer" id="kontak-instagram" className="group bg-arena-800 border border-white/5 p-8 flex flex-col items-center text-center hover:border-pink-500/30 hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-pink-500/8 border border-pink-500/15 group-hover:border-pink-500/40 group-hover:bg-pink-500/15 flex items-center justify-center mb-5 transition-all duration-300">
-                <Instagram className="w-6 h-6 text-pink-400" />
+            <a href={igLink} target="_blank" rel="noreferrer" id="kontak-instagram" className="group bg-arena-800 border border-neutral-light/5 dark:border-white/5 p-8 flex flex-col items-center text-center hover:border-pink-500/30 hover:-translate-y-1 transition-all duration-300">
+              <div className="w-14 h-14 bg-pink-500/10 border border-pink-500/15 group-hover:border-pink-500/40 group-hover:bg-pink-500/15 flex items-center justify-center mb-5 transition-all duration-300">
+                <Instagram className="w-6 h-6 text-pink-600 dark:text-pink-400" />
               </div>
               <h3 className="text-base font-bold text-neutral-light mb-1.5 font-sans">Instagram</h3>
               <p className="text-muted text-sm font-sans">{instagram ? `@${instagram.replace('@', '')}` : 'Belum ada IG'}</p>
             </a>
 
             {/* Email */}
-            <a href={email ? `mailto:${email}` : '#'} id="kontak-email" className="group bg-arena-800 border border-white/5 p-8 flex flex-col items-center text-center hover:border-basket/30 hover:-translate-y-1 transition-all duration-300">
+            <a href={email ? `mailto:${email}` : '#'} id="kontak-email" className="group bg-arena-800 border border-neutral-light/5 dark:border-white/5 p-8 flex flex-col items-center text-center hover:border-basket/30 hover:-translate-y-1 transition-all duration-300">
               <div className="w-14 h-14 bg-basket/10 border border-basket/20 group-hover:border-basket/40 group-hover:bg-basket/20 flex items-center justify-center mb-5 transition-all duration-300">
-                <Mail className="w-6 h-6 text-basket" />
+                <Mail className="w-6 h-6 text-basket-dark dark:text-basket" />
               </div>
               <h3 className="text-base font-bold text-neutral-light mb-1.5 font-sans">Email</h3>
               <p className="text-muted text-sm font-sans">{email || 'Belum ada email'}</p>
             </a>
 
             {/* Alamat */}
-            <div className="group bg-arena-800 border border-white/5 p-8 flex flex-col items-center text-center hover:border-renang/30 hover:-translate-y-1 transition-all duration-300">
+            <div className="group bg-arena-800 border border-neutral-light/5 dark:border-white/5 p-8 flex flex-col items-center text-center hover:border-renang/30 hover:-translate-y-1 transition-all duration-300">
               <div className="w-14 h-14 bg-renang/10 border border-renang/20 group-hover:border-renang/40 group-hover:bg-renang/20 flex items-center justify-center mb-5 transition-all duration-300">
-                <MapPin className="w-6 h-6 text-renang" />
+                <MapPin className="w-6 h-6 text-renang-dark dark:text-renang" />
               </div>
               <h3 className="text-base font-bold text-neutral-light mb-1.5 font-sans">Alamat</h3>
               <p className="text-muted text-sm font-sans">{alamat || 'Belum ada alamat'}</p>

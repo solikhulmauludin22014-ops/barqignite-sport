@@ -11,6 +11,7 @@
     --color-arena-600: 226 232 240;
     --color-neutral-light: 15 23 42;
     --color-neutral-dark: 255 255 255;
+    --color-muted: 71 85 105; /* slate-600 */
   }
 
   .dark {
@@ -21,6 +22,7 @@
     --color-arena-600: 36 48 80;   /* #243050 */
     --color-neutral-light: 230 236 244; /* #E6ECF4 — sedikit lebih dingin, premium */
     --color-neutral-dark: 11 18 32;
+    --color-muted: 139 149 168; /* #8B95A8 */
   }
 
   * {
@@ -54,7 +56,7 @@
 @layer components {
   /* ===== BUTTONS ===== */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-renang text-white text-sm font-bold rounded-xl transition-all duration-300 relative overflow-hidden uppercase tracking-widest;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-renang text-slate-950 text-sm font-bold rounded-xl transition-all duration-300 relative overflow-hidden uppercase tracking-widest;
     box-shadow: 0 4px 20px rgba(0, 194, 203, 0.3), 0 0 0 1px rgba(0, 194, 203, 0.2) inset;
   }
   .btn-primary:hover {
@@ -75,7 +77,7 @@
   .btn-primary:hover::before { left: 100%; }
 
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-basket text-white text-sm font-bold rounded-xl transition-all duration-300 relative overflow-hidden uppercase tracking-widest;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-basket text-slate-950 text-sm font-bold rounded-xl transition-all duration-300 relative overflow-hidden uppercase tracking-widest;
     box-shadow: 0 4px 20px rgba(255, 107, 0, 0.3), 0 0 0 1px rgba(255, 107, 0, 0.2) inset;
   }
   .btn-accent:hover {
@@ -194,7 +196,7 @@
     @apply relative overflow-hidden rounded-xl cursor-pointer;
   }
   .gallery-overlay {
-    @apply absolute inset-0 bg-gradient-to-t from-arena-900/95 via-arena-900/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4;
+    @apply absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4;
   }
   .gallery-item img {
     @apply transition-transform duration-500 group-hover:scale-105;
@@ -244,7 +246,7 @@
   /* Efek outline untuk kata ghost/faded dalam section title */
   .jersey-ghost {
     color: transparent;
-    -webkit-text-stroke: 1px rgba(230,236,244,0.15);
+    -webkit-text-stroke: 1px rgb(var(--color-neutral-light) / 0.15);
     text-shadow: none;
   }
 
