@@ -216,59 +216,61 @@ export default async function BerandaPage() {
               
               {/* Background Text "COACH NAFIS" */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 pointer-events-none w-full">
-                <h2 className="font-display font-black text-white/5 text-center leading-[0.8] tracking-tighter" style={{ fontSize: 'clamp(100px, 15vw, 180px)' }}>
+                <h2 className="font-display font-black text-arena-900/5 dark:text-white/5 text-center leading-[0.8] tracking-tighter" style={{ fontSize: 'clamp(100px, 15vw, 180px)' }}>
                   COACH<br/>NAFIS
                 </h2>
               </div>
 
               {/* Number "24" */}
               <div className="absolute top-0 right-0 lg:right-10 -z-10 pointer-events-none opacity-20">
-                <span className="font-display font-black text-transparent" style={{ fontSize: 'clamp(80px, 10vw, 120px)', WebkitTextStroke: '2px white', lineHeight: 1 }}>24</span>
+                <span className="font-display font-black text-transparent text-arena-900 dark:text-white" style={{ fontSize: 'clamp(80px, 10vw, 120px)', WebkitTextStrokeWidth: '2px', WebkitTextStrokeColor: 'currentColor', lineHeight: 1 }}>24</span>
               </div>
 
-              {/* Cutout Image */}
+              {/* Cutout Image with Glow Line Fade */}
               <div className="relative w-[90%] max-w-[450px] lg:max-w-none lg:w-[85%] xl:w-[75%] aspect-[3/4] lg:h-full lg:aspect-auto">
-                 <Image src="/fd0532d7-593a-43e9-a3e4-d7060080119c.png" alt="Coach Nafis" fill className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" priority />
+                 <Image src="/fd0532d7-593a-43e9-a3e4-d7060080119c.png" alt="Coach Nafis" fill className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" priority style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }} />
+                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-basket to-transparent blur-[2px] opacity-70"></div>
+                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-basket/50 to-transparent"></div>
               </div>
 
               {/* Mini Name Badge */}
-              <div className="absolute top-4 left-4 lg:left-0 bg-arena-800/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xl">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20"><span className="font-display font-black text-white text-sm">B</span></div>
+              <div className="absolute top-4 left-4 lg:left-0 bg-white/80 dark:bg-arena-800/80 backdrop-blur-md border border-neutral-200 dark:border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xl">
+                <div className="w-8 h-8 rounded-full bg-arena-900/10 dark:bg-white/10 flex items-center justify-center border border-arena-900/20 dark:border-white/20"><span className="font-display font-black text-arena-900 dark:text-white text-sm">B</span></div>
                 <div>
-                  <h3 className="type-card-title text-white leading-none text-sm">Barqiyyah Nafis</h3>
-                  <p className="text-primary-400 text-[9px] font-bold uppercase tracking-widest mt-1">Founder & Head Coach</p>
+                  <h3 className="type-card-title text-arena-900 dark:text-white leading-none text-sm">Barqiyyah Nafis</h3>
+                  <p className="text-primary-600 dark:text-primary-400 text-[9px] font-bold uppercase tracking-widest mt-1">Founder & Head Coach</p>
                 </div>
               </div>
 
               {/* Quote */}
-              <div className="absolute bottom-20 left-0 lg:-left-10 bg-arena-900/90 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-xl max-w-[200px] lg:max-w-[250px] hidden sm:block">
-                <p className="text-neutral-light/90 text-xs lg:text-sm font-medium leading-relaxed font-sans mb-2">"Membentuk karakter pemenang tidak hanya di lapangan, tapi dalam setiap aspek kehidupan."</p>
-                <span className="type-label text-primary-400">— Coach Nafis</span>
+              <div className="absolute bottom-20 left-0 lg:-left-10 bg-white/90 dark:bg-arena-900/90 backdrop-blur-md border border-neutral-200 dark:border-white/10 p-4 rounded-2xl shadow-xl max-w-[200px] lg:max-w-[250px] hidden sm:block">
+                <p className="text-arena-900/90 dark:text-neutral-light/90 text-xs lg:text-sm font-medium leading-relaxed font-sans mb-2">"Membentuk karakter pemenang tidak hanya di lapangan, tapi dalam setiap aspek kehidupan."</p>
+                <span className="type-label text-primary-600 dark:text-primary-400">— Coach Nafis</span>
               </div>
 
               {/* Small Cards */}
               <div className="absolute -bottom-6 lg:bottom-10 right-0 lg:-right-10 flex flex-col gap-3">
                 {/* Next Schedule */}
                 {nextSchedule && (
-                  <Link href="/jadwal" className="glass-card-hover border border-white/10 bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
-                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-renang transition-colors">
-                      <Calendar className="w-4 h-4 text-white" />
+                  <Link href="/jadwal" className="glass-card-hover border border-neutral-200 dark:border-white/10 bg-white/90 dark:bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
+                    <div className="w-10 h-10 rounded-full bg-arena-900/5 dark:bg-white/5 flex items-center justify-center shrink-0 border border-arena-900/10 dark:border-white/5 group-hover:border-renang transition-colors">
+                      <Calendar className="w-4 h-4 text-arena-900 dark:text-white" />
                     </div>
                     <div>
                       <p className="type-label text-renang mb-0.5">Latihan Berikutnya</p>
-                      <h4 className="font-bold text-white text-[11px] leading-tight group-hover:text-renang transition-colors">{nextSchedule.cabang_olahraga} — {nextSchedule.hari}</h4>
+                      <h4 className="font-bold text-arena-900 dark:text-white text-[11px] leading-tight group-hover:text-renang transition-colors">{nextSchedule.cabang_olahraga} — {nextSchedule.hari}</h4>
                     </div>
                   </Link>
                 )}
                 
                 {/* Gallery */}
-                <Link href="/galeri" className="glass-card-hover border border-white/10 bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
-                  <div className="w-10 h-10 rounded-xl bg-arena-700 relative overflow-hidden shrink-0 border border-white/5 group-hover:border-basket transition-colors">
-                    <Image src="/LOGO BARQIGNITE BASKETBALL.jpeg" alt="Thumb" fill className="object-cover" />
+                <Link href="#galeri" className="glass-card-hover border border-neutral-200 dark:border-white/10 bg-white/90 dark:bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
+                  <div className="w-10 h-10 rounded-xl bg-arena-100 dark:bg-arena-700 flex items-center justify-center shrink-0 border border-arena-900/10 dark:border-white/5 group-hover:border-basket transition-colors">
+                    <Play className="w-4 h-4 text-basket/70 group-hover:text-basket" />
                   </div>
                   <div>
-                    <p className="type-label text-primary-400 mb-0.5">Dokumentasi</p>
-                    <h4 className="font-bold text-white text-[11px] leading-tight group-hover:text-basket transition-colors">Lihat Galeri</h4>
+                    <p className="type-label text-primary-600 dark:text-primary-400 mb-0.5">Dokumentasi</p>
+                    <h4 className="font-bold text-arena-900 dark:text-white text-[11px] leading-tight group-hover:text-basket transition-colors">Lihat Galeri</h4>
                   </div>
                 </Link>
               </div>
@@ -276,16 +278,16 @@ export default async function BerandaPage() {
 
             {/* 3) CTA BUTTONS (Mobile: Order 3, Desktop: Left Column below text) */}
             <div className="lg:col-span-6 xl:col-span-5 z-20 w-full lg:row-start-2 lg:col-start-1 lg:-mt-24">
-              <div className="flex flex-wrap gap-4">
-                <Link href="/pendaftaran?cabang=Basket" id="cta-daftar-basket" className="btn-accent group relative text-sm px-8 py-4">
-                  <span className="relative z-10 flex items-center gap-2.5">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/pendaftaran?cabang=Basket" id="cta-daftar-basket" className="btn-accent group relative text-sm px-8 py-4 w-full sm:w-auto text-center justify-center flex-1 sm:flex-none">
+                  <span className="relative z-10 flex items-center justify-center gap-2.5">
                     <span className="text-lg">🏀</span>
                     <span>Daftar Basket</span>
                     <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   </span>
                 </Link>
-                <Link href="/pendaftaran?cabang=Renang" id="cta-daftar-renang" className="btn-primary group relative text-sm px-8 py-4">
-                  <span className="relative z-10 flex items-center gap-2.5">
+                <Link href="/pendaftaran?cabang=Renang" id="cta-daftar-renang" className="btn-primary group relative text-sm px-8 py-4 w-full sm:w-auto text-center justify-center flex-1 sm:flex-none">
+                  <span className="relative z-10 flex items-center justify-center gap-2.5">
                     <span className="text-lg">🏊</span>
                     <span>Daftar Renang</span>
                     <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
