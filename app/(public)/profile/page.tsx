@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { BookOpen, Eye, Heart, Users, Award, Star, MessageCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-
+import OwnerProfile from '@/components/public/OwnerProfile';
 export const metadata: Metadata = {
   title: 'Profil Club',
   description: 'Sejarah, visi, misi, dan struktur organisasi club olahraga kami.',
@@ -161,6 +161,7 @@ export default async function ProfilePage() {
           </div>
         </div>
       </section>
+      <OwnerProfile />
 
       {/* Struktur Organisasi */}
       {strukturOrg.length > 0 && (

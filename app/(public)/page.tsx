@@ -9,7 +9,7 @@ import basketLogo from '@/LOGO BARQIGNITE BASKETBALL.jpeg';
 import swimLogo from '@/LOGO BARQIGNITE SWIM.png';
 import CounterStats from '@/components/public/CounterStats';
 import GallerySection from '@/components/public/GallerySection';
-
+import OwnerProfile from '@/components/public/OwnerProfile';
 export const metadata: Metadata = {
   title: 'Beranda — Barqignite Private Sport Sidoarjo',
   description: 'Club olahraga Basket & Renang terbaik di Sidoarjo. Bergabunglah dan raih prestasi bersama Barqignite Private Sport.',
@@ -549,9 +549,14 @@ export default async function BerandaPage() {
       {/* ═══════════════════════════════════════════════════
           DUAL DIVIDER
       ════════════════════════════════════════════════════ */}
-      <div className="divider-dual" />
+      {/* ═══════════════════════════════════════════════════
+          PROFIL OWNER (POSTER LAYOUT)
+      ════════════════════════════════════════════════════ */}
+      <OwnerProfile />
 
       {/* ═══════════════════════════════════════════════════
+          DUAL DIVIDER
+      ════════════════════════════════════════════════════ */}
           KONTAK & SOSIAL MEDIA
       ════════════════════════════════════════════════════ */}
       <section className="py-28 bg-arena-900">
