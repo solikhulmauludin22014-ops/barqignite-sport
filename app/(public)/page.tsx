@@ -216,14 +216,14 @@ export default async function BerandaPage() {
               
               {/* Background Text "COACH NAFIS" */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 pointer-events-none w-full">
-                <h2 className="font-display font-black text-arena-900/5 dark:text-white/5 text-center leading-[0.8] tracking-tighter" style={{ fontSize: 'clamp(100px, 15vw, 180px)' }}>
+                <h2 className="font-display font-black text-neutral-light/5 text-center leading-[0.8] tracking-tighter" style={{ fontSize: 'clamp(100px, 15vw, 180px)' }}>
                   COACH<br/>NAFIS
                 </h2>
               </div>
 
               {/* Number "24" */}
               <div className="absolute top-0 right-0 lg:right-10 -z-10 pointer-events-none opacity-20">
-                <span className="font-display font-black text-transparent text-arena-900 dark:text-white" style={{ fontSize: 'clamp(80px, 10vw, 120px)', WebkitTextStrokeWidth: '2px', WebkitTextStrokeColor: 'currentColor', lineHeight: 1 }}>24</span>
+                <span className="font-display font-black text-transparent" style={{ fontSize: 'clamp(80px, 10vw, 120px)', WebkitTextStroke: '2px rgb(var(--color-neutral-light))', lineHeight: 1 }}>24</span>
               </div>
 
               {/* Cutout Image with Glow Line Fade */}
@@ -234,43 +234,43 @@ export default async function BerandaPage() {
               </div>
 
               {/* Mini Name Badge */}
-              <div className="absolute top-4 left-4 lg:left-0 bg-white/80 dark:bg-arena-800/80 backdrop-blur-md border border-neutral-200 dark:border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xl">
-                <div className="w-8 h-8 rounded-full bg-arena-900/10 dark:bg-white/10 flex items-center justify-center border border-arena-900/20 dark:border-white/20"><span className="font-display font-black text-arena-900 dark:text-white text-sm">B</span></div>
+              <div className="absolute top-4 left-4 lg:left-0 bg-white/80 dark:bg-arena-800/80 backdrop-blur-md border border-neutral-light/10 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xl">
+                <div className="w-8 h-8 rounded-full bg-neutral-light/10 flex items-center justify-center border border-neutral-light/20"><span className="font-display font-black text-neutral-light text-sm">B</span></div>
                 <div>
-                  <h3 className="type-card-title text-arena-900 dark:text-white leading-none text-sm">Barqiyyah Nafis</h3>
-                  <p className="text-primary-600 dark:text-primary-400 text-[9px] font-bold uppercase tracking-widest mt-1">Founder & Head Coach</p>
+                  <h3 className="type-card-title text-neutral-light leading-none text-sm">Barqiyyah Nafis</h3>
+                  <p className="text-basket text-[9px] font-bold uppercase tracking-widest mt-1">Founder & Head Coach</p>
                 </div>
               </div>
 
               {/* Quote */}
-              <div className="absolute bottom-20 left-0 lg:-left-10 bg-white/90 dark:bg-arena-900/90 backdrop-blur-md border border-neutral-200 dark:border-white/10 p-4 rounded-2xl shadow-xl max-w-[200px] lg:max-w-[250px] hidden sm:block">
-                <p className="text-arena-900/90 dark:text-neutral-light/90 text-xs lg:text-sm font-medium leading-relaxed font-sans mb-2">"Membentuk karakter pemenang tidak hanya di lapangan, tapi dalam setiap aspek kehidupan."</p>
-                <span className="type-label text-primary-600 dark:text-primary-400">— Coach Nafis</span>
+              <div className="absolute bottom-20 left-0 lg:-left-10 bg-white/90 dark:bg-arena-900/90 backdrop-blur-md border border-neutral-light/10 p-4 rounded-2xl shadow-xl max-w-[200px] lg:max-w-[250px] hidden sm:block">
+                <p className="text-neutral-light/90 text-xs lg:text-sm font-medium leading-relaxed font-sans mb-2">"Membentuk karakter pemenang tidak hanya di lapangan, tapi dalam setiap aspek kehidupan."</p>
+                <span className="type-label text-basket">— Coach Nafis</span>
               </div>
 
               {/* Small Cards */}
               <div className="absolute -bottom-6 lg:bottom-10 right-0 lg:-right-10 flex flex-col gap-3">
                 {/* Next Schedule */}
                 {nextSchedule && (
-                  <Link href="/jadwal" className="glass-card-hover border border-neutral-200 dark:border-white/10 bg-white/90 dark:bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
-                    <div className="w-10 h-10 rounded-full bg-arena-900/5 dark:bg-white/5 flex items-center justify-center shrink-0 border border-arena-900/10 dark:border-white/5 group-hover:border-renang transition-colors">
-                      <Calendar className="w-4 h-4 text-arena-900 dark:text-white" />
+                  <Link href="/jadwal" className="glass-card-hover border border-neutral-light/10 bg-white/90 dark:bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
+                    <div className="w-10 h-10 rounded-full bg-neutral-light/5 flex items-center justify-center shrink-0 border border-neutral-light/10 group-hover:border-renang transition-colors">
+                      <Calendar className="w-4 h-4 text-neutral-light" />
                     </div>
                     <div>
                       <p className="type-label text-renang mb-0.5">Latihan Berikutnya</p>
-                      <h4 className="font-bold text-arena-900 dark:text-white text-[11px] leading-tight group-hover:text-renang transition-colors">{nextSchedule.cabang_olahraga} — {nextSchedule.hari}</h4>
+                      <h4 className="font-bold text-neutral-light text-[11px] leading-tight group-hover:text-renang transition-colors">{nextSchedule.cabang_olahraga} — {nextSchedule.hari}</h4>
                     </div>
                   </Link>
                 )}
                 
                 {/* Gallery */}
-                <Link href="#galeri" className="glass-card-hover border border-neutral-200 dark:border-white/10 bg-white/90 dark:bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
-                  <div className="w-10 h-10 rounded-xl bg-arena-100 dark:bg-arena-700 flex items-center justify-center shrink-0 border border-arena-900/10 dark:border-white/5 group-hover:border-basket transition-colors">
+                <Link href="#galeri" className="glass-card-hover border border-neutral-light/10 bg-white/90 dark:bg-arena-800/90 backdrop-blur-xl p-3 rounded-2xl flex items-center gap-3 w-48 shadow-xl group cursor-pointer">
+                  <div className="w-10 h-10 rounded-xl bg-neutral-light/5 flex items-center justify-center shrink-0 border border-neutral-light/10 group-hover:border-basket transition-colors">
                     <Play className="w-4 h-4 text-basket/70 group-hover:text-basket" />
                   </div>
                   <div>
-                    <p className="type-label text-primary-600 dark:text-primary-400 mb-0.5">Dokumentasi</p>
-                    <h4 className="font-bold text-arena-900 dark:text-white text-[11px] leading-tight group-hover:text-basket transition-colors">Lihat Galeri</h4>
+                    <p className="type-label text-basket mb-0.5">Dokumentasi</p>
+                    <h4 className="font-bold text-neutral-light text-[11px] leading-tight group-hover:text-basket transition-colors">Lihat Galeri</h4>
                   </div>
                 </Link>
               </div>
