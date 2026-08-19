@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { KATEGORI, type KategoriType } from '@/lib/constants';
 
 const BUCKET = 'galeri-dokumentasi';
 const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+// Gunakan KATEGORI constants — single source of truth
+const ALLOWED_KATEGORI: KategoriType[] = [KATEGORI.BASKET, KATEGORI.RENANG];
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 export async function POST(req: NextRequest) {
@@ -31,12 +34,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!kategori || !['Basket', 'Renang'].includes(kategori)) {
+    if (!kategori || !(ALLOWED_KATEGORI as string[]).includes(kategori)) {
+      console.error(`[API /galeri/upload] Kategori tidak valid: "${kategori}". Harus salah satu dari: ${ALLOWED_KATEGORI.join(', ')}`);
       return NextResponse.json(
-        { error: 'Kategori harus Basket atau Renang.' },
+        { error: `Kategori tidak valid: "${kategori}". Harus "${KATEGORI.BASKET}" atau "${KATEGORI.RENANG}" (huruf kapital di awal, tanpa spasi).` },
         { status: 400 }
       );
     }
+
+    // Log request masuk untuk debugging
+    console.log(`[API /galeri/upload] Request: kategori="${kategori}" | judul="${judul?.trim()}"`);
 
     // Validasi ukuran file
     if (file.size > MAX_SIZE_BYTES) {
@@ -139,6 +146,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log(`[API /galeri/upload] ✅ Berhasil disimpan: id=${record?.id} | kategori="${record?.kategori}" | judul="${record?.judul}"`);
     return NextResponse.json({ data: record, foto_url }, { status: 201 });
   } catch (err) {
     console.error('[API /galeri/upload] Unexpected error:', err);

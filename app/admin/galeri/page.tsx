@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Camera, Upload, Trash2, Star, StarOff, ArrowUp, ArrowDown, X, Loader2, Plus } from 'lucide-react';
+import { KATEGORI, KATEGORI_LIST, type KategoriType } from '@/lib/constants';
 
 interface GaleriItem {
   id: string;
@@ -19,7 +20,7 @@ export default function AdminGaleriPage() {
   const [items, setItems] = useState<GaleriItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [filterTab, setFilterTab] = useState<'Semua' | 'Basket' | 'Renang'>('Semua');
+  const [filterTab, setFilterTab] = useState<'Semua' | KategoriType>('Semua');
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -28,12 +29,17 @@ export default function AdminGaleriPage() {
   // Form state
   const [form, setForm] = useState({
     judul: '',
-    kategori: 'Basket' as 'Basket' | 'Renang',
+    // ⚠️ FIX: selalu default ke KATEGORI.BASKET — akan di-override saat buka modal
+    kategori: KATEGORI.BASKET as KategoriType,
     tanggal: '',
     is_featured: false,
     preview: '',
     file: null as File | null,
   });
+
+  /** Derivasi kategori awal form dari filterTab aktif */
+  const defaultKategori = (): KategoriType =>
+    filterTab === 'Semua' ? KATEGORI.BASKET : filterTab;
 
   // ─── Fetch ────────────────────────────────────────────────────────────────────
 
@@ -80,8 +86,16 @@ export default function AdminGaleriPage() {
     reader.readAsDataURL(file);
   };
 
-  const resetForm = () => {
-    setForm({ judul: '', kategori: 'Basket', tanggal: '', is_featured: false, preview: '', file: null });
+  const resetForm = (keepKategori?: KategoriType) => {
+    setForm({
+      judul: '',
+      // Pertahankan kategori dari filterTab aktif supaya konsisten
+      kategori: keepKategori ?? defaultKategori(),
+      tanggal: '',
+      is_featured: false,
+      preview: '',
+      file: null,
+    });
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -105,10 +119,13 @@ export default function AdminGaleriPage() {
       const formData = new FormData();
       formData.append('file', form.file);
       formData.append('judul', form.judul.trim());
-      formData.append('kategori', form.kategori);
+      formData.append('kategori', form.kategori); // harus 'Basket' atau 'Renang'
       formData.append('tanggal', form.tanggal || '');
       formData.append('is_featured', String(form.is_featured));
       formData.append('urutan', String(items.length + 1));
+
+      // Debug log — konfirmasi kategori yang benar-benar dikirim
+      console.log('[Upload] Mengirim kategori:', form.kategori, '| judul:', form.judul.trim());
 
       const res = await fetch('/api/galeri/upload', {
         method: 'POST',
@@ -121,8 +138,11 @@ export default function AdminGaleriPage() {
         throw new Error(json.error || `Upload gagal (HTTP ${res.status}). Silakan coba lagi.`);
       }
 
-      setSuccess('✅ Foto berhasil diunggah dan ditambahkan ke galeri!');
-      resetForm();
+      const savedKategori = json.data?.kategori as KategoriType | undefined;
+      console.log('[Upload] Kategori tersimpan di DB:', savedKategori);
+      setSuccess(`✅ Foto "${json.data?.judul}" berhasil diunggah ke kategori ${savedKategori || form.kategori}!`);
+      // Reset form tapi pertahankan kategori yang baru saja dipakai
+      resetForm(savedKategori ?? form.kategori);
       setShowUploadForm(false);
       fetchItems();
     } catch (err) {
@@ -194,7 +214,14 @@ export default function AdminGaleriPage() {
         </div>
         <button
           id="btn-tambah-foto"
-          onClick={() => { setError(''); setSuccess(''); setShowUploadForm(true); }}
+          onClick={() => {
+            setError('');
+            setSuccess('');
+            // ✅ FIX: Pre-select kategori berdasarkan tab yang sedang aktif
+            // Kalau user di tab Renang → form buka dengan Renang ter-pilih
+            setForm(f => ({ ...f, kategori: defaultKategori() }));
+            setShowUploadForm(true);
+          }}
           className="btn-accent flex items-center gap-2 shrink-0"
         >
           <Plus className="w-4 h-4" />
@@ -221,7 +248,13 @@ export default function AdminGaleriPage() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-arena-900 border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-xl font-black text-neutral-light uppercase tracking-wider">Upload Foto</h2>
+              <div>
+                <h2 className="font-display text-xl font-black text-neutral-light uppercase tracking-wider">Upload Foto</h2>
+                {/* Hint kategori yang sedang aktif */}
+                <p className="text-[11px] text-neutral-light/30 mt-0.5 font-mono">
+                  Kategori aktif: <span className={form.kategori === KATEGORI.BASKET ? 'text-basket' : 'text-renang'}>{form.kategori}</span>
+                </p>
+              </div>
               <button
                 onClick={() => { setShowUploadForm(false); resetForm(); setError(''); }}
                 className="p-1.5 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-white/5 transition-colors"
@@ -283,7 +316,7 @@ export default function AdminGaleriPage() {
               <div>
                 <label className="form-label">Kategori</label>
                 <div className="flex gap-2">
-                  {(['Basket', 'Renang'] as const).map(k => (
+                  {KATEGORI_LIST.map(k => (
                     <button
                       key={k}
                       type="button"
@@ -291,11 +324,14 @@ export default function AdminGaleriPage() {
                       onClick={() => setForm(f => ({ ...f, kategori: k }))}
                       className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all duration-200 ${
                         form.kategori === k
-                          ? k === 'Basket' ? 'bg-basket text-white border-basket' : 'bg-renang text-white border-renang'
+                          ? k === KATEGORI.BASKET
+                            ? 'bg-basket text-white border-basket shadow-[0_0_12px_rgba(255,107,0,0.4)]'
+                            : 'bg-renang text-white border-renang shadow-[0_0_12px_rgba(0,194,203,0.4)]'
                           : 'text-neutral-light/50 border-white/10 hover:border-white/20'
                       }`}
                     >
-                      {k === 'Basket' ? '🏀' : '🏊'} {k}
+                      {k === KATEGORI.BASKET ? '🏀' : '🏊'} {k}
+                      {form.kategori === k && <span className="ml-1.5 text-[9px] opacity-70">✓ dipilih</span>}
                     </button>
                   ))}
                 </div>
@@ -352,9 +388,15 @@ export default function AdminGaleriPage() {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-1 p-1 bg-arena-900 rounded-xl w-fit">
-        {(['Semua', 'Basket', 'Renang'] as const).map(tab => {
+        {(['Semua', ...KATEGORI_LIST] as const).map(tab => {
           const isActive = filterTab === tab;
-          const color = tab === 'Basket' ? (isActive ? 'bg-basket text-white' : 'text-basket/70') : tab === 'Renang' ? (isActive ? 'bg-renang text-white' : 'text-renang/70') : (isActive ? 'bg-arena-600 text-neutral-light' : 'text-neutral-light/50');
+          const color =
+            tab === KATEGORI.BASKET
+              ? isActive ? 'bg-basket text-white' : 'text-basket/70'
+              : tab === KATEGORI.RENANG
+              ? isActive ? 'bg-renang text-white' : 'text-renang/70'
+              : isActive ? 'bg-arena-600 text-neutral-light' : 'text-neutral-light/50';
+          const count = tab !== 'Semua' ? items.filter(i => i.kategori === tab).length : null;
           return (
             <button
               key={tab}
@@ -362,7 +404,10 @@ export default function AdminGaleriPage() {
               onClick={() => setFilterTab(tab)}
               className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-200 ${color}`}
             >
-              {tab} {tab !== 'Semua' && <span className="ml-1 opacity-60">({items.filter(i => i.kategori === tab).length})</span>}
+              {tab}
+              {count !== null && (
+                <span className="ml-1 opacity-60">({count})</span>
+              )}
             </button>
           );
         })}
