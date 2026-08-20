@@ -109,14 +109,15 @@ export default async function OwnerProfile() {
           {/* Fallback gradient behind image if cutout is not perfect */}
           <div className="absolute bottom-0 w-3/4 h-1/2 bg-gradient-to-t from-arena-900 to-transparent z-10 pointer-events-none blur-xl"></div>
           
-          <Image 
-            src="/fd0532d7-593a-43e9-a3e4-d7060080119c.png" 
-            alt="Coach Barqiyyah Nafis"
-            fill
-            className="object-contain object-bottom z-20 drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]"
-            style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}
-            priority
-          />
+          <div className="absolute inset-0 z-20" style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}>
+            <Image 
+              src="/fd0532d7-593a-43e9-a3e4-d7060080119c.png" 
+              alt="Coach Barqiyyah Nafis"
+              fill
+              className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]"
+              priority
+            />
+          </div>
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-basket to-transparent blur-[2px] opacity-70 z-20"></div>
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-basket/50 to-transparent z-20"></div>
         </div>

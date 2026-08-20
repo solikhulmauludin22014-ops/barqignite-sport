@@ -228,7 +228,9 @@ export default async function BerandaPage() {
 
               {/* Cutout Image with Glow Line Fade */}
               <div className="relative w-[90%] max-w-[450px] lg:max-w-none lg:w-[85%] xl:w-[75%] aspect-[3/4] lg:h-full lg:aspect-auto">
-                 <Image src="/fd0532d7-593a-43e9-a3e4-d7060080119c.png" alt="Coach Nafis" fill className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" priority style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }} />
+                 <div className="absolute inset-0 z-20" style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}>
+                   <Image src="/fd0532d7-593a-43e9-a3e4-d7060080119c.png" alt="Coach Nafis" fill className="object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" priority />
+                 </div>
                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-basket to-transparent blur-[2px] opacity-70"></div>
                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-basket/50 to-transparent"></div>
               </div>
