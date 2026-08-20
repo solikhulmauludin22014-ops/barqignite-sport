@@ -24,11 +24,17 @@ function AdminLoginContent() {
     setLoading(true);
     setError('');
 
+    const slowWarningTimer = setTimeout(() => {
+      setError('Sedang memproses... Sistem mungkin butuh waktu ekstra pada percobaan pertama (Serverless Cold Start).');
+    }, 4000);
+
     const result = await signIn('credentials', {
       username,
       password,
       redirect: false,
     });
+
+    clearTimeout(slowWarningTimer);
 
     if (result?.error) {
       setError('Username atau password salah');

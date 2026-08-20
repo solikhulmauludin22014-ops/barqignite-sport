@@ -114,8 +114,11 @@ export default async function OwnerProfile() {
             alt="Coach Barqiyyah Nafis"
             fill
             className="object-contain object-bottom z-20 drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]"
+            style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}
             priority
           />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-basket to-transparent blur-[2px] opacity-70 z-20"></div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-basket/50 to-transparent z-20"></div>
         </div>
 
         {/* 
