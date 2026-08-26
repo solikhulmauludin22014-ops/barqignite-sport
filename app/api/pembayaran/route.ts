@@ -16,7 +16,22 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
     const cabang = searchParams.get('cabang');
 
-    let query = supabase.from('pembayaran_spp').select('*');
+    // Keamanan: jika tidak ada session admin, wajib menyertakan id_anggota
+    // supaya tidak bisa dump semua data SPP semua anggota
+    const session = await getServerSession(authOptions);
+    if (!session && !id_anggota) {
+      return NextResponse.json(
+        { success: false, error: 'Parameter id_anggota wajib diisi.' },
+        { status: 400 }
+      );
+    }
+
+    // Jika bukan admin: batasi kolom yang dikembalikan (tidak tampilkan nominal dll)
+    const selectFields = session
+      ? '*'
+      : 'nama_anggota, bulan, tahun, status_bayar, metode_bayar';
+
+    let query = supabase.from('pembayaran_spp').select(selectFields);
 
     if (bulan) query = query.eq('bulan', bulan);
     if (tahun) query = query.eq('tahun', tahun);
