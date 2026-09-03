@@ -1,14 +1,21 @@
 import { NextResponse } from 'next/server';
-import { createSnapToken } from '@/lib/midtrans';
 import { supabase } from '@/lib/supabase';
-import { generateId, generateOrderId } from '@/lib/utils';
+import { generateId } from '@/lib/utils';
 import type { PembayaranSPP } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-// GET: ambil data pembayaran
+// GET: ambil data pembayaran — hanya untuk admin (session required)
 export async function GET(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized. Akses hanya untuk admin.' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const bulan = searchParams.get('bulan');
     const tahun = searchParams.get('tahun');
@@ -16,22 +23,10 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
     const cabang = searchParams.get('cabang');
 
-    // Keamanan: jika tidak ada session admin, wajib menyertakan id_anggota
-    // supaya tidak bisa dump semua data SPP semua anggota
-    const session = await getServerSession(authOptions);
-    if (!session && !id_anggota) {
-      return NextResponse.json(
-        { success: false, error: 'Parameter id_anggota wajib diisi.' },
-        { status: 400 }
-      );
-    }
-
-    // Jika bukan admin: batasi kolom yang dikembalikan (tidak tampilkan nominal dll)
-    const selectFields = session
-      ? '*'
-      : 'nama_anggota, bulan, tahun, status_bayar, metode_bayar';
-
-    let query = supabase.from('pembayaran_spp').select(selectFields);
+    let query = supabase
+      .from('pembayaran_spp')
+      .select('*')
+      .order('tanggal_bayar', { ascending: false });
 
     if (bulan) query = query.eq('bulan', bulan);
     if (tahun) query = query.eq('tahun', tahun);
@@ -40,7 +35,6 @@ export async function GET(request: Request) {
     if (cabang) query = query.eq('cabang_olahraga', cabang);
 
     const { data, error } = await query;
-
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
@@ -50,7 +44,35 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: buat tagihan baru atau generate link Midtrans
+// Helper: generate nomor kwitansi berurut (KW-YYYY-NNNN)
+async function generateNomorKwitansi(): Promise<string> {
+  const tahun = new Date().getFullYear();
+  
+  // Atomic increment menggunakan Supabase RPC atau fallback manual
+  const { data: setting, error } = await supabase
+    .from('pengaturan_pembayaran')
+    .select('nomor_kwitansi_terakhir')
+    .eq('id', 'SETTING-001')
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    // Jika tabel belum ada kolom, fallback ke timestamp
+    return `KW-${tahun}-${Date.now().toString().slice(-4)}`;
+  }
+
+  const nomorTerakhir = (setting?.nomor_kwitansi_terakhir || 0) + 1;
+
+  // Update counter
+  await supabase
+    .from('pengaturan_pembayaran')
+    .update({ nomor_kwitansi_terakhir: nomorTerakhir })
+    .eq('id', 'SETTING-001');
+
+  const nomorFormatted = String(nomorTerakhir).padStart(4, '0');
+  return `KW-${tahun}-${nomorFormatted}`;
+}
+
+// POST: tambah data pembayaran manual (admin only)
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -59,50 +81,13 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { action } = body;
 
-    if (action === 'create_payment') {
-      const orderId = generateOrderId('BARQ-SPP');
-      
-      const snapData = await createSnapToken({
-        order_id: orderId,
-        gross_amount: parseInt(body.nominal),
-        customer_name: body.nama_anggota,
-        customer_email: body.email || 'noreply@barqignite.com',
-        customer_phone: body.no_hp || '08000000000',
-        item_name: `SPP ${body.cabang_olahraga} - ${body.nama_anggota} - ${body.bulan}/${body.tahun}`,
-        payment_type: body.payment_type || 'all',
-      });
-
-      const newSPP: PembayaranSPP = {
-        id: generateId('SPP'),
-        id_anggota: body.id_anggota,
-        nama_anggota: body.nama_anggota,
-        cabang_olahraga: body.cabang_olahraga,
-        bulan: body.bulan,
-        tahun: body.tahun,
-        nominal: body.nominal,
-        status_bayar: 'Belum',
-        tanggal_bayar: '',
-        metode_bayar: '',
-        payment_gateway_id: orderId,
-        status_gateway: 'Pending',
-      };
-
-      const { error } = await supabase
-        .from('pembayaran_spp')
-        .insert([newSPP]);
-
-      if (error) throw error;
-
-      return NextResponse.json({
-        success: true,
-        data: { snap_token: snapData.token, redirect_url: snapData.redirect_url, order_id: orderId, spp_id: newSPP.id },
-        message: 'Link pembayaran berhasil dibuat',
-      });
+    // Generate nomor kwitansi jika status langsung Lunas
+    let nomor_kwitansi = '';
+    if (body.status_bayar === 'Lunas') {
+      nomor_kwitansi = await generateNomorKwitansi();
     }
 
-    // POST normal: tambah SPP manual
     const newSPP: PembayaranSPP = {
       id: generateId('SPP'),
       id_anggota: body.id_anggota,
@@ -111,11 +96,11 @@ export async function POST(request: Request) {
       bulan: body.bulan,
       tahun: body.tahun,
       nominal: body.nominal,
-      status_bayar: body.status_bayar || 'Belum',
-      tanggal_bayar: body.tanggal_bayar || '',
-      metode_bayar: body.metode_bayar || '',
-      payment_gateway_id: '',
-      status_gateway: '',
+      status_bayar: body.status_bayar || 'Lunas',
+      tanggal_bayar: body.tanggal_bayar || new Date().toISOString().split('T')[0],
+      metode_bayar: body.metode_bayar || 'Cash',
+      nomor_kwitansi,
+      catatan: body.catatan || '',
     };
 
     const { error } = await supabase
@@ -124,14 +109,42 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, data: newSPP, message: 'Data SPP berhasil ditambahkan' });
+    // Catat ke Kas otomatis saat status Lunas
+    if (newSPP.status_bayar === 'Lunas') {
+      const { data: allKas } = await supabase
+        .from('kas')
+        .select('saldo_berjalan')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      const lastSaldo = (allKas && allKas.length > 0) ? parseFloat(allKas[0].saldo_berjalan || '0') : 0;
+      const nominal = parseFloat(newSPP.nominal || '0');
+
+      await supabase.from('kas').insert([{
+        id: generateId('KAS'),
+        tanggal: newSPP.tanggal_bayar,
+        cabang_olahraga: newSPP.cabang_olahraga,
+        jenis: 'Masuk',
+        sumber: 'Manual',
+        kategori: 'SPP',
+        keterangan: `SPP ${newSPP.nama_anggota} ${newSPP.bulan}/${newSPP.tahun} (${newSPP.nomor_kwitansi})`,
+        nominal: String(nominal),
+        saldo_berjalan: String(lastSaldo + nominal),
+      }]);
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: newSPP,
+      message: `Pembayaran berhasil dicatat. ${nomor_kwitansi ? `Nomor kwitansi: ${nomor_kwitansi}` : ''}`,
+    });
   } catch (error) {
     console.error('Pembayaran POST error:', error);
     return NextResponse.json({ success: false, error: 'Gagal menambahkan data pembayaran' }, { status: 500 });
   }
 }
 
-// PUT: update status manual
+// PUT: update data pembayaran (admin only)
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -140,7 +153,13 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    
+
+    // Cek apakah sudah punya nomor kwitansi, jika belum dan status Lunas → generate
+    let nomor_kwitansi = body.nomor_kwitansi || '';
+    if (body.status_bayar === 'Lunas' && !nomor_kwitansi) {
+      nomor_kwitansi = await generateNomorKwitansi();
+    }
+
     const { error: updateError } = await supabase
       .from('pembayaran_spp')
       .update({
@@ -151,18 +170,18 @@ export async function PUT(request: Request) {
         tahun: body.tahun,
         nominal: body.nominal,
         status_bayar: body.status_bayar,
-        tanggal_bayar: body.tanggal_bayar || new Date().toLocaleDateString('id-ID'),
-        metode_bayar: body.metode_bayar || 'Tunai',
-        payment_gateway_id: body.payment_gateway_id || '',
-        status_gateway: body.status_gateway || '',
+        tanggal_bayar: body.tanggal_bayar || new Date().toISOString().split('T')[0],
+        metode_bayar: body.metode_bayar || 'Cash',
+        nomor_kwitansi,
+        catatan: body.catatan || '',
       })
       .eq('id', body.id);
 
     if (updateError) throw updateError;
 
     // Jika ditandai Lunas secara manual, catat ke Kas
-    if (body.status_bayar === 'Lunas' && !body.payment_gateway_id) {
-      const { data: allKas, error: kasError } = await supabase
+    if (body.status_bayar === 'Lunas') {
+      const { data: allKas } = await supabase
         .from('kas')
         .select('saldo_berjalan')
         .order('created_at', { ascending: false })
@@ -170,27 +189,21 @@ export async function PUT(request: Request) {
 
       const lastSaldo = (allKas && allKas.length > 0) ? parseFloat(allKas[0].saldo_berjalan || '0') : 0;
       const nominal = parseFloat(body.nominal || '0');
-      
-      const newKas = {
+
+      await supabase.from('kas').insert([{
         id: generateId('KAS'),
-        tanggal: new Date().toLocaleDateString('id-ID'),
+        tanggal: body.tanggal_bayar || new Date().toISOString().split('T')[0],
         cabang_olahraga: body.cabang_olahraga || '',
         jenis: 'Masuk',
         sumber: 'Manual',
         kategori: 'SPP',
-        keterangan: `SPP Manual ${body.nama_anggota} ${body.bulan}/${body.tahun}`,
+        keterangan: `SPP Manual ${body.nama_anggota} ${body.bulan}/${body.tahun} (${nomor_kwitansi || 'KW-LAMA'})`,
         nominal: String(nominal),
         saldo_berjalan: String(lastSaldo + nominal),
-      };
-
-      const { error: insertKasError } = await supabase
-        .from('kas')
-        .insert([newKas]);
-        
-      if (insertKasError) throw insertKasError;
+      }]);
     }
 
-    return NextResponse.json({ success: true, message: 'Pembayaran berhasil diperbarui' });
+    return NextResponse.json({ success: true, message: 'Pembayaran berhasil diperbarui', nomor_kwitansi });
   } catch (error) {
     console.error('Pembayaran PUT error:', error);
     return NextResponse.json({ success: false, error: 'Gagal memperbarui pembayaran' }, { status: 500 });
@@ -206,7 +219,7 @@ export async function DELETE(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID tidak ditemukan' }, { status: 400 });
     }

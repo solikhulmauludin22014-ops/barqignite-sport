@@ -135,9 +135,11 @@ export interface PembayaranSPP {
   nominal: string;
   status_bayar: 'Lunas' | 'Belum' | 'Terlambat';
   tanggal_bayar: string;
-  metode_bayar: 'VA Bank' | 'QRIS' | 'Tunai' | 'Transfer' | '';
-  payment_gateway_id: string;
-  status_gateway: 'Pending' | 'Success' | 'Expired' | 'Failed' | '';
+  metode_bayar: 'Cash' | 'Transfer' | 'QRIS' | 'VA Bank' | 'Tunai' | '';
+  payment_gateway_id?: string;
+  status_gateway?: 'Pending' | 'Success' | 'Expired' | 'Failed' | '';
+  nomor_kwitansi?: string;
+  catatan?: string;
 }
 
 export interface Kas {
@@ -198,6 +200,7 @@ export interface PengaturanPembayaran {
   id: string;
   tanggal_jatuh_tempo: string;
   catatan_keterlambatan: string;
+  nomor_kwitansi_terakhir?: number;
   updated_at?: string;
 }
 
@@ -206,6 +209,9 @@ export interface MetodePembayaran {
   nama: string;
   deskripsi?: string;
   nomor_rekening?: string;
+  nama_bank?: string;
+  atas_nama?: string;
+  qris_image_url?: string;
   is_recommended: boolean;
   is_active: boolean;
   urutan: number;

@@ -66,3 +66,41 @@ export function generateId(prefix: string = 'ID'): string {
   const random = Math.floor(Math.random() * 1000);
   return `${prefix}-${timestamp}-${random}`;
 }
+
+// Konversi angka ke teks terbilang (Bahasa Indonesia)
+export function terbilang(angka: number): string {
+  const satuan = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan',
+    'sepuluh', 'sebelas', 'dua belas', 'tiga belas', 'empat belas', 'lima belas',
+    'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas'];
+
+  function konversi(n: number): string {
+    if (n < 20) return satuan[n];
+    if (n < 100) {
+      const puluhan = Math.floor(n / 10);
+      const sisa = n % 10;
+      return (puluhan === 1 ? 'sepuluh' : satuan[puluhan] + ' puluh') + (sisa ? ' ' + satuan[sisa] : '');
+    }
+    if (n < 1000) {
+      const ratusan = Math.floor(n / 100);
+      const sisa = n % 100;
+      return (ratusan === 1 ? 'seratus' : satuan[ratusan] + ' ratus') + (sisa ? ' ' + konversi(sisa) : '');
+    }
+    if (n < 1000000) {
+      const ribuan = Math.floor(n / 1000);
+      const sisa = n % 1000;
+      return (ribuan === 1 ? 'seribu' : konversi(ribuan) + ' ribu') + (sisa ? ' ' + konversi(sisa) : '');
+    }
+    if (n < 1000000000) {
+      const jutaan = Math.floor(n / 1000000);
+      const sisa = n % 1000000;
+      return konversi(jutaan) + ' juta' + (sisa ? ' ' + konversi(sisa) : '');
+    }
+    const milyaran = Math.floor(n / 1000000000);
+    const sisa = n % 1000000000;
+    return konversi(milyaran) + ' miliar' + (sisa ? ' ' + konversi(sisa) : '');
+  }
+
+  if (angka === 0) return 'nol rupiah';
+  const hasil = konversi(Math.floor(Math.abs(angka)));
+  return hasil.charAt(0).toUpperCase() + hasil.slice(1) + ' rupiah';
+}
