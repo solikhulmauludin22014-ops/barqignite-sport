@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import useSWR from 'swr';
 import {
   CheckCircle, AlertTriangle, Loader2, Filter, Download,
@@ -72,11 +72,29 @@ export default function AdminPembayaranPage() {
   const namaClub: string = brandingRes?.data?.nama_club || 'BARQIGNITE PRIVATE SPORT';
   const logoUrl: string = brandingRes?.data?.logo_url || '';
 
-  // Filter anggota sesuai search
-  const filteredAnggota = anggotaList.filter(a =>
-    a.nama.toLowerCase().includes(anggotaSearch.toLowerCase()) ||
-    a.id.toLowerCase().includes(anggotaSearch.toLowerCase())
-  ).slice(0, 10);
+  // Filter anggota sesuai search — jika kosong tampilkan semua
+  const filteredAnggota = anggotaList
+    .filter(a => {
+      if (!anggotaSearch.trim()) return true; // kosong = tampilkan semua
+      const q = anggotaSearch.toLowerCase();
+      return (
+        a.nama.toLowerCase().includes(q) ||
+        a.id.toLowerCase().includes(q)
+      );
+    })
+    .slice(0, 15); // batas 15 item di dropdown
+
+  // Ref untuk detect klik di luar dropdown
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowAnggotaDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // Pilih anggota dari dropdown
   const selectAnggota = (a: Anggota) => {
@@ -201,39 +219,88 @@ export default function AdminPembayaranPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Pilih Anggota */}
-            <div className="sm:col-span-2 lg:col-span-3 relative">
+            <div className="sm:col-span-2 lg:col-span-3 relative" ref={dropdownRef}>
               <label className="form-label">Pilih Anggota <span className="text-red-400">*</span></label>
               <div className="relative">
                 <input
                   value={anggotaSearch}
-                  onChange={(e) => { setAnggotaSearch(e.target.value); setShowAnggotaDropdown(true); if (!e.target.value) setForm(prev => ({ ...prev, id_anggota: '', nama_anggota: '', cabang_olahraga: '' })); }}
+                  onChange={(e) => {
+                    setAnggotaSearch(e.target.value);
+                    setShowAnggotaDropdown(true);
+                    // Reset pilihan jika teks diubah manual
+                    if (form.id_anggota && e.target.value !== form.nama_anggota) {
+                      setForm(prev => ({ ...prev, id_anggota: '', nama_anggota: '', cabang_olahraga: '' }));
+                    }
+                  }}
                   onFocus={() => setShowAnggotaDropdown(true)}
-                  placeholder="Ketik nama atau ID anggota..."
+                  placeholder={anggotaList.length > 0 ? `Cari dari ${anggotaList.length} anggota aktif...` : 'Memuat data anggota...'}
                   className="form-input w-full pr-10"
+                  autoComplete="off"
                 />
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-light/40" />
+                <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-transform ${
+                  showAnggotaDropdown ? 'rotate-180 text-primary-400' : 'text-neutral-light/40'
+                }`} />
               </div>
-              {showAnggotaDropdown && anggotaSearch && filteredAnggota.length > 0 && (
-                <div className="absolute z-20 top-full mt-1 w-full glass-card border rounded-xl overflow-hidden shadow-2xl max-h-52 overflow-y-auto">
-                  {filteredAnggota.map(a => (
-                    <button
-                      key={a.id}
-                      onMouseDown={() => selectAnggota(a)}
-                      className="w-full text-left px-4 py-3 hover:bg-neutral-light/10 transition-colors flex items-center justify-between"
-                    >
-                      <div>
-                        <div className="font-medium text-neutral-light text-sm">{a.nama}</div>
-                        <div className="text-xs text-neutral-light/50">{a.id}</div>
-                      </div>
-                      <span className={`badge text-xs ${a.cabang_olahraga === 'Basket' ? 'bg-orange-500/20 border-orange-500/30 text-orange-400' : 'bg-blue-500/20 border-blue-500/30 text-blue-400'}`}>
-                        {a.cabang_olahraga === 'Basket' ? '🏀' : '🏊'} {a.cabang_olahraga}
-                      </span>
-                    </button>
-                  ))}
+
+              {/* Dropdown — tampil saat fokus, dengan atau tanpa teks */}
+              {showAnggotaDropdown && (
+                <div className="absolute z-30 top-full mt-1 w-full glass-card border border-arena-600/50 rounded-xl overflow-hidden shadow-2xl max-h-60 overflow-y-auto">
+                  {!anggotaRes ? (
+                    // Loading state
+                    <div className="flex items-center justify-center gap-2 py-5 text-neutral-light/50 text-sm">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Memuat data anggota...
+                    </div>
+                  ) : filteredAnggota.length === 0 ? (
+                    // Empty state
+                    <div className="py-5 px-4 text-center text-neutral-light/40 text-sm">
+                      {anggotaList.length === 0
+                        ? 'Belum ada anggota aktif di database'
+                        : `Tidak ada anggota yang cocok dengan "${anggotaSearch}"`
+                      }
+                    </div>
+                  ) : (
+                    // Daftar anggota
+                    filteredAnggota.map(a => (
+                      <button
+                        key={a.id}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault(); // cegah blur dulu sebelum select
+                          selectAnggota(a);
+                        }}
+                        className={`w-full text-left px-4 py-3 hover:bg-neutral-light/10 transition-colors flex items-center justify-between gap-3 border-b border-arena-600/20 last:border-0 ${
+                          form.id_anggota === a.id ? 'bg-primary-500/10' : ''
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <div className="font-medium text-neutral-light text-sm truncate">{a.nama}</div>
+                          <div className="text-xs text-neutral-light/40 font-mono">{a.id}</div>
+                        </div>
+                        <span className={`badge text-xs shrink-0 ${
+                          a.cabang_olahraga === 'Basket'
+                            ? 'bg-orange-500/20 border-orange-500/30 text-orange-400'
+                            : 'bg-blue-500/20 border-blue-500/30 text-blue-400'
+                        }`}>
+                          {a.cabang_olahraga === 'Basket' ? '🏀' : '🏊'} {a.cabang_olahraga}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                  {filteredAnggota.length === 15 && anggotaSearch.trim() === '' && (
+                    <div className="py-2 px-4 text-xs text-neutral-light/30 text-center border-t border-arena-600/20">
+                      Menampilkan 15 dari {anggotaList.length} anggota — ketik untuk cari lebih spesifik
+                    </div>
+                  )}
                 </div>
               )}
+
+              {/* Indikator anggota terpilih */}
               {form.id_anggota && (
-                <p className="text-xs text-emerald-400 mt-1">✓ {form.id_anggota} — {form.cabang_olahraga}</p>
+                <p className="text-xs text-emerald-400 mt-1.5 flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" />
+                  {form.id_anggota} — Cabang {form.cabang_olahraga}
+                </p>
               )}
             </div>
 
