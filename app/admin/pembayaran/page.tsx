@@ -232,7 +232,7 @@ export default function AdminPembayaranPage() {
     .reduce((acc, d) => acc + parseFloat(d.nominal || '0'), 0);
 
   // ─── Shared Form Fields ────────────────────────────────────────────────────
-  const FormFields = () => (
+  const renderFormFields = () => (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {/* Pilih Anggota */}
       <div className="sm:col-span-2 lg:col-span-3 relative" ref={dropdownRef}>
@@ -389,7 +389,7 @@ export default function AdminPembayaranPage() {
             </button>
           </div>
 
-          <FormFields />
+          {renderFormFields()}
 
           {/* Error Message */}
           {formError && (
