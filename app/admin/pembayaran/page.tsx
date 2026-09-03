@@ -167,6 +167,9 @@ export default function AdminPembayaranPage() {
       const json = await res.json();
       if (json.success) {
         mutate();
+        if (json.data) {
+          handleCetakKwitansi(json.data);
+        }
         closeForm();
       } else {
         setFormError(json.error || 'Gagal menyimpan. Coba lagi.');
@@ -319,9 +322,9 @@ export default function AdminPembayaranPage() {
       <div>
         <label className="form-label">Nominal (Rp) <span className="text-red-400">*</span></label>
         <input
-          type="number" min={0}
+          type="text" inputMode="numeric"
           value={form.nominal}
-          onChange={e => setForm({ ...form, nominal: e.target.value })}
+          onChange={e => setForm({ ...form, nominal: e.target.value.replace(/[^0-9]/g, '') })}
           placeholder="Contoh: 300000"
           className="form-input"
         />
@@ -400,7 +403,7 @@ export default function AdminPembayaranPage() {
             <button onClick={closeForm} className="btn-secondary">Batal</button>
             <button onClick={handleSimpan} disabled={saving} className={`px-8 flex items-center gap-2 ${isEditMode ? 'btn-primary' : 'btn-success'}`}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              {isEditMode ? 'Simpan Perubahan' : 'Simpan & Selesai'}
+              {isEditMode ? 'Simpan Perubahan' : 'Simpan & Cetak Kwitansi'}
             </button>
           </div>
         </div>

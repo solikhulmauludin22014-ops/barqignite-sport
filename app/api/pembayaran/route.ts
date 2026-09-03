@@ -217,7 +217,7 @@ export async function PUT(request: Request) {
       nomor_kwitansi = nomor;
     }
 
-    const { error: updateErr } = await supabase
+    const { data: updated, error: updateErr } = await supabase
       .from('pembayaran_spp')
       .update({
         id_anggota:      body.id_anggota,
@@ -232,7 +232,9 @@ export async function PUT(request: Request) {
         nomor_kwitansi,
         catatan:         body.catatan || '',
       })
-      .eq('id', body.id);
+      .eq('id', body.id)
+      .select()
+      .single();
 
     if (updateErr) {
       const detail = supabaseErrorMessage(updateErr);
@@ -266,7 +268,7 @@ export async function PUT(request: Request) {
       }]);
     }
 
-    return NextResponse.json({ success: true, message: 'Pembayaran berhasil diperbarui', nomor_kwitansi });
+    return NextResponse.json({ success: true, message: 'Pembayaran berhasil diperbarui', nomor_kwitansi, data: updated });
   } catch (err) {
     const msg = supabaseErrorMessage(err);
     console.error('Pembayaran PUT error:', msg);

@@ -135,11 +135,13 @@ export interface PembayaranSPP {
   nominal: string;
   status_bayar: 'Lunas' | 'Belum' | 'Terlambat';
   tanggal_bayar: string;
-  metode_bayar: 'Cash' | 'Transfer' | 'QRIS' | 'VA Bank' | 'Tunai' | '';
-  payment_gateway_id?: string;
-  status_gateway?: 'Pending' | 'Success' | 'Expired' | 'Failed' | '';
+  // Metode manual — Cash/Tunai/Transfer/QRIS (Tunai dan VA Bank tetap ada untuk kompatibilitas data lama)
+  metode_bayar: 'Cash' | 'Tunai' | 'Transfer' | 'QRIS' | 'VA Bank' | '';
   nomor_kwitansi?: string;
   catatan?: string;
+  // Legacy gateway fields (hanya ada pada data historis, selalu '' pada data baru)
+  payment_gateway_id?: string;
+  status_gateway?: string;
 }
 
 export interface Kas {
@@ -147,7 +149,7 @@ export interface Kas {
   tanggal: string;
   cabang_olahraga: string;
   jenis: 'Masuk' | 'Keluar';
-  sumber: 'Manual' | 'Gateway';
+  sumber: 'Manual' | 'Gateway'; // Gateway tetap ada untuk kompatibilitas data historis
   kategori: string;
   keterangan: string;
   nominal: string;
@@ -167,6 +169,8 @@ export interface Jadwal {
   keterangan?: string;
 }
 
+// LogTransaksiGateway dihapus — tabel dropped, tidak ada data baru
+// (interface dipertahankan sebagai referensi saja)
 export interface LogTransaksiGateway {
   id: string;
   order_id: string;
@@ -230,9 +234,12 @@ export interface ApiResponse<T = unknown> {
 }
 
 // =====================
-// Payment Gateway Types
+// Payment Gateway Types — DEPRECATED
+// Midtrans tidak lagi digunakan. Interface dipertahankan untuk
+// referensi saja, tidak dipakai di kode aktif.
 // =====================
 
+/** @deprecated Midtrans tidak digunakan */
 export interface MidtransCreatePaymentRequest {
   orderId: string;
   amount: number;
@@ -247,6 +254,7 @@ export interface MidtransCreatePaymentRequest {
   paymentType?: 'qris' | 'va';
 }
 
+/** @deprecated Midtrans tidak digunakan */
 export interface MidtransPaymentResponse {
   token: string;
   redirect_url: string;
