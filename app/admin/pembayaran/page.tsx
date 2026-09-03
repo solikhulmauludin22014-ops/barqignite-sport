@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import useSWR from 'swr';
 import {
   CheckCircle, AlertTriangle, Loader2, Filter, Download,
-  Plus, Trash2, Printer, X, Save, ChevronDown, Settings
+  Plus, Trash2, Printer, X, Save, ChevronDown, Settings, Edit2,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { PembayaranSPP, Anggota, SppKategori } from '@/types';
@@ -12,15 +12,14 @@ import { formatCurrency, getMonthName, cn } from '@/lib/utils';
 import Link from 'next/link';
 import { printKwitansi } from '@/components/admin/KwitansiPrint';
 
-
 const BULAN_LIST = Array.from({ length: 12 }, (_, i) => String(i + 1));
 const TAHUN_LIST = ['2024', '2025', '2026', '2027'];
 const METODE_LIST = ['Cash', 'Transfer', 'QRIS'];
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
-// Form state untuk input manual
 interface FormPembayaran {
+  id?: string; // ada saat edit
   id_anggota: string;
   nama_anggota: string;
   cabang_olahraga: 'Basket' | 'Renang' | '';
@@ -30,6 +29,7 @@ interface FormPembayaran {
   tanggal_bayar: string;
   metode_bayar: string;
   catatan: string;
+  nomor_kwitansi?: string;
 }
 
 const formDefault: FormPembayaran = {
@@ -51,11 +51,22 @@ export default function AdminPembayaranPage() {
     status: '',
     cabang: '',
   });
-  const [saving, setSaving] = useState(false);
+
+  // Form Create/Edit
   const [showForm, setShowForm] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [form, setForm] = useState<FormPembayaran>(formDefault);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  // Anggota combobox
   const [anggotaSearch, setAnggotaSearch] = useState('');
   const [showAnggotaDropdown, setShowAnggotaDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Delete confirm modal
+  const [deleteTarget, setDeleteTarget] = useState<PembayaranSPP | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const params = new URLSearchParams(
     Object.fromEntries(Object.entries(filter).filter(([, v]) => v))
@@ -72,20 +83,16 @@ export default function AdminPembayaranPage() {
   const namaClub: string = brandingRes?.data?.nama_club || 'BARQIGNITE PRIVATE SPORT';
   const logoUrl: string = brandingRes?.data?.logo_url || '';
 
-  // Filter anggota sesuai search — jika kosong tampilkan semua
+  // Filter anggota — kosong = tampilkan semua
   const filteredAnggota = anggotaList
     .filter(a => {
-      if (!anggotaSearch.trim()) return true; // kosong = tampilkan semua
+      if (!anggotaSearch.trim()) return true;
       const q = anggotaSearch.toLowerCase();
-      return (
-        a.nama.toLowerCase().includes(q) ||
-        a.id.toLowerCase().includes(q)
-      );
+      return a.nama.toLowerCase().includes(q) || a.id.toLowerCase().includes(q);
     })
-    .slice(0, 15); // batas 15 item di dropdown
+    .slice(0, 15);
 
-  // Ref untuk detect klik di luar dropdown
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -96,58 +103,98 @@ export default function AdminPembayaranPage() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Pilih anggota dari dropdown
   const selectAnggota = (a: Anggota) => {
-    setForm(prev => ({
-      ...prev,
-      id_anggota: a.id,
-      nama_anggota: a.nama,
-      cabang_olahraga: a.cabang_olahraga,
-    }));
+    setForm(prev => ({ ...prev, id_anggota: a.id, nama_anggota: a.nama, cabang_olahraga: a.cabang_olahraga }));
     setAnggotaSearch(a.nama);
     setShowAnggotaDropdown(false);
+    setFormError('');
+    // Auto-fill nominal dari SPP kategori
+    const sppMatch = sppList.find(s => s.cabang === a.cabang_olahraga && s.is_active);
+    if (sppMatch) setForm(prev => ({ ...prev, nominal: String(sppMatch.nominal) }));
+  };
 
-    // Auto-set nominal dari kategori SPP jika ada
-    const sppMatch = sppList.find(s =>
-      s.cabang === a.cabang_olahraga && s.is_active
-    );
-    if (sppMatch) {
-      setForm(prev => ({ ...prev, nominal: String(sppMatch.nominal) }));
-    }
+  const openCreate = () => {
+    setIsEditMode(false);
+    setForm(formDefault);
+    setAnggotaSearch('');
+    setFormError('');
+    setShowForm(true);
+  };
+
+  const openEdit = (row: PembayaranSPP) => {
+    setIsEditMode(true);
+    setForm({
+      id: row.id,
+      id_anggota: row.id_anggota,
+      nama_anggota: row.nama_anggota,
+      cabang_olahraga: row.cabang_olahraga,
+      bulan: row.bulan,
+      tahun: row.tahun,
+      nominal: row.nominal,
+      tanggal_bayar: row.tanggal_bayar || new Date().toISOString().split('T')[0],
+      metode_bayar: row.metode_bayar || 'Cash',
+      catatan: row.catatan || '',
+      nomor_kwitansi: row.nomor_kwitansi,
+    });
+    setAnggotaSearch(row.nama_anggota);
+    setFormError('');
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setIsEditMode(false);
+    setForm(formDefault);
+    setAnggotaSearch('');
+    setFormError('');
   };
 
   const handleSimpan = async () => {
-    if (!form.id_anggota || !form.nominal || !form.bulan || !form.tahun) {
-      alert('Harap lengkapi: Anggota, Nominal, Bulan, dan Tahun.');
-      return;
-    }
+    if (!form.id_anggota)     return setFormError('Pilih anggota terlebih dahulu.');
+    if (!form.cabang_olahraga) return setFormError('Cabang wajib diisi.');
+    if (!form.nominal || parseFloat(form.nominal) <= 0) return setFormError('Nominal harus lebih dari 0.');
+    if (!form.bulan || !form.tahun) return setFormError('Bulan dan tahun wajib diisi.');
+
     setSaving(true);
+    setFormError('');
     try {
+      const method = isEditMode ? 'PUT' : 'POST';
       const res = await fetch('/api/pembayaran', {
-        method: 'POST',
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, status_bayar: 'Lunas' }),
       });
       const json = await res.json();
       if (json.success) {
-        setForm(formDefault);
-        setAnggotaSearch('');
-        setShowForm(false);
         mutate();
+        closeForm();
       } else {
-        alert(json.error || 'Gagal menyimpan');
+        setFormError(json.error || 'Gagal menyimpan. Coba lagi.');
       }
+    } catch {
+      setFormError('Koneksi gagal. Periksa jaringan dan coba lagi.');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Yakin hapus data pembayaran ini?')) return;
-    const res = await fetch(`/api/pembayaran?id=${id}`, { method: 'DELETE' });
-    const json = await res.json();
-    if (json.success) mutate();
-    else alert(json.error || 'Gagal menghapus');
+  const confirmDelete = (row: PembayaranSPP) => setDeleteTarget(row);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/pembayaran?id=${deleteTarget.id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        mutate();
+        setDeleteTarget(null);
+      } else {
+        alert(json.error || 'Gagal menghapus');
+      }
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleCetakKwitansi = useCallback((row: PembayaranSPP) => {
@@ -156,23 +203,23 @@ export default function AdminPembayaranPage() {
 
   const exportToExcel = () => {
     if (pembayaranData.length === 0) return;
-    const dataToExport = pembayaranData.map((item, index) => ({
-      'No': index + 1,
+    const rows = pembayaranData.map((item, i) => ({
+      'No': i + 1,
       'No. Kwitansi': item.nomor_kwitansi || '-',
       'Nama Anggota': item.nama_anggota,
-      'Cabang Olahraga': item.cabang_olahraga,
-      'Periode (Bulan/Tahun)': `${getMonthName(item.bulan)} ${item.tahun}`,
+      'Cabang': item.cabang_olahraga,
+      'Periode': `${getMonthName(item.bulan)} ${item.tahun}`,
       'Nominal (Rp)': item.nominal,
-      'Status Bayar': item.status_bayar,
-      'Metode Bayar': item.metode_bayar || '-',
-      'Tanggal Bayar': item.tanggal_bayar || '-',
+      'Status': item.status_bayar,
+      'Metode': item.metode_bayar || '-',
+      'Tgl Bayar': item.tanggal_bayar || '-',
       'Catatan': item.catatan || '-',
     }));
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Pembayaran SPP');
-    const filterLabel = [filter.bulan && getMonthName(filter.bulan), filter.tahun].filter(Boolean).join('_');
-    XLSX.writeFile(workbook, `Data_Pembayaran_SPP${filterLabel ? '_' + filterLabel : ''}.xlsx`);
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Pembayaran SPP');
+    const label = [filter.bulan && getMonthName(filter.bulan), filter.tahun].filter(Boolean).join('_');
+    XLSX.writeFile(wb, `Pembayaran_SPP${label ? '_' + label : ''}.xlsx`);
   };
 
   const lunas = pembayaranData.filter(d => d.status_bayar === 'Lunas').length;
@@ -180,6 +227,128 @@ export default function AdminPembayaranPage() {
   const totalNominal = pembayaranData
     .filter(d => d.status_bayar === 'Lunas')
     .reduce((acc, d) => acc + parseFloat(d.nominal || '0'), 0);
+
+  // ─── Shared Form Fields ────────────────────────────────────────────────────
+  const FormFields = () => (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Pilih Anggota */}
+      <div className="sm:col-span-2 lg:col-span-3 relative" ref={dropdownRef}>
+        <label className="form-label">Pilih Anggota <span className="text-red-400">*</span></label>
+        <div className="relative">
+          <input
+            value={anggotaSearch}
+            onChange={(e) => {
+              setAnggotaSearch(e.target.value);
+              setShowAnggotaDropdown(true);
+              if (form.id_anggota && e.target.value !== form.nama_anggota) {
+                setForm(prev => ({ ...prev, id_anggota: '', nama_anggota: '', cabang_olahraga: '' }));
+              }
+            }}
+            onFocus={() => setShowAnggotaDropdown(true)}
+            placeholder={anggotaList.length > 0 ? `Cari dari ${anggotaList.length} anggota aktif...` : 'Memuat data anggota...'}
+            className="form-input w-full pr-10"
+            autoComplete="off"
+            disabled={isEditMode} // saat edit, anggota tidak bisa diganti
+          />
+          <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-transform ${showAnggotaDropdown && !isEditMode ? 'rotate-180 text-primary-400' : 'text-neutral-light/40'}`} />
+        </div>
+
+        {showAnggotaDropdown && !isEditMode && (
+          <div className="absolute z-30 top-full mt-1 w-full glass-card border border-arena-600/50 rounded-xl overflow-hidden shadow-2xl max-h-60 overflow-y-auto">
+            {!anggotaRes ? (
+              <div className="flex items-center justify-center gap-2 py-5 text-neutral-light/50 text-sm">
+                <Loader2 className="w-4 h-4 animate-spin" /> Memuat...
+              </div>
+            ) : filteredAnggota.length === 0 ? (
+              <div className="py-5 px-4 text-center text-neutral-light/40 text-sm">
+                {anggotaList.length === 0
+                  ? 'Belum ada anggota aktif di database'
+                  : `Tidak ada yang cocok dengan "${anggotaSearch}"`}
+              </div>
+            ) : (
+              filteredAnggota.map(a => (
+                <button
+                  key={a.id} type="button"
+                  onMouseDown={(e) => { e.preventDefault(); selectAnggota(a); }}
+                  className={`w-full text-left px-4 py-3 hover:bg-neutral-light/10 transition-colors flex items-center justify-between gap-3 border-b border-arena-600/20 last:border-0 ${form.id_anggota === a.id ? 'bg-primary-500/10' : ''}`}
+                >
+                  <div className="min-w-0">
+                    <div className="font-medium text-neutral-light text-sm truncate">{a.nama}</div>
+                    <div className="text-xs text-neutral-light/40 font-mono">{a.id}</div>
+                  </div>
+                  <span className={`badge text-xs shrink-0 ${a.cabang_olahraga === 'Basket' ? 'bg-orange-500/20 border-orange-500/30 text-orange-400' : 'bg-blue-500/20 border-blue-500/30 text-blue-400'}`}>
+                    {a.cabang_olahraga === 'Basket' ? '🏀' : '🏊'} {a.cabang_olahraga}
+                  </span>
+                </button>
+              ))
+            )}
+            {filteredAnggota.length === 15 && !anggotaSearch.trim() && (
+              <div className="py-2 px-4 text-xs text-neutral-light/30 text-center border-t border-arena-600/20">
+                Menampilkan 15 dari {anggotaList.length} — ketik untuk cari lebih spesifik
+              </div>
+            )}
+          </div>
+        )}
+        {form.id_anggota && (
+          <p className="text-xs text-emerald-400 mt-1.5 flex items-center gap-1">
+            <CheckCircle className="w-3 h-3" /> {form.id_anggota} — {form.cabang_olahraga}
+          </p>
+        )}
+        {isEditMode && (
+          <p className="text-xs text-neutral-light/30 mt-1">Anggota tidak dapat diubah saat edit. Hapus dan buat baru jika perlu.</p>
+        )}
+      </div>
+
+      {/* Bulan */}
+      <div>
+        <label className="form-label">Bulan <span className="text-red-400">*</span></label>
+        <select value={form.bulan} onChange={e => setForm({ ...form, bulan: e.target.value })} className="form-select">
+          {BULAN_LIST.map(b => <option key={b} value={b}>{getMonthName(b)}</option>)}
+        </select>
+      </div>
+
+      {/* Tahun */}
+      <div>
+        <label className="form-label">Tahun <span className="text-red-400">*</span></label>
+        <select value={form.tahun} onChange={e => setForm({ ...form, tahun: e.target.value })} className="form-select">
+          {TAHUN_LIST.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+
+      {/* Nominal */}
+      <div>
+        <label className="form-label">Nominal (Rp) <span className="text-red-400">*</span></label>
+        <input
+          type="number" min={0}
+          value={form.nominal}
+          onChange={e => setForm({ ...form, nominal: e.target.value })}
+          placeholder="Contoh: 300000"
+          className="form-input"
+        />
+        {form.nominal && <p className="text-xs text-neutral-light/40 mt-1">{formatCurrency(parseFloat(form.nominal) || 0)}</p>}
+      </div>
+
+      {/* Tanggal Bayar */}
+      <div>
+        <label className="form-label">Tanggal Bayar <span className="text-red-400">*</span></label>
+        <input type="date" value={form.tanggal_bayar} onChange={e => setForm({ ...form, tanggal_bayar: e.target.value })} className="form-input" />
+      </div>
+
+      {/* Metode */}
+      <div>
+        <label className="form-label">Metode Pembayaran</label>
+        <select value={form.metode_bayar} onChange={e => setForm({ ...form, metode_bayar: e.target.value })} className="form-select">
+          {METODE_LIST.map(m => <option key={m} value={m}>{m}</option>)}
+        </select>
+      </div>
+
+      {/* Catatan */}
+      <div>
+        <label className="form-label">Catatan (opsional)</label>
+        <input type="text" value={form.catatan} onChange={e => setForm({ ...form, catatan: e.target.value })} placeholder="Misal: Titip via kakak" className="form-input" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-in">
@@ -190,189 +359,48 @@ export default function AdminPembayaranPage() {
           <p className="text-neutral-light/50 mt-1 text-sm">Catat pembayaran manual (cash / transfer / QRIS langsung ke admin)</p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => { setShowForm(!showForm); setForm(formDefault); setAnggotaSearch(''); }}
-            className="btn-primary"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Catat Pembayaran
+          <button onClick={openCreate} className="btn-primary">
+            <Plus className="w-4 h-4 mr-2" /> Catat Pembayaran
           </button>
           <Link href="/admin/pembayaran/settings" className="btn-secondary">
-            <Settings className="w-4 h-4 mr-2" />
-            Pengaturan SPP &amp; Metode
+            <Settings className="w-4 h-4 mr-2" /> Pengaturan SPP &amp; Metode
           </Link>
         </div>
       </div>
 
-      {/* Form Input Manual */}
+      {/* ─── Form Input Manual (Create / Edit) ──────────────────────────────── */}
       {showForm && (
-        <div className="glass-card border border-primary-500/20 bg-primary-500/5 rounded-2xl p-6 space-y-4">
-          <div className="flex items-center justify-between mb-2">
+        <div className={`glass-card border rounded-2xl p-6 space-y-4 ${isEditMode ? 'border-blue-500/20 bg-blue-500/5' : 'border-primary-500/20 bg-primary-500/5'}`}>
+          <div className="flex items-center justify-between mb-1">
             <h2 className="font-bold text-neutral-light flex items-center gap-2">
-              <Plus className="w-4 h-4 text-primary-400" />
-              Input Pembayaran Manual
+              {isEditMode
+                ? <><Edit2 className="w-4 h-4 text-blue-400" /> Edit Pembayaran</>
+                : <><Plus className="w-4 h-4 text-primary-400" /> Input Pembayaran Manual</>
+              }
+              {isEditMode && form.nomor_kwitansi && (
+                <span className="text-xs font-mono text-neutral-light/40 ml-1">({form.nomor_kwitansi})</span>
+              )}
             </h2>
-            <button onClick={() => setShowForm(false)} className="p-1.5 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-neutral-light/10">
+            <button onClick={closeForm} className="p-1.5 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-neutral-light/10">
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Pilih Anggota */}
-            <div className="sm:col-span-2 lg:col-span-3 relative" ref={dropdownRef}>
-              <label className="form-label">Pilih Anggota <span className="text-red-400">*</span></label>
-              <div className="relative">
-                <input
-                  value={anggotaSearch}
-                  onChange={(e) => {
-                    setAnggotaSearch(e.target.value);
-                    setShowAnggotaDropdown(true);
-                    // Reset pilihan jika teks diubah manual
-                    if (form.id_anggota && e.target.value !== form.nama_anggota) {
-                      setForm(prev => ({ ...prev, id_anggota: '', nama_anggota: '', cabang_olahraga: '' }));
-                    }
-                  }}
-                  onFocus={() => setShowAnggotaDropdown(true)}
-                  placeholder={anggotaList.length > 0 ? `Cari dari ${anggotaList.length} anggota aktif...` : 'Memuat data anggota...'}
-                  className="form-input w-full pr-10"
-                  autoComplete="off"
-                />
-                <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-transform ${
-                  showAnggotaDropdown ? 'rotate-180 text-primary-400' : 'text-neutral-light/40'
-                }`} />
-              </div>
+          <FormFields />
 
-              {/* Dropdown — tampil saat fokus, dengan atau tanpa teks */}
-              {showAnggotaDropdown && (
-                <div className="absolute z-30 top-full mt-1 w-full glass-card border border-arena-600/50 rounded-xl overflow-hidden shadow-2xl max-h-60 overflow-y-auto">
-                  {!anggotaRes ? (
-                    // Loading state
-                    <div className="flex items-center justify-center gap-2 py-5 text-neutral-light/50 text-sm">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Memuat data anggota...
-                    </div>
-                  ) : filteredAnggota.length === 0 ? (
-                    // Empty state
-                    <div className="py-5 px-4 text-center text-neutral-light/40 text-sm">
-                      {anggotaList.length === 0
-                        ? 'Belum ada anggota aktif di database'
-                        : `Tidak ada anggota yang cocok dengan "${anggotaSearch}"`
-                      }
-                    </div>
-                  ) : (
-                    // Daftar anggota
-                    filteredAnggota.map(a => (
-                      <button
-                        key={a.id}
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault(); // cegah blur dulu sebelum select
-                          selectAnggota(a);
-                        }}
-                        className={`w-full text-left px-4 py-3 hover:bg-neutral-light/10 transition-colors flex items-center justify-between gap-3 border-b border-arena-600/20 last:border-0 ${
-                          form.id_anggota === a.id ? 'bg-primary-500/10' : ''
-                        }`}
-                      >
-                        <div className="min-w-0">
-                          <div className="font-medium text-neutral-light text-sm truncate">{a.nama}</div>
-                          <div className="text-xs text-neutral-light/40 font-mono">{a.id}</div>
-                        </div>
-                        <span className={`badge text-xs shrink-0 ${
-                          a.cabang_olahraga === 'Basket'
-                            ? 'bg-orange-500/20 border-orange-500/30 text-orange-400'
-                            : 'bg-blue-500/20 border-blue-500/30 text-blue-400'
-                        }`}>
-                          {a.cabang_olahraga === 'Basket' ? '🏀' : '🏊'} {a.cabang_olahraga}
-                        </span>
-                      </button>
-                    ))
-                  )}
-                  {filteredAnggota.length === 15 && anggotaSearch.trim() === '' && (
-                    <div className="py-2 px-4 text-xs text-neutral-light/30 text-center border-t border-arena-600/20">
-                      Menampilkan 15 dari {anggotaList.length} anggota — ketik untuk cari lebih spesifik
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Indikator anggota terpilih */}
-              {form.id_anggota && (
-                <p className="text-xs text-emerald-400 mt-1.5 flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" />
-                  {form.id_anggota} — Cabang {form.cabang_olahraga}
-                </p>
-              )}
+          {/* Error Message */}
+          {formError && (
+            <div className="flex items-start gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span className="break-words">{formError}</span>
             </div>
+          )}
 
-            {/* Bulan */}
-            <div>
-              <label className="form-label">Bulan Pembayaran <span className="text-red-400">*</span></label>
-              <select value={form.bulan} onChange={e => setForm({ ...form, bulan: e.target.value })} className="form-select">
-                {BULAN_LIST.map(b => <option key={b} value={b}>{getMonthName(b)}</option>)}
-              </select>
-            </div>
-
-            {/* Tahun */}
-            <div>
-              <label className="form-label">Tahun <span className="text-red-400">*</span></label>
-              <select value={form.tahun} onChange={e => setForm({ ...form, tahun: e.target.value })} className="form-select">
-                {TAHUN_LIST.map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-            </div>
-
-            {/* Nominal */}
-            <div>
-              <label className="form-label">Nominal (Rp) <span className="text-red-400">*</span></label>
-              <input
-                type="number"
-                value={form.nominal}
-                onChange={e => setForm({ ...form, nominal: e.target.value })}
-                placeholder="Contoh: 300000"
-                className="form-input"
-                min={0}
-              />
-              {form.nominal && <p className="text-xs text-neutral-light/40 mt-1">{formatCurrency(parseFloat(form.nominal) || 0)}</p>}
-            </div>
-
-            {/* Tanggal Bayar */}
-            <div>
-              <label className="form-label">Tanggal Bayar <span className="text-red-400">*</span></label>
-              <input
-                type="date"
-                value={form.tanggal_bayar}
-                onChange={e => setForm({ ...form, tanggal_bayar: e.target.value })}
-                className="form-input"
-              />
-            </div>
-
-            {/* Metode */}
-            <div>
-              <label className="form-label">Metode Pembayaran</label>
-              <select value={form.metode_bayar} onChange={e => setForm({ ...form, metode_bayar: e.target.value })} className="form-select">
-                {METODE_LIST.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-
-            {/* Catatan */}
-            <div className="sm:col-span-2 lg:col-span-1">
-              <label className="form-label">Catatan (opsional)</label>
-              <input
-                type="text"
-                value={form.catatan}
-                onChange={e => setForm({ ...form, catatan: e.target.value })}
-                placeholder="Misal: Titip via kakak"
-                className="form-input"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button onClick={() => { setShowForm(false); setForm(formDefault); setAnggotaSearch(''); }} className="btn-secondary">
-              Batal
-            </button>
-            <button onClick={handleSimpan} disabled={saving} className="btn-success px-8">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-              Simpan &amp; Cetak Kwitansi
+          <div className="flex gap-3 pt-1">
+            <button onClick={closeForm} className="btn-secondary">Batal</button>
+            <button onClick={handleSimpan} disabled={saving} className={`px-8 flex items-center gap-2 ${isEditMode ? 'btn-primary' : 'btn-success'}`}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {isEditMode ? 'Simpan Perubahan' : 'Simpan & Selesai'}
             </button>
           </div>
         </div>
@@ -398,7 +426,7 @@ export default function AdminPembayaranPage() {
             <option value="Lunas">Lunas</option>
             <option value="Belum">Belum Bayar</option>
           </select>
-          <button className="btn-primary justify-center">
+          <button className="btn-primary justify-center" onClick={() => mutate()}>
             <Filter className="w-4 h-4 mr-2" /> Filter
           </button>
           <button onClick={exportToExcel} disabled={pembayaranData.length === 0} className="btn-success justify-center">
@@ -451,16 +479,11 @@ export default function AdminPembayaranPage() {
               {data && pembayaranData.map((row) => (
                 <tr key={row.id} className={row.status_bayar !== 'Lunas' ? 'bg-amber-500/[0.03]' : ''}>
                   <td className="font-mono text-xs text-neutral-light/60">
-                    {row.nomor_kwitansi || <span className="text-neutral-light/30 italic">—</span>}
+                    {row.nomor_kwitansi || <span className="text-neutral-light/25 italic">—</span>}
                   </td>
                   <td className="font-medium text-neutral-light">{row.nama_anggota}</td>
                   <td>
-                    <span className={cn(
-                      'badge',
-                      row.cabang_olahraga === 'Basket'
-                        ? 'bg-orange-500/20 border-orange-500/30 text-orange-400'
-                        : 'bg-blue-500/20 border-blue-500/30 text-blue-400'
-                    )}>
+                    <span className={cn('badge', row.cabang_olahraga === 'Basket' ? 'bg-orange-500/20 border-orange-500/30 text-orange-400' : 'bg-blue-500/20 border-blue-500/30 text-blue-400')}>
                       {row.cabang_olahraga === 'Basket' ? '🏀' : '🏊'} {row.cabang_olahraga}
                     </span>
                   </td>
@@ -478,12 +501,11 @@ export default function AdminPembayaranPage() {
                   <td className="text-neutral-light/60 text-sm">
                     {row.tanggal_bayar
                       ? new Date(row.tanggal_bayar).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-                      : '—'
-                    }
+                      : '—'}
                   </td>
                   <td>
                     <div className="flex gap-1.5">
-                      {/* Cetak Kwitansi — tersedia untuk semua baris */}
+                      {/* Cetak Kwitansi */}
                       <button
                         onClick={() => handleCetakKwitansi(row)}
                         className="btn-secondary text-xs py-1 px-2.5 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/30"
@@ -491,9 +513,17 @@ export default function AdminPembayaranPage() {
                       >
                         <Printer className="w-3 h-3" />
                       </button>
+                      {/* Edit */}
+                      <button
+                        onClick={() => openEdit(row)}
+                        className="btn-secondary text-xs py-1 px-2.5 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/30"
+                        title="Edit Pembayaran"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </button>
                       {/* Hapus */}
                       <button
-                        onClick={() => handleDelete(row.id!)}
+                        onClick={() => confirmDelete(row)}
                         className="btn-secondary text-xs py-1 px-2.5 text-red-400 hover:bg-red-500/10 hover:border-red-500/30"
                         title="Hapus Pembayaran"
                       >
@@ -511,7 +541,7 @@ export default function AdminPembayaranPage() {
                         <Filter className="w-5 h-5 text-neutral-light/30" />
                       </div>
                       <p>Belum ada data pembayaran</p>
-                      <button onClick={() => setShowForm(true)} className="btn-primary text-sm mt-1">
+                      <button onClick={openCreate} className="btn-primary text-sm mt-1">
                         <Plus className="w-3.5 h-3.5 mr-1.5" /> Catat Pembayaran Pertama
                       </button>
                     </div>
@@ -522,6 +552,42 @@ export default function AdminPembayaranPage() {
           </table>
         </div>
       </div>
+
+      {/* ─── Modal Konfirmasi Hapus ──────────────────────────────────────────── */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card border border-red-500/20 rounded-2xl p-6 w-full max-w-md animate-slide-up">
+            <div className="flex items-start gap-4 mb-5">
+              <div className="w-10 h-10 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-neutral-light mb-1">Hapus Data Pembayaran?</h3>
+                <p className="text-neutral-light/60 text-sm leading-relaxed">
+                  Anda akan menghapus pembayaran <strong className="text-neutral-light">{deleteTarget.nama_anggota}</strong> periode{' '}
+                  <strong className="text-neutral-light">{getMonthName(deleteTarget.bulan)} {deleteTarget.tahun}</strong>{' '}
+                  senilai <strong className="text-neutral-light">{formatCurrency(deleteTarget.nominal)}</strong>.
+                </p>
+                {deleteTarget.nomor_kwitansi && (
+                  <p className="text-xs text-red-400/70 mt-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    Kwitansi <strong>{deleteTarget.nomor_kwitansi}</strong> akan ikut terhapus — tidak bisa dikembalikan.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteTarget(null)} className="btn-secondary flex-1 justify-center" disabled={deleting}>
+                Batal
+              </button>
+              <button onClick={handleDelete} disabled={deleting} className="flex-1 justify-center flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl px-4 py-2.5 font-semibold transition-all">
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
