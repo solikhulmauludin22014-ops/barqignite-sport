@@ -1,11 +1,18 @@
 import type { Metadata } from 'next';
-import { UserCheck, Award, Briefcase, SlidersHorizontal } from 'lucide-react';
+import Image from 'next/image';
+import { UserCheck, Award, Briefcase } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Pelatih } from '@/types';
 
 export const metadata: Metadata = {
-  title: 'Profil Pelatih',
-  description: 'Pelatih profesional Barqignite Private Sport Sidoarjo — Basket dan Renang.',
+  title: 'Profil Pelatih — Barqignite Private Sport Sidoarjo',
+  description: 'Tim pelatih profesional bersertifikat di Barqignite Private Sport Sidoarjo — cabang Basket dan Renang. Berpengalaman melatih dari usia dini hingga kompetitif.',
+  keywords: ['pelatih basket sidoarjo', 'pelatih renang sidoarjo', 'barqignite pelatih', 'coach basket sidoarjo'],
+  openGraph: {
+    title: 'Profil Pelatih — Barqignite Private Sport',
+    description: 'Kenali tim pelatih profesional bersertifikat Barqignite Private Sport Sidoarjo',
+    url: 'https://www.barqignitesports.web.id/pelatih',
+  },
 };
 
 async function getPelatih(): Promise<Pelatih[]> {
@@ -29,14 +36,20 @@ export default async function PelatihPage() {
   const basketPelatih = pelatihList.filter((p) => p.cabang_olahraga === 'Basket');
   const renangPelatih = pelatihList.filter((p) => p.cabang_olahraga === 'Renang');
 
-  const PelatihCard = ({ pelatih }: { pelatih: Pelatih }) => {
+const PelatihCard = ({ pelatih }: { pelatih: Pelatih }) => {
     const cfg = cabangConfig[pelatih.cabang_olahraga as keyof typeof cabangConfig] || cabangConfig.Basket;
     return (
       <div className="glass-card-hover border rounded-2xl overflow-hidden group">
+        {/* Foto */}
         <div className={`relative h-44 ${cfg.bg} border-0 overflow-hidden`}>
           {pelatih.foto_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={pelatih.foto_url} alt={pelatih.nama} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <Image
+              src={pelatih.foto_url}
+              alt={`Foto pelatih ${pelatih.nama}`}
+              fill
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className={`w-20 h-20 rounded-2xl ${cfg.bg} border flex items-center justify-center`}>
@@ -56,6 +69,7 @@ export default async function PelatihPage() {
             </div>
           )}
         </div>
+        {/* Info */}
         <div className="p-5">
           <h3 className="type-card-title text-neutral-light mb-1">{pelatih.nama}</h3>
           <p className={`text-sm font-medium ${cfg.color} mb-3`}>{pelatih.spesialisasi}</p>
