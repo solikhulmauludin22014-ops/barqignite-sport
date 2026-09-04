@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import PrestasiClient from './client-page';
+import PrestasiPage from './client-page';
 
 export const metadata: Metadata = {
-  title: 'Prestasi — Barqignite Private Sport Sidoarjo',
+  title: 'Prestasi Club — Barqignite Private Sport Sidoarjo',
   description:
-    'Kumpulan prestasi dan pencapaian atlet Barqignite Private Sport Sidoarjo di cabang Basket dan Renang — dari kompetisi lokal hingga kejuaraan nasional.',
+    'Kumpulan prestasi dan pencapaian atlet Barqignite Private Sport di cabang Basket dan Renang — dari kompetisi lokal hingga kejuaraan nasional.',
   keywords: ['prestasi basket sidoarjo', 'prestasi renang sidoarjo', 'barqignite sport', 'kejuaraan basket sidoarjo'],
   openGraph: {
     title: 'Prestasi Club — Barqignite Private Sport',
@@ -13,6 +13,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PrestasiPage() {
-  return <PrestasiClient />;
+export default function Page() {
+  return <PrestasiPage />;
 }
