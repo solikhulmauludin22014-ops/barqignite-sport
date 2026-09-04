@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Camera, Upload, Trash2, Star, StarOff, ArrowUp, ArrowDown, X, Loader2, Plus } from 'lucide-react';
 import { KATEGORI, KATEGORI_LIST, type KategoriType } from '@/lib/constants';
+import ImageCropModal from '@/components/ImageCropModal';
 
 interface GaleriItem {
   id: string;
@@ -24,6 +25,7 @@ export default function AdminGaleriPage() {
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [cropSrc, setCropSrc] = useState<string | null>(null); // gambar mentah untuk di-crop
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
@@ -81,9 +83,18 @@ export default function AdminGaleriPage() {
     }
 
     setError('');
+    // Buka crop modal — tampilkan gambar sebagai data URL
     const reader = new FileReader();
-    reader.onload = (ev) => setForm(f => ({ ...f, file, preview: ev.target?.result as string }));
+    reader.onload = (ev) => { if (ev.target?.result) setCropSrc(ev.target.result as string); };
     reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  /** Dipanggil setelah crop selesai — simpan blob hasil crop ke form state */
+  const handleGaleriCropComplete = (blob: Blob) => {
+    setCropSrc(null);
+    const objectUrl = URL.createObjectURL(blob);
+    setForm(f => ({ ...f, file: blob as unknown as File, preview: objectUrl }));
   };
 
   const resetForm = (keepKategori?: KategoriType) => {
@@ -297,6 +308,18 @@ export default function AdminGaleriPage() {
                   onChange={handleFileChange}
                 />
               </div>
+
+              {/* Crop Modal — muncul setelah foto dipilih */}
+              {cropSrc && (
+                <ImageCropModal
+                  imageSrc={cropSrc}
+                  aspect={4 / 5}
+                  title="Atur Posisi Foto Galeri"
+                  onComplete={handleGaleriCropComplete}
+                  onClose={() => setCropSrc(null)}
+                  onPickNew={() => { setCropSrc(null); fileInputRef.current?.click(); }}
+                />
+              )}
 
               {/* Judul */}
               <div>

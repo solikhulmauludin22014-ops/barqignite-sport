@@ -5,6 +5,7 @@ import { Plus, Pencil, Loader2, Trophy, X, CheckCircle, Trash2, Download, Image 
 import * as XLSX from 'xlsx';
 import type { Prestasi } from '@/types';
 import { formatDate } from '@/lib/utils';
+import ImageCropModal from '@/components/ImageCropModal';
 
 const emptyForm = { 
   nama_atlet: '', 
@@ -23,8 +24,9 @@ export default function AdminPrestasiPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Prestasi | null>(null);
   const [form, setForm] = useState<any>(emptyForm);
-  const [fotoFile, setFotoFile] = useState<File | null>(null);
+  const [fotoFile, setFotoFile] = useState<File | Blob | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string>('');
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [filterKategori, setFilterKategori] = useState('');
@@ -72,13 +74,30 @@ export default function AdminPrestasiPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Ukuran file maksimal 2MB');
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Ukuran file maksimal 10MB');
+        if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
-      setFotoFile(file);
-      setFotoPreview(URL.createObjectURL(file));
+      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowed.includes(file.type)) {
+        alert('Format tidak didukung. Gunakan JPG, PNG, atau WebP.');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+      // Buka crop modal
+      const reader = new FileReader();
+      reader.onload = (ev) => { if (ev.target?.result) setCropSrc(ev.target.result as string); };
+      reader.readAsDataURL(file);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handlePrestasisCropComplete = (blob: Blob) => {
+    setCropSrc(null);
+    const objectUrl = URL.createObjectURL(blob);
+    setFotoFile(blob as unknown as File);
+    setFotoPreview(objectUrl);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -332,7 +351,7 @@ export default function AdminPrestasiPage() {
                           <ImageIcon className="w-6 h-6 text-neutral-light/40 group-hover:text-primary-400" />
                         </div>
                         <p className="text-sm font-medium text-neutral-light">Klik untuk upload gambar</p>
-                        <p className="text-xs text-neutral-light/40 mt-1">JPG, PNG, WEBP (Max 2MB)</p>
+                        <p className="text-xs text-neutral-light/40 mt-1">JPG, PNG, WEBP (Max 10MB)</p>
                       </div>
                     )}
                     <input 
@@ -344,6 +363,18 @@ export default function AdminPrestasiPage() {
                     />
                   </div>
                 </div>
+
+                {/* Crop Modal */}
+                {cropSrc && (
+                  <ImageCropModal
+                    imageSrc={cropSrc}
+                    aspect={1}
+                    title="Atur Posisi Foto Prestasi"
+                    onComplete={handlePrestasisCropComplete}
+                    onClose={() => setCropSrc(null)}
+                    onPickNew={() => { setCropSrc(null); fileInputRef.current?.click(); }}
+                  />
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

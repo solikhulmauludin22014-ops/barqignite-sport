@@ -8,6 +8,7 @@ import {
 import Image from 'next/image';
 import * as XLSX from 'xlsx';
 import type { Pelatih } from '@/types';
+import ImageCropModal from '@/components/ImageCropModal';
 
 const emptyForm = {
   nama: '',
@@ -21,7 +22,7 @@ const emptyForm = {
 // ─── Komponen Upload Foto (didefinisikan di luar agar tidak remount) ───────────
 interface FotoUploaderProps {
   currentUrl: string;
-  oldUrl: string; // URL foto yang sudah tersimpan (untuk hapus saat ganti)
+  oldUrl: string;
   onUploaded: (url: string) => void;
   onError: (msg: string) => void;
 }
@@ -30,12 +31,13 @@ function FotoUploader({ currentUrl, oldUrl, onUploaded, onError }: FotoUploaderP
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string>(currentUrl || '');
   const [dragOver, setDragOver] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null); // gambar mentah untuk di-crop
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync preview ketika form di-reset (edit beda pelatih)
   useEffect(() => { setPreview(currentUrl || ''); }, [currentUrl]);
 
-  const validateAndUpload = async (file: File) => {
+  const validateAndOpenCrop = (file: File) => {
     onError('');
 
     // Validasi tipe
@@ -51,15 +53,26 @@ function FotoUploader({ currentUrl, oldUrl, onUploaded, onError }: FotoUploaderP
       return;
     }
 
-    // Preview lokal sebelum upload
-    const objectUrl = URL.createObjectURL(file);
+    // Buka crop modal dengan data URL gambar
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (ev.target?.result) setCropSrc(ev.target.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (blob: Blob) => {
+    setCropSrc(null); // tutup crop modal
+
+    // Preview lokal langsung
+    const objectUrl = URL.createObjectURL(blob);
     setPreview(objectUrl);
     setUploading(true);
 
     try {
       const fd = new FormData();
-      fd.append('foto', file);
-      // Kirim URL lama untuk dihapus dari storage setelah upload berhasil
+      // Blob hasil crop dikirim sebagai file dengan ekstensi .jpg
+      fd.append('foto', blob, 'foto-pelatih.jpg');
       if (oldUrl) fd.append('old_path', oldUrl);
 
       const res = await fetch('/api/pelatih/upload', { method: 'POST', body: fd });
@@ -67,14 +80,14 @@ function FotoUploader({ currentUrl, oldUrl, onUploaded, onError }: FotoUploaderP
 
       if (!json.success) {
         onError(json.error || 'Gagal upload foto');
-        setPreview(oldUrl || ''); // rollback preview
+        setPreview(currentUrl || '');
         return;
       }
 
       onUploaded(json.url);
     } catch {
       onError('Terjadi kesalahan saat upload foto');
-      setPreview(oldUrl || '');
+      setPreview(currentUrl || '');
     } finally {
       setUploading(false);
       URL.revokeObjectURL(objectUrl);
@@ -83,8 +96,7 @@ function FotoUploader({ currentUrl, oldUrl, onUploaded, onError }: FotoUploaderP
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) validateAndUpload(file);
-    // Reset value agar bisa pilih file yang sama lagi
+    if (file) validateAndOpenCrop(file);
     e.target.value = '';
   };
 
@@ -92,7 +104,7 @@ function FotoUploader({ currentUrl, oldUrl, onUploaded, onError }: FotoUploaderP
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file) validateAndUpload(file);
+    if (file) validateAndOpenCrop(file);
   };
 
   return (
@@ -170,6 +182,18 @@ function FotoUploader({ currentUrl, oldUrl, onUploaded, onError }: FotoUploaderP
         onChange={handleFileChange}
         className="hidden"
       />
+
+      {/* Crop Modal */}
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          aspect={3 / 4}
+          title="Atur Posisi Foto Pelatih"
+          onComplete={handleCropComplete}
+          onClose={() => setCropSrc(null)}
+          onPickNew={() => { setCropSrc(null); inputRef.current?.click(); }}
+        />
+      )}
     </div>
   );
 }
