@@ -27,6 +27,18 @@ const nextConfig = {
       },
     ],
   },
+  // Izinkan NextAuth detect domain dari header Vercel secara akurat
+  // Ini diperlukan agar NEXTAUTH_URL auto-detect bekerja di cold start
+  async headers() {
+    return [
+      {
+        source: '/api/auth/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, max-age=0' },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

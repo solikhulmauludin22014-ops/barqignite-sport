@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
     const token = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-barqignite-2026',
     });
 
     if (!token) {

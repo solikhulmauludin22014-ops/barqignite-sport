@@ -1,7 +1,9 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -98,4 +100,41 @@ export const authOptions: NextAuthOptions = {
     error: '/admin/login',
   },
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-barqignite-2026',
+  // ─── Fix CSRF cold start issue pada Vercel & custom domain ────────────────────────────────
+  // Ketika NEXTAUTH_URL tidak cocok dengan actual host (cold start / proxy),
+  // NextAuth gagal generate CSRF token yang valid sehingga form login tidak berfungsi
+  // pada load pertama. Setting trustHost = true membuat NextAuth percaya pada
+  // x-forwarded-host header dari Vercel's edge network.
+  // Referensi: https://next-auth.js.org/configuration/options#trusthost
+  ...(isProduction && {
+    cookies: {
+      sessionToken: {
+        name: `__Secure-next-auth.session-token`,
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: true,
+        },
+      },
+      callbackUrl: {
+        name: `__Secure-next-auth.callback-url`,
+        options: {
+          httpOnly: false,
+          sameSite: 'lax',
+          path: '/',
+          secure: true,
+        },
+      },
+      csrfToken: {
+        name: `__Host-next-auth.csrf-token`,
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: true,
+        },
+      },
+    },
+  }),
 };
