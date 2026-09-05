@@ -7,19 +7,31 @@ function generateId(prefix: string = 'ID'): string {
   return `${prefix}-${timestamp}-${random}`;
 }
 
-// Ambil nama hari Indonesia dari Date object
-function getNamaHariIndonesia(date: Date): string {
-  const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-  return hari[date.getDay()];
+// Ambil nama hari (Senin-Minggu) secara aman dalam WIB
+function getNamaHariWIB(date: Date): string {
+  const dayNameEn = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jakarta', weekday: 'short' }).format(date);
+  const map: Record<string, string> = {
+    Sun: 'Minggu', Mon: 'Senin', Tue: 'Selasa', Wed: 'Rabu', Thu: 'Kamis', Fri: 'Jumat', Sat: 'Sabtu'
+  };
+  return map[dayNameEn] || 'Senin';
+}
+
+function parseTimeToMinutes(timeStr: string) {
+  if (!timeStr) return 0;
+  const [h, m] = timeStr.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
 }
 
 // GET: Ambil sesi latihan hari ini (dari tabel jadwal, berdasarkan hari)
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const now = new Date();
-    const namaHari = getNamaHariIndonesia(now);
+    const { searchParams } = new URL(request.url);
+    const debugTime = searchParams.get('debug_time');
+    const now = debugTime ? new Date(debugTime) : new Date();
 
-    // Ambil semua jadwal yang hari-nya cocok dengan hari ini
+    const namaHari = getNamaHariWIB(now);
+
+    // Ambil semua jadwal yang hari-nya cocok dengan hari ini (WIB)
     const { data: jadwalHariIni, error } = await supabase
       .from('jadwal')
       .select('id, kategori, jam_mulai, jam_selesai, jenis, keterangan, cabang_olahraga')
@@ -29,21 +41,21 @@ export async function GET() {
     if (error) throw error;
 
     // Format waktu saat ini ke menit (zona waktu WIB / lokal server)
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentTotalMinutes = currentHour * 60 + currentMinute;
-
-    function parseTimeToMinutes(timeStr: string) {
-      if (!timeStr) return 0;
-      const [h, m] = timeStr.split(':').map(Number);
-      return (h || 0) * 60 + (m || 0);
-    }
+    const timeWIB = new Intl.DateTimeFormat('en-GB', { 
+      timeZone: 'Asia/Jakarta', 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hourCycle: 'h23' 
+    }).format(now);
+    
+    const [wibHourStr, wibMinuteStr] = timeWIB.split(':');
+    const currentTotalMinutes = parseInt(wibHourStr, 10) * 60 + parseInt(wibMinuteStr, 10);
 
     // Filter sesi yang sedang berlangsung
     const activeSessions = (jadwalHariIni || []).filter((j) => {
       const startMins = parseTimeToMinutes(j.jam_mulai);
       const endMins = parseTimeToMinutes(j.jam_selesai);
-      // Cek apakah waktu saat ini berada di dalam rentang
+      // Cek apakah waktu saat ini berada di dalam rentang (inklusif)
       return currentTotalMinutes >= startMins && currentTotalMinutes <= endMins;
     });
 
@@ -56,6 +68,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       hari: namaHari,
+      waktu_wib_saat_ini: timeWIB, // Untuk keperluan debug info
       data: sesiList,
     });
   } catch (error) {
@@ -71,7 +84,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, sesi_id, sesi_label } = body;
+    const { email, sesi_id, sesi_label, debug_time } = body;
 
     if (!email || (!sesi_id && !sesi_label)) {
       return NextResponse.json(
@@ -101,12 +114,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Waktu & tanggal server (BUKAN dari klien)
-    const now = new Date();
-    const todayISO = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    const waktuSubmit = now.toISOString(); // Timestamp server penuh
+    // 2. Waktu & tanggal server WIB
+    const now = debug_time ? new Date(debug_time) : new Date();
+    
+    // Format: YYYY-MM-DD dalam timezone Asia/Jakarta
+    const todayISO = new Intl.DateTimeFormat('en-CA', { 
+        timeZone: 'Asia/Jakarta', 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+    }).format(now);
+    
+    const waktuSubmit = now.toISOString(); // Timestamp mutlak untuk disimpan (TIMESTAMPTZ)
 
-    // Label sesi yang disimpan ke DB (gunakan sesi_label jika ada, atau fallback ke sesi_id)
+    // Label sesi yang disimpan ke DB
     const sesiLabel = sesi_label || sesi_id;
 
     // 3. Cek apakah sudah presensi hari ini untuk sesi yang sama
@@ -120,14 +141,20 @@ export async function POST(request: Request) {
 
     if (existing) {
       // Sudah pernah submit untuk sesi & tanggal ini
-      const sudahJam = existing.waktu_submit
-        ? new Date(existing.waktu_submit).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })
-        : 'hari ini';
+      let sudahJam = 'hari ini';
+      if (existing.waktu_submit) {
+        sudahJam = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Asia/Jakarta',
+          hour: '2-digit',
+          minute: '2-digit',
+          hourCycle: 'h23'
+        }).format(new Date(existing.waktu_submit));
+      }
 
       return NextResponse.json(
         {
           success: false,
-          error: `Kamu sudah submit presensi untuk sesi ini hari ini (pukul ${sudahJam}). Menunggu konfirmasi admin.`,
+          error: `Kamu sudah submit presensi untuk sesi ini pada pukul ${sudahJam} WIB. Menunggu konfirmasi admin.`,
           already_submitted: true,
           waktu_submit: existing.waktu_submit,
           status: existing.status_hadir,
@@ -136,7 +163,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Insert presensi dengan status 'Menunggu Konfirmasi' (server-side, bukan dari klien)
+    // 4. Insert presensi dengan status 'Menunggu Konfirmasi'
     const presensiData = {
       id: generateId('PRE'),
       tanggal: todayISO,
@@ -144,9 +171,9 @@ export async function POST(request: Request) {
       id_anggota: anggota.id,
       nama_anggota: anggota.nama,
       kategori: anggota.kategori,
-      status_hadir: 'Menunggu Konfirmasi', // Selalu pending — admin yang konfirmasi
+      status_hadir: 'Menunggu Konfirmasi',
       sesi: sesiLabel,
-      waktu_submit: waktuSubmit,           // Timestamp server, tidak bisa dimanipulasi klien
+      waktu_submit: waktuSubmit,
     };
 
     const { error: insertError } = await supabase
@@ -156,11 +183,12 @@ export async function POST(request: Request) {
     if (insertError) throw insertError;
 
     // Format jam lokal (WIB) untuk pesan konfirmasi ke siswa
-    const jamWIB = now.toLocaleTimeString('id-ID', {
+    const jamWIB = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Jakarta',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'Asia/Jakarta',
-    });
+      hourCycle: 'h23'
+    }).format(now);
 
     return NextResponse.json({
       success: true,
