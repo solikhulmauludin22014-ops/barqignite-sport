@@ -42,6 +42,7 @@ export async function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE
   const nominal = parseFloat(pembayaran.nominal || '0');
   const terbilangText = terbilang(nominal);
   const metode = pembayaran.metode_bayar || 'Cash';
+  const noKwitansi = pembayaran.nomor_kwitansi || 'N/A';
 
   const logoHtml = base64Logo 
     ? `<img src="${base64Logo}" alt="Logo" style="height:50px;width:50px;object-fit:contain;" />` 
@@ -53,6 +54,26 @@ export async function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE
         ${label}
       </div>
       
+      <div style="display:flex;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #eee;">
+        ${logoHtml}
+        <div style="margin-left:15px;">
+          <div style="font-size:18px;font-weight:900;color:#1a1a2e;letter-spacing:1px;text-transform:uppercase;">${namaClub}</div>
+          <div style="font-size:11px;color:#666;margin-top:2px;">TANDA BUKTI PEMBAYARAN SAH</div>
+        </div>
+      </div>
+
+      <table style="width:100%;font-size:12px;line-height:1.4;border-collapse:collapse;">
+        <tr>
+          <td style="width:140px;padding:4px 0;color:#555;">No. Kwitansi</td>
+          <td style="padding:4px 0;color:#333;font-weight:bold;">: ${noKwitansi}</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0;color:#555;">Telah Terima Dari</td>
+          <td style="padding:4px 0;color:#333;font-weight:bold;">: ${pembayaran.nama_anggota}</td>
+        </tr>
+        <tr>
+          <td style="padding:4px 0;color:#555;">Untuk Pembayaran</td>
+          <td style="padding:4px 0;color:#333;">: SPP Bulan ${pembayaran.bulan} ${pembayaran.tahun}</td>
         </tr>
         <tr>
           <td style="padding:4px 0;color:#555;">Nominal</td>
@@ -64,7 +85,7 @@ export async function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE
         </tr>
         <tr>
           <td style="padding:4px 0;color:#555;">Tanggal Bayar</td>
-          <td style="padding:4px 0;color:#333;">: ${tgl}</td>
+          <td style="padding:4px 0;color:#333;">: ${tanggalText}</td>
         </tr>
         <tr>
           <td style="padding:4px 0;color:#555;">Metode Pembayaran</td>
