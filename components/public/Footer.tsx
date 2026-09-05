@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Instagram, Youtube, MapPin, Phone, Mail, MessageCircle, Trophy } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
-import mainLogo from '@/LOGO BARQIGNITE NEW.png';
 async function getBranding() {
   try {
     const { data, error } = await supabase.from('branding').select('*').eq('id', 'BRAND-001').single();
@@ -34,8 +33,8 @@ export default async function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-4 mb-6">
               <div className="relative bg-white rounded-xl p-3 shadow-lg shadow-white/5 flex items-center justify-center">
-                <Image 
-                  src={mainLogo} 
+                <img 
+                  src="/logo-barqignite.png" 
                   alt="Barqignite Logo" 
                   className="w-20 md:w-24 h-auto object-contain relative z-10"
                 />

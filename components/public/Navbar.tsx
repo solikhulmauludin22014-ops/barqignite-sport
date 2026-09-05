@@ -7,7 +7,6 @@ import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ThemeToggle from '@/components/ThemeToggle';
 import Image from 'next/image';
-import mainLogo from '@/LOGO BARQIGNITE NEW.png';
 const navLinks = [
   { href: '/', label: 'Beranda' },
   { href: '/profile', label: 'Profil' },
@@ -39,11 +38,10 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center group mr-6 lg:mr-10">
             <div className="relative bg-white/95 rounded-lg p-1.5 shadow-md flex items-center justify-center transform group-hover:scale-105 transition-all duration-300">
-              <Image 
-                src={mainLogo} 
+              <img 
+                src="/logo-barqignite.png" 
                 alt="Barqignite Logo" 
                 className="h-8 sm:h-10 w-auto object-contain relative z-10"
-                priority
               />
             </div>
           </Link>
