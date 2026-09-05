@@ -20,7 +20,8 @@ export function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE SPORT
   const terbilangText = terbilang(nominal);
   const metode = pembayaran.metode_bayar || 'Cash';
 
-  const finalLogoUrl = logoUrl || '/LOGO BARQIGNITE NEW.png';
+  // Gunakan absolute URL agar gambar tetap muncul saat dicetak di window about:blank
+  const finalLogoUrl = logoUrl || `${window.location.origin}/logo-barqignite.png`;
   const logoHtml = `<img src="${finalLogoUrl}" alt="Logo" style="height:50px;width:50px;object-fit:contain;" />`;
 
   const halfContent = (label: string) => `
