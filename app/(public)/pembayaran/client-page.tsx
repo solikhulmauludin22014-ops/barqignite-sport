@@ -15,6 +15,13 @@ export default function PembayaranPage() {
   const [cabangFilter, setCabangFilter] = useState<CabangOlahraga>('Basket');
   const [copied, setCopied] = useState<string | null>(null);
 
+  // Status Pembayaran States
+  const [namaCek, setNamaCek] = useState('');
+  const [tglLahirCek, setTglLahirCek] = useState('');
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [statusError, setStatusError] = useState('');
+  const [statusData, setStatusData] = useState<{ nama: string; tahun: number; riwayat: { bulan: string; tahun: string; status_bayar: string }[] } | null>(null);
+
   // Fetch Data
   const { data: sppRes } = useSWR('/api/spp_kategori?is_active=true', fetcher);
   const { data: pengRes } = useSWR('/api/pengaturan_pembayaran', fetcher);
@@ -35,6 +42,37 @@ export default function PembayaranPage() {
       setCopied(key);
       setTimeout(() => setCopied(null), 2000);
     });
+  };
+
+  const handleCekStatus = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!namaCek.trim() || !tglLahirCek) {
+      setStatusError('Nama dan Tanggal Lahir wajib diisi.');
+      return;
+    }
+
+    setStatusLoading(true);
+    setStatusError('');
+    setStatusData(null);
+
+    try {
+      const res = await fetch('/api/pembayaran/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama: namaCek, tanggal_lahir: tglLahirCek }),
+      });
+      const json = await res.json();
+      
+      if (json.success) {
+        setStatusData(json.data);
+      } else {
+        setStatusError(json.error || 'Terjadi kesalahan. Coba lagi.');
+      }
+    } catch {
+      setStatusError('Koneksi bermasalah. Periksa internet Anda.');
+    } finally {
+      setStatusLoading(false);
+    }
   };
 
   const cabangConfig = {
@@ -128,6 +166,100 @@ export default function PembayaranPage() {
                     </div>
                   </div>
                 ))
+              )}
+            </div>
+          </div>
+
+          {/* Cek Status Pembayaran */}
+          <div>
+            <h2 className="type-section-heading text-neutral-light mb-4">Cek Status Pembayaran SPP</h2>
+            <div className="glass-card border border-arena-600/30 rounded-2xl p-6 md:p-8">
+              <form onSubmit={handleCekStatus} className="grid sm:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-xs font-bold text-neutral-light/50 uppercase tracking-widest mb-2 ml-1">
+                    Nama Lengkap *
+                  </label>
+                  <input
+                    type="text"
+                    value={namaCek}
+                    onChange={(e) => setNamaCek(e.target.value)}
+                    placeholder="Masukkan nama sesuai pendaftaran"
+                    className="w-full bg-arena-800/50 dark:bg-black/20 border border-neutral-light/10 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 rounded-xl px-4 py-3 text-neutral-light outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-neutral-light/50 uppercase tracking-widest mb-2 ml-1">
+                    Tanggal Lahir *
+                  </label>
+                  <input
+                    type="date"
+                    value={tglLahirCek}
+                    onChange={(e) => setTglLahirCek(e.target.value)}
+                    className="w-full bg-arena-800/50 dark:bg-black/20 border border-neutral-light/10 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 rounded-xl px-4 py-3 text-neutral-light outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <button
+                    type="submit"
+                    disabled={statusLoading}
+                    className="w-full bg-neutral-light text-arena-900 font-bold py-3 rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {statusLoading ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Memeriksa...</>
+                    ) : (
+                      'Cek Status SPP'
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              {statusError && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-start gap-3 mt-4">
+                  <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-300">{statusError}</p>
+                </div>
+              )}
+
+              {statusData && (
+                <div className="mt-8 animate-fade-in">
+                  <div className="mb-4">
+                    <p className="text-neutral-light/60 text-sm">Status SPP Tahun {statusData.tahun} untuk:</p>
+                    <h3 className="text-lg font-bold text-neutral-light">{statusData.nama}</h3>
+                  </div>
+
+                  {statusData.riwayat.some(r => r.status_bayar !== 'Lunas') && (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4 flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-amber-300 text-sm font-semibold">Ada tagihan yang belum lunas!</p>
+                        <p className="text-neutral-light/60 text-xs mt-1 leading-relaxed">
+                          Anda belum melakukan pembayaran SPP untuk bulan {statusData.riwayat.filter(r => r.status_bayar !== 'Lunas').map(r => r.bulan).join(', ')}. Segera lakukan pembayaran untuk menjaga status keaktifan keanggotaan.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {statusData.riwayat.length === 0 ? (
+                    <p className="text-center text-neutral-light/50 text-sm py-4 border border-dashed border-neutral-light/10 rounded-xl">
+                      Belum ada catatan pembayaran untuk tahun ini.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {statusData.riwayat.map((r, idx) => (
+                        <div key={idx} className="bg-neutral-light/5 border border-neutral-light/10 rounded-xl p-3 flex justify-between items-center">
+                          <span className="font-medium text-neutral-light text-sm">{r.bulan}</span>
+                          {r.status_bayar === 'Lunas' ? (
+                            <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Lunas</span>
+                          ) : (
+                            <span className="bg-neutral-light/10 text-neutral-light/50 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Belum</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

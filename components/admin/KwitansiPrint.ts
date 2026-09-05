@@ -20,9 +20,8 @@ export function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE SPORT
   const terbilangText = terbilang(nominal);
   const metode = pembayaran.metode_bayar || 'Cash';
 
-  const logoHtml = logoUrl
-    ? `<img src="${logoUrl}" alt="Logo" style="height:50px;object-fit:contain;" />`
-    : `<div style="width:50px;height:50px;background:#f97316;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:18px;">B</div>`;
+  const finalLogoUrl = logoUrl || '/LOGO BARQIGNITE NEW.png';
+  const logoHtml = `<img src="${finalLogoUrl}" alt="Logo" style="height:50px;width:50px;object-fit:contain;" />`;
 
   const halfContent = (label: string) => `
     <div style="border:2px solid #1a1a2e;border-radius:10px;padding:22px 26px;margin-bottom:8px;">

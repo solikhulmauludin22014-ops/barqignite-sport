@@ -74,8 +74,8 @@ export default function AdminSidebar() {
           <div className="absolute inset-0 bg-gradient-to-br from-basket/5 to-renang/5 pointer-events-none" />
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-basket to-renang rounded-xl flex items-center justify-center shadow-lg">
-                <Trophy className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg p-1 overflow-hidden">
+                <img src="/LOGO BARQIGNITE NEW.png" alt="Barqignite Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <p className="font-ui font-bold tracking-widest uppercase text-neutral-light text-sm">Barqignite</p>
