@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import type { Presensi } from '@/types';
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -8,14 +7,56 @@ function generateId(prefix: string = 'ID'): string {
   return `${prefix}-${timestamp}-${random}`;
 }
 
+// Ambil nama hari Indonesia dari Date object
+function getNamaHariIndonesia(date: Date): string {
+  const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  return hari[date.getDay()];
+}
+
+// GET: Ambil sesi latihan hari ini (dari tabel jadwal, berdasarkan hari)
+export async function GET() {
+  try {
+    const now = new Date();
+    const namaHari = getNamaHariIndonesia(now);
+
+    // Ambil semua jadwal yang hari-nya cocok dengan hari ini
+    const { data: jadwalHariIni, error } = await supabase
+      .from('jadwal')
+      .select('id, kategori, jam_mulai, jam_selesai, jenis, keterangan, cabang_olahraga')
+      .eq('hari', namaHari)
+      .order('jam_mulai', { ascending: true });
+
+    if (error) throw error;
+
+    // Format label sesi untuk dropdown
+    const sesiList = (jadwalHariIni || []).map((j) => {
+      const label = `${j.jenis} ${j.kategori} (${j.jam_mulai}–${j.jam_selesai})`;
+      return { id: j.id, label, jam_mulai: j.jam_mulai, jam_selesai: j.jam_selesai, kategori: j.kategori, jenis: j.jenis, cabang_olahraga: j.cabang_olahraga };
+    });
+
+    return NextResponse.json({
+      success: true,
+      hari: namaHari,
+      data: sesiList,
+    });
+  } catch (error) {
+    console.error('Presensi Public GET error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Gagal mengambil jadwal hari ini.' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST: Siswa submit laporan kedatangan
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, sesi, status_hadir } = body;
+    const { email, sesi_id, sesi_label } = body;
 
-    if (!email || !sesi || !status_hadir) {
+    if (!email || (!sesi_id && !sesi_label)) {
       return NextResponse.json(
-        { success: false, error: 'Email, sesi, dan status kehadiran wajib diisi.' },
+        { success: false, error: 'Email dan sesi latihan wajib diisi.' },
         { status: 400 }
       );
     }
@@ -41,36 +82,52 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Cek apakah sudah presensi hari ini
-    const today = new Date().toLocaleDateString('id-ID'); // Format: DD/MM/YYYY or similar depending on server locale.
-    // To ensure consistent date format matching what might be in DB, we'll use a standard format, or let's use the local date format they likely use.
-    // Actually, looking at the previous code: new Date().toLocaleDateString('id-ID') is what they use.
+    // 2. Waktu & tanggal server (BUKAN dari klien)
+    const now = new Date();
+    const todayISO = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const waktuSubmit = now.toISOString(); // Timestamp server penuh
 
-    const { data: existing, error: errExisting } = await supabase
+    // Label sesi yang disimpan ke DB (gunakan sesi_label jika ada, atau fallback ke sesi_id)
+    const sesiLabel = sesi_label || sesi_id;
+
+    // 3. Cek apakah sudah presensi hari ini untuk sesi yang sama
+    const { data: existing } = await supabase
       .from('presensi')
-      .select('id')
+      .select('id, status_hadir, waktu_submit')
       .eq('id_anggota', anggota.id)
-      .eq('tanggal', today)
-      .eq('sesi', sesi)
+      .eq('tanggal', todayISO)
+      .eq('sesi', sesiLabel)
       .maybeSingle();
 
     if (existing) {
+      // Sudah pernah submit untuk sesi & tanggal ini
+      const sudahJam = existing.waktu_submit
+        ? new Date(existing.waktu_submit).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })
+        : 'hari ini';
+
       return NextResponse.json(
-        { success: false, error: 'Anda sudah melakukan presensi untuk sesi ini.' },
-        { status: 400 }
+        {
+          success: false,
+          error: `Kamu sudah submit presensi untuk sesi ini hari ini (pukul ${sudahJam}). Menunggu konfirmasi admin.`,
+          already_submitted: true,
+          waktu_submit: existing.waktu_submit,
+          status: existing.status_hadir,
+        },
+        { status: 409 }
       );
     }
 
-    // 3. Insert Presensi
+    // 4. Insert presensi dengan status 'Menunggu Konfirmasi' (server-side, bukan dari klien)
     const presensiData = {
       id: generateId('PRE'),
-      tanggal: today,
+      tanggal: todayISO,
       cabang_olahraga: anggota.cabang_olahraga,
       id_anggota: anggota.id,
       nama_anggota: anggota.nama,
       kategori: anggota.kategori,
-      status_hadir,
-      sesi,
+      status_hadir: 'Menunggu Konfirmasi', // Selalu pending — admin yang konfirmasi
+      sesi: sesiLabel,
+      waktu_submit: waktuSubmit,           // Timestamp server, tidak bisa dimanipulasi klien
     };
 
     const { error: insertError } = await supabase
@@ -79,10 +136,24 @@ export async function POST(request: Request) {
 
     if (insertError) throw insertError;
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Presensi berhasil dicatat!',
-      data: { nama: anggota.nama, cabang: anggota.cabang_olahraga }
+    // Format jam lokal (WIB) untuk pesan konfirmasi ke siswa
+    const jamWIB = now.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Jakarta',
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `Presensi berhasil dicatat!`,
+      data: {
+        nama: anggota.nama,
+        cabang: anggota.cabang_olahraga,
+        waktu_submit: waktuSubmit,
+        jam_wib: jamWIB,
+        sesi: sesiLabel,
+        status: 'Menunggu Konfirmasi',
+      },
     });
 
   } catch (error) {

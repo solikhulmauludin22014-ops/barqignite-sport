@@ -120,9 +120,11 @@ export interface Presensi {
   cabang_olahraga: CabangOlahraga;
   id_anggota: string;
   nama_anggota: string;
+  email?: string;
   kategori: string;
-  status_hadir: 'Hadir' | 'Izin' | 'Sakit' | 'Alpa';
+  status_hadir: 'Hadir' | 'Izin' | 'Sakit' | 'Alpa' | 'Menunggu Konfirmasi';
   sesi: string;
+  waktu_submit?: string; // Timestamp server saat siswa submit laporan kedatangan
 }
 
 export interface PembayaranSPP {

@@ -17,8 +17,13 @@ export async function GET(request: Request) {
     const id_anggota = searchParams.get('id_anggota');
     const kategori = searchParams.get('kategori');
     const cabang = searchParams.get('cabang');
+    const status = searchParams.get('status');   // 'Menunggu Konfirmasi' | 'Hadir' | dll
+    const sesi = searchParams.get('sesi');
 
-    let query = supabase.from('presensi').select('*');
+    let query = supabase
+      .from('presensi')
+      .select('*')
+      .order('waktu_submit', { ascending: false });
 
     if (id_anggota) {
       // Validasi apakah anggota tersebut terdaftar dan aktif
@@ -41,6 +46,8 @@ export async function GET(request: Request) {
     if (tanggal) query = query.eq('tanggal', tanggal);
     if (kategori) query = query.eq('kategori', kategori);
     if (cabang) query = query.eq('cabang_olahraga', cabang);
+    if (status) query = query.eq('status_hadir', status);
+    if (sesi) query = query.eq('sesi', sesi);
 
     const { data, error } = await query;
 
@@ -53,6 +60,7 @@ export async function GET(request: Request) {
   }
 }
 
+// POST: Admin input presensi manual (langsung Hadir, untuk yang lupa submit sendiri)
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -63,6 +71,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { tanggal, sesi, items } = body;
 
+    const now = new Date().toISOString();
+
     const presensiData = items.map((item: any) => ({
       id: generateId('PRE'),
       tanggal,
@@ -72,6 +82,7 @@ export async function POST(request: Request) {
       kategori: item.kategori,
       status_hadir: item.status_hadir,
       sesi,
+      waktu_submit: now,
     }));
 
     const { error } = await supabase
@@ -87,6 +98,7 @@ export async function POST(request: Request) {
   }
 }
 
+// PUT: Admin konfirmasi / update status presensi (ACC atau Tolak)
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -95,7 +107,19 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    
+
+    // Bulk update (admin ACC / Tolak banyak sekaligus)
+    if (body.ids && Array.isArray(body.ids) && body.status_hadir) {
+      const { error } = await supabase
+        .from('presensi')
+        .update({ status_hadir: body.status_hadir })
+        .in('id', body.ids);
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, message: `${body.ids.length} presensi berhasil diperbarui` });
+    }
+
+    // Single update
     const { error } = await supabase
       .from('presensi')
       .update({
