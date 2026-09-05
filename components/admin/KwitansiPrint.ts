@@ -44,9 +44,8 @@ export async function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE
   const metode = pembayaran.metode_bayar || 'Cash';
   const noKwitansi = pembayaran.nomor_kwitansi || 'N/A';
 
-  const logoHtml = base64Logo 
-    ? `<img src="${base64Logo}" alt="Logo" style="height:50px;width:50px;object-fit:contain;" />` 
-    : '';
+  const logoSrc = base64Logo || logoUrl || '/logo-barqignite.png';
+  const logoHtml = `<img src="${logoSrc}" alt="Logo" style="height:50px;width:50px;object-fit:contain;" onError="this.style.display='none'" />`;
 
   const halfContent = (label: string) => `
     <div style="flex:1; border: 2px dashed #ccc; border-radius: 12px; padding: 25px; position: relative; background: #fff;">
@@ -153,16 +152,21 @@ export async function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE
     </html>
   `;
 
-  const win = window.open('', '_blank', 'width=800,height=1000');
-  if (!win) {
-    alert('Popup diblokir browser. Izinkan popup untuk mencetak kwitansi.');
-    return;
-  }
-  win.document.write(html);
-  win.document.close();
-  win.onload = () => {
-    setTimeout(() => {
-      win.print();
-    }, 300);
-  };
+  if (printWindow.closed) return;
+
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+
+  // Berikan jeda sejenak agar stylesheet dan gambar selesai dimuat sebelum dialog cetak muncul
+  setTimeout(() => {
+    try {
+      if (!printWindow.closed) {
+        printWindow.focus();
+        printWindow.print();
+      }
+    } catch (err) {
+      console.error('Print trigger error:', err);
+    }
+  }, 400);
 }
