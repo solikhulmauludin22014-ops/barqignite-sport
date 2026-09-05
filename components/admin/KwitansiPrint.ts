@@ -10,46 +10,49 @@ interface KwitansiData {
 }
 
 // Generate dan print kwitansi menggunakan browser print (no external lib needed)
-export function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE SPORT', logoUrl }: KwitansiData) {
-  const noKwitansi = pembayaran.nomor_kwitansi || `KW-LAMA-${pembayaran.id?.slice(-6)}`;
+export async function printKwitansi({ pembayaran, namaClub = 'BARQIGNITE PRIVATE SPORT', logoUrl }: KwitansiData) {
+  // Buka window secara sinkron untuk menghindari pemblokiran pop-up browser
+  const printWindow = window.open('', '_blank', 'width=800,height=1000');
+  if (!printWindow) {
+    alert('Pop-up diblokir oleh browser. Harap izinkan pop-up untuk mencetak kwitansi.');
+    return;
+  }
+  
+  // Loading sementara
+  printWindow.document.write('<div style="padding:20px;font-family:sans-serif;">Menyiapkan dokumen kwitansi...</div>');
+
+  let base64Logo = '';
+  try {
+    const url = logoUrl || `${window.location.origin}/logo-barqignite.png`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const blob = await res.blob();
+      base64Logo = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+    }
+  } catch (e) {
+    console.error('Gagal convert logo ke base64:', e);
+  }
+
+  const date = pembayaran.tanggal_bayar ? new Date(pembayaran.tanggal_bayar) : new Date();
+  const tanggalText = `${date.getDate()} ${getMonthName(String(date.getMonth() + 1))} ${date.getFullYear()}`;
   const nominal = parseFloat(pembayaran.nominal || '0');
-  const tgl = pembayaran.tanggal_bayar
-    ? new Date(pembayaran.tanggal_bayar).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-    : '-';
-  const periode = `${getMonthName(pembayaran.bulan)} ${pembayaran.tahun}`;
   const terbilangText = terbilang(nominal);
   const metode = pembayaran.metode_bayar || 'Cash';
 
-  // Gunakan absolute URL agar gambar tetap muncul saat dicetak di window about:blank
-  const finalLogoUrl = logoUrl || `${window.location.origin}/logo-barqignite.png`;
-  const logoHtml = `<img src="${finalLogoUrl}" alt="Logo" style="height:50px;width:50px;object-fit:contain;" />`;
+  const logoHtml = base64Logo 
+    ? `<img src="${base64Logo}" alt="Logo" style="height:50px;width:50px;object-fit:contain;" />` 
+    : '';
 
   const halfContent = (label: string) => `
-    <div style="border:2px solid #1a1a2e;border-radius:10px;padding:22px 26px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1.5px dashed #ccc;">
-        ${logoHtml}
-        <div>
-          <div style="font-size:15px;font-weight:900;letter-spacing:0.5px;color:#1a1a2e;">${namaClub}</div>
-          <div style="font-size:10px;color:#666;margin-top:2px;">BUKTI PEMBAYARAN SPP${label ? ' — ' + label : ''}</div>
-        </div>
-        <div style="margin-left:auto;text-align:right;">
-          <div style="font-size:10px;color:#666;">No. Kwitansi</div>
-          <div style="font-size:14px;font-weight:900;color:#f97316;letter-spacing:1px;">${noKwitansi}</div>
-        </div>
+    <div style="flex:1; border: 2px dashed #ccc; border-radius: 12px; padding: 25px; position: relative; background: #fff;">
+      <div style="position: absolute; top: -12px; right: 20px; background: #fff; padding: 0 10px; font-weight: bold; color: #666; font-size: 14px; border: 2px dashed #ccc; border-radius: 20px;">
+        ${label}
       </div>
       
-      <table style="width:100%;border-collapse:collapse;font-size:11.5px;">
-        <tr>
-          <td style="padding:4px 0;color:#555;width:140px;">Nama Anggota</td>
-          <td style="padding:4px 0;color:#333;">: <strong>${pembayaran.nama_anggota}</strong></td>
-        </tr>
-        <tr>
-          <td style="padding:4px 0;color:#555;">Cabang Olahraga</td>
-          <td style="padding:4px 0;color:#333;">: ${pembayaran.cabang_olahraga}</td>
-        </tr>
-        <tr>
-          <td style="padding:4px 0;color:#555;">Periode Pembayaran</td>
-          <td style="padding:4px 0;color:#333;">: ${periode}</td>
         </tr>
         <tr>
           <td style="padding:4px 0;color:#555;">Nominal</td>
