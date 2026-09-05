@@ -28,9 +28,28 @@ export async function GET() {
 
     if (error) throw error;
 
-    // Format label sesi untuk dropdown
-    const sesiList = (jadwalHariIni || []).map((j) => {
-      const label = `${j.jenis} ${j.kategori} (${j.jam_mulai}–${j.jam_selesai})`;
+    // Format waktu saat ini ke menit (zona waktu WIB / lokal server)
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTotalMinutes = currentHour * 60 + currentMinute;
+
+    function parseTimeToMinutes(timeStr: string) {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    }
+
+    // Filter sesi yang sedang berlangsung
+    const activeSessions = (jadwalHariIni || []).filter((j) => {
+      const startMins = parseTimeToMinutes(j.jam_mulai);
+      const endMins = parseTimeToMinutes(j.jam_selesai);
+      // Cek apakah waktu saat ini berada di dalam rentang
+      return currentTotalMinutes >= startMins && currentTotalMinutes <= endMins;
+    });
+
+    // Format label sesi untuk UI (hanya rentang jam tanpa kategori)
+    const sesiList = activeSessions.map((j) => {
+      const label = `${j.jam_mulai}–${j.jam_selesai}`;
       return { id: j.id, label, jam_mulai: j.jam_mulai, jam_selesai: j.jam_selesai, kategori: j.kategori, jenis: j.jenis, cabang_olahraga: j.cabang_olahraga };
     });
 

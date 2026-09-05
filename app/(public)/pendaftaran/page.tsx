@@ -15,11 +15,11 @@ const schema = z.object({
   jenis_kelamin: z.enum(['Laki-laki', 'Perempuan'], { required_error: 'Pilih jenis kelamin' }),
   alamat: z.string().min(10, 'Alamat minimal 10 karakter'),
   no_hp: z.string().min(9, 'Nomor HP tidak valid').max(15),
-  email: z.string().email('Format email tidak valid').or(z.literal('')),
+  email: z.string().email('Format email tidak valid'),
   nama_wali: z.string().optional(),
   asal_sekolah: z.string().min(2, 'Asal Sekolah wajib diisi'),
   kelas: z.string().min(1, 'Kelas wajib diisi'),
-  kategori: z.string().min(1, 'Pilih kategori'),
+  umur: z.coerce.number().min(3, 'Umur minimal 3 tahun').max(80, 'Umur tidak valid'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -171,8 +171,8 @@ function PendaftaranContent() {
               </div>
 
               <div>
-                <label className="form-label">Email</label>
-                <input {...register('email')} type="email" placeholder="email@contoh.com (opsional)" className="form-input" />
+                <label className="form-label">Email *</label>
+                <input {...register('email')} type="email" placeholder="email@contoh.com" className="form-input" />
                 {errors.email && <p className="form-error">{errors.email.message}</p>}
               </div>
 
@@ -194,14 +194,12 @@ function PendaftaranContent() {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="form-label">Kategori Usia *</label>
-                <select {...register('kategori')} className="form-select">
-                  <option value="">-- Pilih Kategori --</option>
-                  {(kategoriOptions[selectedCabang as CabangOlahraga] || kategoriOptions.Basket).map((k) => (
-                    <option key={k} value={k}>{k}</option>
-                  ))}
-                </select>
-                {errors.kategori && <p className="form-error">{errors.kategori.message}</p>}
+                <label className="form-label">Umur *</label>
+                <input {...register('umur')} type="number" min="3" max="80" placeholder="Masukkan umur (misal: 10)" className="form-input" />
+                <p className="text-neutral-light/40 text-xs mt-1">
+                  Kategori akan ditentukan secara otomatis berdasarkan umur.
+                </p>
+                {errors.umur && <p className="form-error">{errors.umur.message}</p>}
               </div>
             </div>
 

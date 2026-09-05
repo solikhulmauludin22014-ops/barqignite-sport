@@ -180,7 +180,7 @@ export default function PresensiPage() {
               {/* Sesi Latihan Hari Ini */}
               <div>
                 <label className="block text-xs font-bold text-neutral-light/50 uppercase tracking-widest mb-2 ml-1">
-                  Sesi Latihan — <span className="text-renang normal-case">{hariIni || 'Hari ini'}</span>
+                  Sesi Latihan (Real-time)
                 </label>
                 {loadingSesi ? (
                   <div className="flex items-center gap-3 bg-arena-800/50 border border-neutral-light/10 rounded-2xl px-5 py-4">
@@ -188,17 +188,29 @@ export default function PresensiPage() {
                     <span className="text-neutral-light/40 text-sm">Memuat jadwal hari ini...</span>
                   </div>
                 ) : sesiList.length === 0 ? (
-                  /* Tidak ada jadwal hari ini */
+                  /* Tidak ada sesi yang sedang berlangsung */
                   <div className="flex items-start gap-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl px-5 py-4">
                     <CalendarX className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-amber-300 text-sm font-medium">Tidak ada jadwal latihan hari ini ({hariIni})</p>
+                      <p className="text-amber-300 text-sm font-medium">Tidak ada sesi latihan yang sedang berlangsung saat ini</p>
                       <p className="text-neutral-light/40 text-xs mt-0.5">
-                        Presensi hanya bisa dilakukan pada hari yang ada jadwal latihannya.
+                        Presensi hanya bisa dilakukan pada saat jam latihan berlangsung.
                       </p>
                     </div>
                   </div>
+                ) : sesiList.length === 1 ? (
+                  /* Hanya 1 sesi aktif, tampilkan teks readonly */
+                  <div className="relative">
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-light/30 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={sesiList[0].label}
+                      readOnly
+                      className="w-full bg-arena-800/50 dark:bg-black/20 border border-neutral-light/10 rounded-2xl pl-12 pr-4 py-4 text-neutral-light font-medium outline-none cursor-not-allowed opacity-80"
+                    />
+                  </div>
                 ) : (
+                  /* Lebih dari 1 sesi aktif (jarang tapi mungkin), tampilkan dropdown */
                   <div className="relative">
                     <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-light/30 pointer-events-none" />
                     <select

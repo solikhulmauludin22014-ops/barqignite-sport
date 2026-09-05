@@ -33,6 +33,22 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const umur = Number(body.umur) || 0;
+
+    // Hitung kategori otomatis berdasarkan umur dan cabang olahraga
+    let calculatedKategori = '';
+    if (body.cabang_olahraga === 'Basket') {
+      if (umur <= 8) calculatedKategori = 'Mini (5-8 tahun)';
+      else if (umur <= 12) calculatedKategori = 'Pemula (9-12 tahun)';
+      else if (umur <= 17) calculatedKategori = 'Junior (13-17 tahun)';
+      else calculatedKategori = 'Senior (18+ tahun)';
+    } else { // Renang
+      if (umur <= 8) calculatedKategori = 'Beginner (5-8 tahun)';
+      else if (umur <= 13) calculatedKategori = 'Intermediate (9-13 tahun)';
+      else if (umur <= 17) calculatedKategori = 'Advanced (14-18 tahun)'; // Note: assuming < 18 is Advanced to avoid overlap
+      else calculatedKategori = 'Dewasa (18+ tahun)';
+    }
+
     const newPendaftar: Pendaftar = {
       id: generateId('PDF'),
       nama: body.nama,
@@ -45,7 +61,7 @@ export async function POST(request: Request) {
       nama_wali: body.nama_wali || '',
       asal_sekolah: body.asal_sekolah || '',
       kelas: body.kelas || '',
-      kategori: body.kategori,
+      kategori: calculatedKategori,
       status_pendaftaran: 'Pending',
       tanggal_daftar: new Date().toLocaleDateString('id-ID'),
     };
