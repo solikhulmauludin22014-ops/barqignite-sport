@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { nama, tanggal_lahir } = body;
+    const { nama, tanggal_lahir, bulan, tahun } = body;
 
     if (!nama || !tanggal_lahir) {
       return NextResponse.json(
@@ -44,6 +44,17 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Tentukan bulan & tahun target (fallback ke bulan/tahun berjalan)
+    const currentDate = new Date();
+    const bulanInt = parseInt(bulan, 10);
+    const tahunInt = parseInt(tahun, 10);
+    const targetBulan = (!bulan || isNaN(bulanInt) || bulanInt < 1 || bulanInt > 12)
+      ? (currentDate.getMonth() + 1)
+      : bulanInt;
+    const targetTahun = (!tahun || isNaN(tahunInt) || tahunInt < 2020 || tahunInt > currentDate.getFullYear() + 1)
+      ? currentDate.getFullYear()
+      : tahunInt;
 
     // 1. Cari anggota dengan nama (case-insensitive) dan tanggal lahir yang tepat
     const { data: anggota, error: errAnggota } = await supabase
@@ -60,25 +71,30 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Cari data pembayaran untuk anggota ini pada tahun ini (atau maksimal 12 data terakhir)
-    const currentYear = new Date().getFullYear();
-    const { data: riwayat, error: errRiwayat } = await supabase
+    // 2. Cari record pembayaran spesifik untuk bulan & tahun yang dipilih
+    // Kolom bulan & tahun disimpan sebagai STRING di tabel pembayaran_spp
+    const { data: record, error: errRecord } = await supabase
       .from('pembayaran_spp')
-      .select('bulan, tahun, status_bayar')
+      .select('id, bulan, tahun, status_bayar, tanggal_bayar, nominal, metode_bayar, nomor_kwitansi')
       .eq('id_anggota', anggota.id)
-      .eq('tahun', String(currentYear))
-      .order('bulan', { ascending: true });
+      .eq('bulan', String(targetBulan))
+      .eq('tahun', String(targetTahun))
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (errRiwayat) {
-      throw errRiwayat;
+    if (errRecord) {
+      throw errRecord;
     }
 
     return NextResponse.json({
       success: true,
       data: {
         nama: anggota.nama,
-        tahun: currentYear,
-        riwayat: riwayat || []
+        bulan: targetBulan,
+        tahun: targetTahun,
+        // record = null berarti belum ada catatan pembayaran untuk bulan ini
+        record: record || null,
       }
     });
 

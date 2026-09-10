@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   CreditCard, Calendar, Loader2, QrCode, Building2, Copy, CheckCheck,
-  Banknote, AlertCircle,
+  Banknote, AlertCircle, CheckCircle2, ArrowDown,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import useSWR from 'swr';
@@ -18,9 +18,31 @@ export default function PembayaranPage() {
   // Status Pembayaran States
   const [namaCek, setNamaCek] = useState('');
   const [tglLahirCek, setTglLahirCek] = useState('');
+
+  // Bulan & Tahun default ke bulan/tahun berjalan
+  const now = new Date();
+  const [bulanCek, setBulanCek] = useState<number>(now.getMonth() + 1);
+  const [tahunCek, setTahunCek] = useState<number>(now.getFullYear());
+
   const [statusLoading, setStatusLoading] = useState(false);
   const [statusError, setStatusError] = useState('');
-  const [statusData, setStatusData] = useState<{ nama: string; tahun: number; riwayat: { bulan: string; tahun: string; status_bayar: string }[] } | null>(null);
+
+  type PaymentRecord = {
+    id: string;
+    bulan: string;
+    tahun: string;
+    status_bayar: string;
+    tanggal_bayar: string | null;
+    nominal: string | null;
+    metode_bayar: string | null;
+    nomor_kwitansi: string | null;
+  };
+  const [statusData, setStatusData] = useState<{
+    nama: string;
+    bulan: number;
+    tahun: number;
+    record: PaymentRecord | null;
+  } | null>(null);
 
   // Fetch Data
   const { data: sppRes } = useSWR('/api/spp_kategori?is_active=true', fetcher);
@@ -44,6 +66,11 @@ export default function PembayaranPage() {
     });
   };
 
+  const BULAN_NAMES = [
+    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
+
   const handleCekStatus = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!namaCek.trim() || !tglLahirCek) {
@@ -59,7 +86,12 @@ export default function PembayaranPage() {
       const res = await fetch('/api/pembayaran/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama: namaCek, tanggal_lahir: tglLahirCek }),
+        body: JSON.stringify({
+          nama: namaCek,
+          tanggal_lahir: tglLahirCek,
+          bulan: bulanCek,
+          tahun: tahunCek,
+        }),
       });
       const json = await res.json();
       
@@ -171,15 +203,17 @@ export default function PembayaranPage() {
           </div>
 
           {/* Cek Status Pembayaran */}
-          <div>
+          <div id="cek-status">
             <h2 className="type-section-heading text-neutral-light mb-4">Cek Status Pembayaran SPP</h2>
             <div className="glass-card border border-arena-600/30 rounded-2xl p-6 md:p-8">
               <form onSubmit={handleCekStatus} className="grid sm:grid-cols-2 gap-4 mb-6">
+                {/* Nama Lengkap */}
                 <div>
                   <label className="block text-xs font-bold text-neutral-light/50 uppercase tracking-widest mb-2 ml-1">
                     Nama Lengkap *
                   </label>
                   <input
+                    id="cek-nama"
                     type="text"
                     value={namaCek}
                     onChange={(e) => setNamaCek(e.target.value)}
@@ -188,11 +222,14 @@ export default function PembayaranPage() {
                     required
                   />
                 </div>
+
+                {/* Tanggal Lahir */}
                 <div>
                   <label className="block text-xs font-bold text-neutral-light/50 uppercase tracking-widest mb-2 ml-1">
                     Tanggal Lahir *
                   </label>
                   <input
+                    id="cek-tgl-lahir"
                     type="date"
                     value={tglLahirCek}
                     onChange={(e) => setTglLahirCek(e.target.value)}
@@ -200,6 +237,46 @@ export default function PembayaranPage() {
                     required
                   />
                 </div>
+
+                {/* Bulan */}
+                <div>
+                  <label className="block text-xs font-bold text-neutral-light/50 uppercase tracking-widest mb-2 ml-1">
+                    Bulan
+                  </label>
+                  <select
+                    id="cek-bulan"
+                    value={bulanCek}
+                    onChange={(e) => setBulanCek(Number(e.target.value))}
+                    className="w-full bg-arena-800/50 dark:bg-black/20 border border-neutral-light/10 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 rounded-xl px-4 py-3 text-neutral-light outline-none transition-all appearance-none cursor-pointer"
+                  >
+                    {BULAN_NAMES.slice(1).map((nama, idx) => (
+                      <option key={idx + 1} value={idx + 1} className="bg-arena-900 text-neutral-light">
+                        {nama}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Tahun */}
+                <div>
+                  <label className="block text-xs font-bold text-neutral-light/50 uppercase tracking-widest mb-2 ml-1">
+                    Tahun
+                  </label>
+                  <select
+                    id="cek-tahun"
+                    value={tahunCek}
+                    onChange={(e) => setTahunCek(Number(e.target.value))}
+                    className="w-full bg-arena-800/50 dark:bg-black/20 border border-neutral-light/10 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 rounded-xl px-4 py-3 text-neutral-light outline-none transition-all appearance-none cursor-pointer"
+                  >
+                    {Array.from({ length: now.getFullYear() - 2024 + 1 }, (_, i) => 2025 + i).map((y) => (
+                      <option key={y} value={y} className="bg-arena-900 text-neutral-light">
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Submit */}
                 <div className="sm:col-span-2">
                   <button
                     type="submit"
@@ -215,48 +292,99 @@ export default function PembayaranPage() {
                 </div>
               </form>
 
+              {/* Error */}
               {statusError && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-start gap-3 mt-4">
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                   <p className="text-sm text-red-300">{statusError}</p>
                 </div>
               )}
 
+              {/* Hasil Cek Status */}
               {statusData && (
-                <div className="mt-8 animate-fade-in">
-                  <div className="mb-4">
-                    <p className="text-neutral-light/60 text-sm">Status SPP Tahun {statusData.tahun} untuk:</p>
-                    <h3 className="text-lg font-bold text-neutral-light">{statusData.nama}</h3>
+                <div className="mt-6 animate-fade-in">
+                  {/* Header identitas */}
+                  <div className="mb-5 pb-4 border-b border-neutral-light/10">
+                    <p className="text-neutral-light/50 text-xs uppercase tracking-widest font-bold mb-1">Hasil pengecekan untuk:</p>
+                    <p className="text-neutral-light font-bold text-lg">{statusData.nama}</p>
+                    <p className="text-neutral-light/40 text-sm">
+                      {BULAN_NAMES[statusData.bulan]} {statusData.tahun}
+                    </p>
                   </div>
 
-                  {statusData.riwayat.some(r => r.status_bayar !== 'Lunas') && (
-                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4 flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-amber-300 text-sm font-semibold">Ada tagihan yang belum lunas!</p>
-                        <p className="text-neutral-light/60 text-xs mt-1 leading-relaxed">
-                          Anda belum melakukan pembayaran SPP untuk bulan {statusData.riwayat.filter(r => r.status_bayar !== 'Lunas').map(r => r.bulan).join(', ')}. Segera lakukan pembayaran untuk menjaga status keaktifan keanggotaan.
-                        </p>
+                  {statusData.record && statusData.record.status_bayar === 'Lunas' ? (
+                    /* ── LUNAS ──────────────────────────────── */
+                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-emerald-300 font-bold text-base">Pembayaran Lunas ✓</p>
+                          <p className="text-emerald-300/60 text-xs">
+                            SPP {BULAN_NAMES[statusData.bulan]} {statusData.tahun} telah tercatat
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        {statusData.record.tanggal_bayar && (
+                          <div className="bg-emerald-500/10 rounded-xl p-3">
+                            <p className="text-emerald-300/50 text-xs mb-0.5 uppercase tracking-wider">Tanggal Bayar</p>
+                            <p className="text-emerald-200 font-semibold">
+                              {new Date(statusData.record.tanggal_bayar).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                          </div>
+                        )}
+                        {statusData.record.nominal && (
+                          <div className="bg-emerald-500/10 rounded-xl p-3">
+                            <p className="text-emerald-300/50 text-xs mb-0.5 uppercase tracking-wider">Nominal</p>
+                            <p className="text-emerald-200 font-semibold">{formatCurrency(parseFloat(statusData.record.nominal))}</p>
+                          </div>
+                        )}
+                        {statusData.record.metode_bayar && (
+                          <div className="bg-emerald-500/10 rounded-xl p-3">
+                            <p className="text-emerald-300/50 text-xs mb-0.5 uppercase tracking-wider">Metode</p>
+                            <p className="text-emerald-200 font-semibold">{statusData.record.metode_bayar}</p>
+                          </div>
+                        )}
+                        {statusData.record.nomor_kwitansi && (
+                          <div className="bg-emerald-500/10 rounded-xl p-3">
+                            <p className="text-emerald-300/50 text-xs mb-0.5 uppercase tracking-wider">No. Kwitansi</p>
+                            <p className="text-emerald-200 font-semibold font-mono">{statusData.record.nomor_kwitansi}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
-
-                  {statusData.riwayat.length === 0 ? (
-                    <p className="text-center text-neutral-light/50 text-sm py-4 border border-dashed border-neutral-light/10 rounded-xl">
-                      Belum ada catatan pembayaran untuk tahun ini.
-                    </p>
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {statusData.riwayat.map((r, idx) => (
-                        <div key={idx} className="bg-neutral-light/5 border border-neutral-light/10 rounded-xl p-3 flex justify-between items-center">
-                          <span className="font-medium text-neutral-light text-sm">{r.bulan}</span>
-                          {r.status_bayar === 'Lunas' ? (
-                            <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Lunas</span>
-                          ) : (
-                            <span className="bg-neutral-light/10 text-neutral-light/50 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Belum</span>
-                          )}
+                    /* ── BELUM BAYAR ───────────────────────── */
+                    <div className="bg-amber-500/10 border-2 border-amber-500/40 rounded-2xl p-5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+                          <AlertCircle className="w-5 h-5 text-amber-400" />
                         </div>
-                      ))}
+                        <div>
+                          <p className="text-amber-300 font-bold text-base">Belum Ada Catatan Pembayaran</p>
+                          <p className="text-amber-300/60 text-xs">Status SPP bulan ini belum tercatat</p>
+                        </div>
+                      </div>
+                      <p className="text-amber-200/80 text-sm leading-relaxed mb-5">
+                        Anda belum melakukan pembayaran SPP untuk bulan{' '}
+                        <strong className="text-amber-200">
+                          {BULAN_NAMES[statusData.bulan]} {statusData.tahun}
+                        </strong>.
+                        Segera lakukan pembayaran untuk menjaga status keaktifan keanggotaan Anda.
+                      </p>
+                      <a
+                        href="#info-pembayaran"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          document.getElementById('info-pembayaran')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-sm px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-amber-500/20"
+                      >
+                        <ArrowDown className="w-4 h-4" />
+                        Lihat Cara & Info Pembayaran
+                      </a>
                     </div>
                   )}
                 </div>
@@ -264,6 +392,8 @@ export default function PembayaranPage() {
             </div>
           </div>
 
+          {/* Info Rekening & Cara Bayar — id anchor untuk CTA dari hasil cek status */}
+          <div id="info-pembayaran" />
           {/* Info Rekening & Cara Bayar */}
           {(!metodeRes || metodeList.length > 0) && (
             <div>
