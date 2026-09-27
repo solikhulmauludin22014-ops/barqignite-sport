@@ -1,6 +1,38 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+// ─── Timeout untuk fetch ke API routes (client-side) ─────────────────────────
+// Jika server tidak merespons dalam `ms` milidetik, lempar error "timeout".
+// Ini mencegah tombol stuck loading selamanya saat Supabase sedang tidak aktif.
+export async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  ms: number = 12000 // 12 detik default
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Koneksi ke server timeout. Pastikan koneksi internet stabil dan coba lagi.');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ─── Timeout untuk Promise Supabase (server-side / API route) ────────────────
+// Bungkus query Supabase dengan race condition agar tidak hang selamanya.
+export function withTimeout<T>(promise: PromiseLike<T> | Promise<T>, ms: number = 12000): Promise<T> {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Database timeout setelah ${ms / 1000} detik. Supabase mungkin sedang tidak aktif — coba beberapa saat lagi.`)), ms)
+  );
+  return Promise.race([Promise.resolve(promise), timeout]);
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

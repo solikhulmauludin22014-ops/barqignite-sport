@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Loader2, Calendar, Clock, MapPin, Trophy, X, CheckCircle, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { Jadwal } from '@/types';
+import { fetchWithTimeout } from '@/lib/utils';
+
 
 const HARI = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
 const KATEGORI = ['Mini','Pemula','Junior','Senior','Semua'];
@@ -24,9 +26,12 @@ export default function AdminJadwalPage() {
     setLoading(true);
     try {
       const url = filterJenis ? `/api/jadwal?jenis=${filterJenis}` : '/api/jadwal';
-      const res = await fetch(url);
+      const res = await fetchWithTimeout(url);
       const json = await res.json();
       if (json.success) setData(json.data || []);
+      else console.error('Gagal memuat jadwal:', json.error);
+    } catch (err) {
+      console.error('Jadwal load error:', err instanceof Error ? err.message : err);
     } finally { setLoading(false); }
   }, [filterJenis]);
 
@@ -41,24 +46,33 @@ export default function AdminJadwalPage() {
     try {
       const method = editing ? 'PUT' : 'POST';
       const body = editing ? { ...form, id: editing.id } : form;
-      const res = await fetch('/api/jadwal', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const res = await fetchWithTimeout('/api/jadwal', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const json = await res.json();
-      if (json.success) { setSaved(true); setTimeout(() => setSaved(false), 2000); setShowForm(false); loadData(); }
+      if (json.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        setShowForm(false);
+        loadData();
+      } else {
+        alert(`Gagal menyimpan jadwal: ${json.error || 'Terjadi kesalahan pada server'}`);
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
     } finally { setSaving(false); }
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) return;
     try {
-      const res = await fetch(`/api/jadwal?id=${id}`, { method: 'DELETE' });
+      const res = await fetchWithTimeout(`/api/jadwal?id=${id}`, { method: 'DELETE' }, 12000);
       const json = await res.json();
       if (json.success) {
         loadData();
       } else {
         alert(json.error || 'Gagal menghapus jadwal');
       }
-    } catch (err) {
-      alert('Terjadi kesalahan saat menghapus jadwal');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus jadwal');
     }
   };
 

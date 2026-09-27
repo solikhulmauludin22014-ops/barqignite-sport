@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import type { Jadwal } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
+
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
     if (kategori) query = query.eq('kategori', kategori);
     if (cabang) query = query.eq('cabang_olahraga', cabang);
 
-    const { data, error } = await query;
+    const { data, error } = await withTimeout(query);
 
     if (error) throw error;
 
@@ -32,8 +34,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Jadwal GET error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal mengambil jadwal' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal mengambil jadwal';
+    console.error('Jadwal GET error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -58,17 +61,17 @@ export async function POST(request: Request) {
       keterangan: body.keterangan || '',
     };
 
-    const { data, error } = await supabase
-      .from('jadwal')
-      .insert([newJadwal])
-      .select();
+    const { data, error } = await withTimeout(
+      supabase.from('jadwal').insert([newJadwal]).select()
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, data: data[0], message: 'Jadwal berhasil ditambahkan' });
   } catch (error) {
-    console.error('Jadwal POST error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menambahkan jadwal' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal menambahkan jadwal';
+    console.error('Jadwal POST error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 

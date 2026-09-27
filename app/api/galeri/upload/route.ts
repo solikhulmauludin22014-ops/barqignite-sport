@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { KATEGORI, type KategoriType } from '@/lib/constants';
+import { withTimeout } from '@/lib/utils';
 
 const BUCKET = 'galeri-dokumentasi';
 const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -69,13 +70,16 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        upsert: false,
-        cacheControl: '3600',
-      });
+    const { data: uploadData, error: uploadError } = await withTimeout(
+      supabase.storage
+        .from(BUCKET)
+        .upload(fileName, buffer, {
+          contentType: file.type,
+          upsert: false,
+          cacheControl: '3600',
+        }),
+      15000 // 15 detik timeout untuk upload file
+    );
 
     if (uploadError) {
       console.error('[API /galeri/upload] Storage error:', uploadError);
@@ -121,20 +125,22 @@ export async function POST(req: NextRequest) {
     const foto_url = urlData.publicUrl;
 
     // ─── Insert record ke database ─────────────────────────────────
-    const { data: record, error: dbError } = await supabase
-      .from('galeri_dokumentasi')
-      .insert([
-        {
-          judul: judul.trim(),
-          kategori,
-          foto_url,
-          tanggal: tanggal || null,
-          is_featured,
-          urutan: isNaN(urutan) ? 0 : urutan,
-        },
-      ])
-      .select()
-      .single();
+    const { data: record, error: dbError } = await withTimeout(
+      supabase
+        .from('galeri_dokumentasi')
+        .insert([
+          {
+            judul: judul.trim(),
+            kategori,
+            foto_url,
+            tanggal: tanggal || null,
+            is_featured,
+            urutan: isNaN(urutan) ? 0 : urutan,
+          },
+        ])
+        .select()
+        .single()
+    );
 
     if (dbError) {
       console.error('[API /galeri/upload] DB error:', dbError);

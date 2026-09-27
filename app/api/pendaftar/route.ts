@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import type { Pendaftar, Anggota } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
+
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -19,14 +21,17 @@ export async function GET(request: Request) {
 
     if (status) query = query.eq('status_pendaftaran', status);
 
-    const { data, error } = await query.order('tanggal_daftar', { ascending: false });
+    const { data, error } = await withTimeout(
+      query.order('tanggal_daftar', { ascending: false })
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Pendaftar GET error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal mengambil data pendaftar' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal mengambil data pendaftar';
+    console.error('Pendaftar GET error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -66,20 +71,19 @@ export async function POST(request: Request) {
       tanggal_daftar: new Date().toLocaleDateString('id-ID'),
     };
 
-    const { data, error } = await supabase
-      .from('pendaftar')
-      .insert([newPendaftar])
-      .select();
+    const { data, error } = await withTimeout(
+      supabase.from('pendaftar').insert([newPendaftar]).select()
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, data: data[0], message: 'Pendaftaran berhasil dikirim!' });
   } catch (error) {
-    console.error('Pendaftar POST error:', error);
+    const msg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error('Pendaftar POST error:', msg);
     return NextResponse.json({ 
       success: false, 
-      error: 'Gagal menyimpan pendaftaran', 
-      details: error instanceof Error ? error.message : JSON.stringify(error) 
+      error: msg, 
     }, { status: 500 });
   }
 }

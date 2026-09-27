@@ -5,9 +5,9 @@ import Link from 'next/link';
 import {
   Users, UserPlus, Wallet, AlertTriangle, ArrowRight, CheckCircle, Zap,
 } from 'lucide-react';
-import { formatCurrency, getMonthName } from '@/lib/utils';
+import { formatCurrency, getMonthName, fetchWithTimeout } from '@/lib/utils';
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = (url: string) => fetchWithTimeout(url, {}, 8000).then(r => r.json());
 
 export default function AdminDashboard() {
   const bulanIni = new Date().getMonth() + 1;

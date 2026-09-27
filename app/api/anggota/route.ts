@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import type { Anggota } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
+
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -23,14 +25,15 @@ export async function GET(request: Request) {
     if (kategori) query = query.eq('kategori', kategori);
     if (cabang) query = query.eq('cabang_olahraga', cabang);
 
-    const { data, error } = await query;
+    const { data, error } = await withTimeout(query);
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Anggota GET error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal mengambil data anggota' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal mengambil data anggota';
+    console.error('Anggota GET error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -56,17 +59,17 @@ export async function POST(request: Request) {
       tanggal_gabung: new Date().toLocaleDateString('id-ID'),
     };
 
-    const { data, error } = await supabase
-      .from('anggota')
-      .insert([newAnggota])
-      .select();
+    const { data, error } = await withTimeout(
+      supabase.from('anggota').insert([newAnggota]).select()
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, data: data[0], message: 'Anggota berhasil ditambahkan' });
   } catch (error) {
-    console.error('Anggota POST error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menambahkan anggota' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal menambahkan anggota';
+    console.error('Anggota POST error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 

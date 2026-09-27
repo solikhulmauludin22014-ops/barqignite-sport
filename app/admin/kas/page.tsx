@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, Trash2, Pencil, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { formatCurrency, getMonthName } from '@/lib/utils';
+import { formatCurrency, getMonthName, fetchWithTimeout } from '@/lib/utils';
 import type { Kas } from '@/types';
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
@@ -34,9 +34,12 @@ export default function AdminKasPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams({ bulan: filter.bulan, tahun: filter.tahun });
-      const res = await fetch(`/api/kas?${params.toString()}`);
+      const res = await fetchWithTimeout(`/api/kas?${params.toString()}`);
       const json = await res.json();
       if (json.success) setData(json.data || []);
+      else console.error('Gagal memuat kas:', json.error);
+    } catch (err) {
+      console.error('Kas load error:', err instanceof Error ? err.message : err);
     } finally { setLoading(false); }
   }, [filter]);
 
@@ -66,7 +69,7 @@ export default function AdminKasPage() {
     try {
       const method = editing ? 'PUT' : 'POST';
       const payload = editing ? { ...form, id: editing.id, nominal: parseFloat(form.nominal) } : { ...form, nominal: parseFloat(form.nominal) };
-      const res = await fetch('/api/kas', {
+      const res = await fetchWithTimeout('/api/kas', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -76,22 +79,28 @@ export default function AdminKasPage() {
         setShowForm(false);
         setForm({ tanggal: new Date().toISOString().split('T')[0], jenis: 'Masuk', kategori: '', keterangan: '', nominal: '' });
         loadData();
+      } else {
+        alert(`Gagal menyimpan: ${json.error || 'Terjadi kesalahan pada server'}`);
       }
-    } finally { setSaving(false); }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus transaksi ini secara permanen?')) return;
     try {
-      const res = await fetch(`/api/kas?id=${id}`, { method: 'DELETE' });
+      const res = await fetchWithTimeout(`/api/kas?id=${id}`, { method: 'DELETE' }, 12000);
       const json = await res.json();
       if (json.success) {
         loadData();
       } else {
         alert(json.error || 'Gagal menghapus transaksi');
       }
-    } catch (err) {
-      alert('Terjadi kesalahan saat menghapus transaksi');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus transaksi');
     }
   };
 

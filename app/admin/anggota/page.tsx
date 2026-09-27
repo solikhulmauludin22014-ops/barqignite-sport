@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Loader2, Search, Download, Filter, UserCheck, RefreshCw, Trash2, Pencil, X, CheckCircle, Plus } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { Anggota } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate, fetchWithTimeout } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+
 
 export default function AdminAnggotaPage() {
   const [data, setData] = useState<Anggota[]>([]);
@@ -34,9 +35,12 @@ export default function AdminAnggotaPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/anggota`);
+      const res = await fetchWithTimeout(`/api/anggota`);
       const json = await res.json();
       if (json.success) setData(json.data || []);
+      else console.error('Gagal memuat anggota:', json.error);
+    } catch (err) {
+      console.error('Anggota load error:', err instanceof Error ? err.message : err);
     } finally {
       setLoading(false);
     }
@@ -65,7 +69,7 @@ export default function AdminAnggotaPage() {
     if (!editing) return;
     setSaving(true);
     try {
-      const res = await fetch('/api/anggota', {
+      const res = await fetchWithTimeout('/api/anggota', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, id: editing.id }),
@@ -79,6 +83,8 @@ export default function AdminAnggotaPage() {
       } else {
         alert(json.error || 'Gagal menyimpan');
       }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
     } finally { setSaving(false); }
   };
 
@@ -124,15 +130,15 @@ export default function AdminAnggotaPage() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus data anggota ini secara permanen?')) return;
     try {
-      const res = await fetch(`/api/anggota?id=${id}`, { method: 'DELETE' });
+      const res = await fetchWithTimeout(`/api/anggota?id=${id}`, { method: 'DELETE' }, 12000);
       const json = await res.json();
       if (json.success) {
         loadData();
       } else {
         alert(json.error || 'Gagal menghapus anggota');
       }
-    } catch (err) {
-      alert('Terjadi kesalahan saat menghapus anggota');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus anggota');
     }
   };
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Loader2, Paintbrush, CheckCircle, AlertCircle } from 'lucide-react';
+import { fetchWithTimeout } from '@/lib/utils';
 
 interface BrandingForm {
   nama_club: string;
@@ -58,12 +59,19 @@ export default function AdminBrandingPage() {
   const [activeTab, setActiveTab] = useState('umum');
 
   useEffect(() => {
-    fetch('/api/branding').then(r => r.json()).then(j => {
-      if (j.success && j.data) {
-        setForm((prev) => ({ ...prev, ...j.data }));
-      }
-      setLoading(false);
-    });
+    fetchWithTimeout('/api/branding', {}, 12000)
+      .then(r => r.json())
+      .then(j => {
+        if (j.success && j.data) {
+          setForm((prev) => ({ ...prev, ...j.data }));
+        }
+      })
+      .catch(() => {
+        setError('Gagal memuat pengaturan branding.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -71,11 +79,11 @@ export default function AdminBrandingPage() {
     setSaving(true);
     setError('');
     try {
-      const res = await fetch('/api/branding', {
+      const res = await fetchWithTimeout('/api/branding', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
-      });
+      }, 12000);
       const json = await res.json();
       if (json.success) {
         setSaved(true);
@@ -83,8 +91,8 @@ export default function AdminBrandingPage() {
       } else {
         setError(json.error || 'Gagal menyimpan');
       }
-    } catch {
-      setError('Koneksi bermasalah');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Koneksi bermasalah');
     } finally {
       setSaving(false);
     }

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Pencil, Loader2, Trophy, X, CheckCircle, Trash2, Download, Image as ImageIcon } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { Prestasi } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate, fetchWithTimeout } from '@/lib/utils';
 import ImageCropModal from '@/components/ImageCropModal';
 
 const emptyForm = { 
@@ -38,9 +38,11 @@ export default function AdminPrestasiPage() {
     try {
       const url = new URL('/api/prestasi', window.location.origin);
       if (filterKategori) url.searchParams.append('kategori', filterKategori);
-      const res = await fetch(url.toString());
+      const res = await fetchWithTimeout(url.toString(), {}, 12000);
       const json = await res.json();
       if (json.success) setData(json.data || []);
+    } catch (err: unknown) {
+      console.error('Gagal memuat prestasi:', err);
     } finally { setLoading(false); }
   }, [filterKategori]);
 
@@ -125,10 +127,10 @@ export default function AdminPrestasiPage() {
       if (fotoFile) formData.append('foto', fotoFile);
       if (editing) formData.append('old_foto_url', editing.foto_url);
 
-      const res = await fetch('/api/prestasi', { 
+      const res = await fetchWithTimeout('/api/prestasi', { 
         method, 
         body: formData 
-      });
+      }, 15000);
       
       const json = await res.json();
       if (json.success) { 
@@ -139,8 +141,9 @@ export default function AdminPrestasiPage() {
       } else {
         alert(json.error || 'Gagal menyimpan data');
       }
-    } catch (err) {
-      alert('Terjadi kesalahan saat menyimpan data');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan data';
+      alert(msg);
     } finally { 
       setSaving(false); 
     }
@@ -153,15 +156,16 @@ export default function AdminPrestasiPage() {
       url.searchParams.append('id', p.id);
       if (p.foto_url) url.searchParams.append('foto_url', p.foto_url);
       
-      const res = await fetch(url.toString(), { method: 'DELETE' });
+      const res = await fetchWithTimeout(url.toString(), { method: 'DELETE' }, 12000);
       const json = await res.json();
       if (json.success) {
         loadData();
       } else {
         alert(json.error || 'Gagal menghapus prestasi');
       }
-    } catch (err) {
-      alert('Terjadi kesalahan saat menghapus prestasi');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus prestasi';
+      alert(msg);
     }
   };
 
@@ -186,7 +190,7 @@ export default function AdminPrestasiPage() {
     formData.append('old_foto_url', item.foto_url); // don't change photo
 
     try {
-      await fetch('/api/prestasi', { method: 'PUT', body: formData });
+      await fetchWithTimeout('/api/prestasi', { method: 'PUT', body: formData }, 12000);
       // We don't necessarily need to reload if optimistic update is enough
     } catch (err) {
       console.error('Failed to update urutan', err);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { withTimeout } from '@/lib/utils';
 
 // Next.js 15: params adalah Promise
 export async function DELETE(
@@ -10,17 +11,21 @@ export async function DELETE(
     const { id } = await params;
 
     // Ambil foto_url untuk hapus dari Storage juga
-    const { data: item } = await supabase
-      .from('galeri_dokumentasi')
-      .select('foto_url')
-      .eq('id', id)
-      .single();
+    const { data: item } = await withTimeout(
+      supabase
+        .from('galeri_dokumentasi')
+        .select('foto_url')
+        .eq('id', id)
+        .single()
+    );
 
     // Hapus row dari database
-    const { error } = await supabase
-      .from('galeri_dokumentasi')
-      .delete()
-      .eq('id', id);
+    const { error } = await withTimeout(
+      supabase
+        .from('galeri_dokumentasi')
+        .delete()
+        .eq('id', id)
+    );
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -52,12 +57,14 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
 
-    const { data, error } = await supabase
-      .from('galeri_dokumentasi')
-      .update(body)
-      .eq('id', id)
-      .select()
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('galeri_dokumentasi')
+        .update(body)
+        .eq('id', id)
+        .select()
+        .single()
+    );
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

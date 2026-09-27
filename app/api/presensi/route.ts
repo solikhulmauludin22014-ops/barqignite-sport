@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import type { Presensi } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
+
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -27,11 +29,9 @@ export async function GET(request: Request) {
 
     if (id_anggota) {
       // Validasi apakah anggota tersebut terdaftar dan aktif
-      const { data: anggota, error: errAnggota } = await supabase
-        .from('anggota')
-        .select('id, status')
-        .eq('id', id_anggota)
-        .single();
+      const { data: anggota, error: errAnggota } = await withTimeout(
+        supabase.from('anggota').select('id, status').eq('id', id_anggota).single()
+      );
 
       if (errAnggota || !anggota || anggota.status !== 'Aktif') {
         return NextResponse.json({ 
@@ -49,14 +49,15 @@ export async function GET(request: Request) {
     if (status) query = query.eq('status_hadir', status);
     if (sesi) query = query.eq('sesi', sesi);
 
-    const { data, error } = await query;
+    const { data, error } = await withTimeout(query);
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Presensi GET error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal mengambil data presensi' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal mengambil data presensi';
+    console.error('Presensi GET error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -85,16 +86,17 @@ export async function POST(request: Request) {
       waktu_submit: now,
     }));
 
-    const { error } = await supabase
-      .from('presensi')
-      .insert(presensiData);
+    const { error } = await withTimeout(
+      supabase.from('presensi').insert(presensiData)
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: `${items.length} presensi berhasil disimpan` });
   } catch (error) {
-    console.error('Presensi POST error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menyimpan presensi' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal menyimpan presensi';
+    console.error('Presensi POST error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 

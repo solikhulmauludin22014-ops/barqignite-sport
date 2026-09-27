@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { withTimeout } from '@/lib/utils';
+
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,7 +21,7 @@ export async function GET(req: NextRequest) {
       query = query.eq('kategori', kategori);
     }
 
-    const { data, error } = await query;
+    const { data, error } = await withTimeout(query);
 
     if (error) {
       console.error('[API /galeri] Supabase error:', error.message);
@@ -42,14 +44,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'judul, kategori, dan foto_url wajib diisi' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
-      .from('galeri_dokumentasi')
-      .insert([{ judul, kategori, foto_url, tanggal, is_featured: is_featured || false, urutan: urutan || 0 }])
-      .select()
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('galeri_dokumentasi')
+        .insert([{ judul, kategori, foto_url, tanggal, is_featured: is_featured || false, urutan: urutan || 0 }])
+        .select()
+        .single()
+    );
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      const msg = (error as { message?: string })?.message || 'Gagal menyimpan data galeri';
+      return NextResponse.json({ error: msg }, { status: 500 });
     }
 
     return NextResponse.json({ data }, { status: 201 });

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { PembayaranSPP, Anggota, SppKategori } from '@/types';
-import { formatCurrency, getMonthName, cn } from '@/lib/utils';
+import { formatCurrency, getMonthName, cn, fetchWithTimeout } from '@/lib/utils';
 import Link from 'next/link';
 import { printKwitansi } from '@/components/admin/KwitansiPrint';
 
@@ -159,7 +159,7 @@ export default function AdminPembayaranPage() {
     setFormError('');
     try {
       const method = isEditMode ? 'PUT' : 'POST';
-      const res = await fetch('/api/pembayaran', {
+      const res = await fetchWithTimeout('/api/pembayaran', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, status_bayar: 'Lunas' }),
@@ -174,8 +174,8 @@ export default function AdminPembayaranPage() {
       } else {
         setFormError(json.error || 'Gagal menyimpan. Coba lagi.');
       }
-    } catch {
-      setFormError('Koneksi gagal. Periksa jaringan dan coba lagi.');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Koneksi gagal. Periksa jaringan dan coba lagi.');
     } finally {
       setSaving(false);
     }
@@ -187,7 +187,7 @@ export default function AdminPembayaranPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/pembayaran?id=${deleteTarget.id}`, { method: 'DELETE' });
+      const res = await fetchWithTimeout(`/api/pembayaran?id=${deleteTarget.id}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
         mutate();

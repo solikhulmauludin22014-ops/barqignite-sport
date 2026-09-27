@@ -5,9 +5,9 @@ import useSWR from 'swr';
 import { Plus, Edit, Trash2, Save, X, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { SppKategori, PengaturanPembayaran, MetodePembayaran, CabangOlahraga } from '@/types';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, fetchWithTimeout } from '@/lib/utils';
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = (url: string) => fetchWithTimeout(url, {}, 8000).then(r => r.json());
 
 export default function PengaturanPembayaranPage() {
   const [activeTab, setActiveTab] = useState<'spp' | 'umum' | 'metode'>('spp');
@@ -35,47 +35,82 @@ export default function PengaturanPembayaranPage() {
   const saveSpp = async () => {
     if (!sppForm?.cabang || !sppForm?.nama_kategori || !sppForm?.nominal) return alert('Data wajib belum lengkap');
     setLoading(true);
-    const method = sppForm.id ? 'PUT' : 'POST';
-    await fetch('/api/spp_kategori', {
-      method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sppForm)
-    });
-    setSppForm(null);
-    mutateSpp();
-    setLoading(false);
+    try {
+      const method = sppForm.id ? 'PUT' : 'POST';
+      const res = await fetchWithTimeout('/api/spp_kategori', {
+        method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sppForm)
+      }, 12000);
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        throw new Error(json.error || 'Gagal menyimpan kategori SPP');
+      }
+      setSppForm(null);
+      mutateSpp();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan kategori SPP');
+    } finally {
+      setLoading(false);
+    }
   };
   const deleteSpp = async (id: string) => {
     if (!confirm('Yakin hapus?')) return;
-    await fetch(`/api/spp_kategori?id=${id}`, { method: 'DELETE' });
-    mutateSpp();
+    try {
+      const res = await fetchWithTimeout(`/api/spp_kategori?id=${id}`, { method: 'DELETE' }, 12000);
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Gagal menghapus');
+      mutateSpp();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus');
+    }
   };
 
   // Handler Pengaturan
   const savePengaturan = async () => {
     setLoading(true);
-    await fetch('/api/pengaturan_pembayaran', {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pengaturanForm)
-    });
-    mutatePeng();
-    alert('Pengaturan disimpan!');
-    setLoading(false);
+    try {
+      const res = await fetchWithTimeout('/api/pengaturan_pembayaran', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pengaturanForm)
+      }, 12000);
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Gagal menyimpan pengaturan');
+      mutatePeng();
+      alert('Pengaturan disimpan!');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan pengaturan');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handler Metode
   const saveMetode = async () => {
     if (!metodeForm?.nama) return alert('Nama wajib diisi');
     setLoading(true);
-    const method = metodeForm.id ? 'PUT' : 'POST';
-    await fetch('/api/metode_pembayaran', {
-      method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(metodeForm)
-    });
-    setMetodeForm(null);
-    mutateMetode();
-    setLoading(false);
+    try {
+      const method = metodeForm.id ? 'PUT' : 'POST';
+      const res = await fetchWithTimeout('/api/metode_pembayaran', {
+        method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(metodeForm)
+      }, 12000);
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Gagal menyimpan metode pembayaran');
+      setMetodeForm(null);
+      mutateMetode();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan metode pembayaran');
+    } finally {
+      setLoading(false);
+    }
   };
   const deleteMetode = async (id: string) => {
     if (!confirm('Yakin hapus?')) return;
-    await fetch(`/api/metode_pembayaran?id=${id}`, { method: 'DELETE' });
-    mutateMetode();
+    try {
+      const res = await fetchWithTimeout(`/api/metode_pembayaran?id=${id}`, { method: 'DELETE' }, 12000);
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Gagal menghapus');
+      mutateMetode();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus');
+    }
   };
 
   return (

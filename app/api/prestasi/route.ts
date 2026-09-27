@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import type { Prestasi } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
+
 
 export async function GET(request: Request) {
   try {
@@ -15,15 +17,18 @@ export async function GET(request: Request) {
     if (kategori) query = query.eq('kategori', kategori);
     if (is_featured === 'true') query = query.eq('is_featured', true);
 
-    const { data, error } = await query.order('urutan', { ascending: true }).order('created_at', { ascending: false });
+    const { data, error } = await withTimeout(
+      query.order('urutan', { ascending: true }).order('created_at', { ascending: false })
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Prestasi GET error:', error);
+    const msg = error instanceof Error ? error.message : 'Gagal mengambil data prestasi';
+    console.error('Prestasi GET error:', msg);
     return NextResponse.json(
-      { success: false, error: 'Gagal mengambil data prestasi' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }
@@ -54,9 +59,10 @@ export async function POST(request: Request) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('prestasi-photos')
-        .upload(fileName, file);
+      const { data: uploadData, error: uploadError } = await withTimeout(
+        supabase.storage.from('prestasi-photos').upload(fileName, file),
+        20000 // file upload boleh lebih lama
+      );
 
       if (uploadError) throw uploadError;
 
@@ -79,10 +85,9 @@ export async function POST(request: Request) {
       urutan
     };
 
-    const { data, error } = await supabase
-      .from('prestasi')
-      .insert([newPrestasi])
-      .select();
+    const { data, error } = await withTimeout(
+      supabase.from('prestasi').insert([newPrestasi]).select()
+    );
 
     if (error) throw error;
 
@@ -92,9 +97,10 @@ export async function POST(request: Request) {
       message: 'Prestasi berhasil ditambahkan',
     });
   } catch (error) {
-    console.error('Prestasi POST error:', error);
+    const msg = error instanceof Error ? error.message : 'Gagal menambahkan prestasi';
+    console.error('Prestasi POST error:', msg);
     return NextResponse.json(
-      { success: false, error: 'Gagal menambahkan prestasi' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }

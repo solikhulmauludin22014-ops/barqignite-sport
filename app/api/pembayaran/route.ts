@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { generateId } from '@/lib/utils';
+import { generateId, withTimeout } from '@/lib/utils';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
@@ -21,11 +21,13 @@ function supabaseErrorMessage(err: unknown): string {
 async function generateNomorKwitansi(): Promise<{ nomor: string; error?: string }> {
   const tahun = new Date().getFullYear();
 
-  const { data: setting, error: fetchErr } = await supabase
-    .from('pengaturan_pembayaran')
-    .select('nomor_kwitansi_terakhir')
-    .eq('id', 'SETTING-001')
-    .single();
+  const { data: setting, error: fetchErr } = await withTimeout(
+    supabase
+      .from('pengaturan_pembayaran')
+      .select('nomor_kwitansi_terakhir')
+      .eq('id', 'SETTING-001')
+      .single()
+  );
 
   if (fetchErr && fetchErr.code !== 'PGRST116') {
     // Kolom mungkin belum ada (migration belum dijalankan) — fallback ke timestamp
@@ -35,10 +37,12 @@ async function generateNomorKwitansi(): Promise<{ nomor: string; error?: string 
 
   const nomorTerakhir = ((setting?.nomor_kwitansi_terakhir as number) || 0) + 1;
 
-  const { error: updateErr } = await supabase
-    .from('pengaturan_pembayaran')
-    .update({ nomor_kwitansi_terakhir: nomorTerakhir })
-    .eq('id', 'SETTING-001');
+  const { error: updateErr } = await withTimeout(
+    supabase
+      .from('pengaturan_pembayaran')
+      .update({ nomor_kwitansi_terakhir: nomorTerakhir })
+      .eq('id', 'SETTING-001')
+  );
 
   if (updateErr) {
     const fallback = `KW-${tahun}-${Date.now().toString().slice(-4)}`;
@@ -75,7 +79,7 @@ export async function GET(request: Request) {
     if (status)     query = query.eq('status_bayar', status);
     if (cabang)     query = query.eq('cabang_olahraga', cabang);
 
-    const { data, error } = await query;
+    const { data, error } = await withTimeout(query);
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
@@ -114,27 +118,29 @@ export async function POST(request: Request) {
     }
 
     // Insert — sertakan semua kolom termasuk legacy gateway fields (bisa kosong)
-    const { data: inserted, error: insertErr } = await supabase
-      .from('pembayaran_spp')
-      .insert([{
-        id:                 generateId('SPP'),
-        id_anggota:         body.id_anggota,
-        nama_anggota:       body.nama_anggota,
-        cabang_olahraga:    body.cabang_olahraga,
-        bulan:              String(body.bulan),
-        tahun:              String(body.tahun),
-        nominal:            String(body.nominal),
-        status_bayar:       body.status_bayar || 'Lunas',
-        tanggal_bayar:      body.tanggal_bayar || new Date().toISOString().split('T')[0],
-        metode_bayar:       body.metode_bayar || 'Cash',
-        nomor_kwitansi,
-        catatan:            body.catatan || '',
-        // Legacy gateway columns — kosong untuk entry manual
-        payment_gateway_id: '',
-        status_gateway:     '',
-      }])
-      .select()
-      .single();
+    const { data: inserted, error: insertErr } = await withTimeout(
+      supabase
+        .from('pembayaran_spp')
+        .insert([{
+          id:                 generateId('SPP'),
+          id_anggota:         body.id_anggota,
+          nama_anggota:       body.nama_anggota,
+          cabang_olahraga:    body.cabang_olahraga,
+          bulan:              String(body.bulan),
+          tahun:              String(body.tahun),
+          nominal:            String(body.nominal),
+          status_bayar:       body.status_bayar || 'Lunas',
+          tanggal_bayar:      body.tanggal_bayar || new Date().toISOString().split('T')[0],
+          metode_bayar:       body.metode_bayar || 'Cash',
+          nomor_kwitansi,
+          catatan:            body.catatan || '',
+          // Legacy gateway columns — kosong untuk entry manual
+          payment_gateway_id: '',
+          status_gateway:     '',
+        }])
+        .select()
+        .single()
+    );
 
     if (insertErr) {
       const detail = supabaseErrorMessage(insertErr);
@@ -148,26 +154,30 @@ export async function POST(request: Request) {
     // Catat ke Kas otomatis saat status Lunas
     const statusBayar = body.status_bayar || 'Lunas';
     if (statusBayar === 'Lunas') {
-      const { data: allKas } = await supabase
-        .from('kas')
-        .select('saldo_berjalan')
-        .order('created_at', { ascending: false })
-        .limit(1);
+      const { data: allKas } = await withTimeout(
+        supabase
+          .from('kas')
+          .select('saldo_berjalan')
+          .order('created_at', { ascending: false })
+          .limit(1)
+      );
 
       const lastSaldo = (allKas && allKas.length > 0) ? parseFloat(String(allKas[0].saldo_berjalan || '0')) : 0;
       const nominal   = parseFloat(String(body.nominal || '0'));
 
-      const { error: kasErr } = await supabase.from('kas').insert([{
-        id:             generateId('KAS'),
-        tanggal:        body.tanggal_bayar || new Date().toISOString().split('T')[0],
-        cabang_olahraga: body.cabang_olahraga,
-        jenis:          'Masuk',
-        sumber:         'Manual',
-        kategori:       'SPP',
-        keterangan:     `SPP ${body.nama_anggota} ${body.bulan}/${body.tahun}${nomor_kwitansi ? ` (${nomor_kwitansi})` : ''}`,
-        nominal:        String(nominal),
-        saldo_berjalan: String(lastSaldo + nominal),
-      }]);
+      const { error: kasErr } = await withTimeout(
+        supabase.from('kas').insert([{
+          id:             generateId('KAS'),
+          tanggal:        body.tanggal_bayar || new Date().toISOString().split('T')[0],
+          cabang_olahraga: body.cabang_olahraga,
+          jenis:          'Masuk',
+          sumber:         'Manual',
+          kategori:       'SPP',
+          keterangan:     `SPP ${body.nama_anggota} ${body.bulan}/${body.tahun}${nomor_kwitansi ? ` (${nomor_kwitansi})` : ''}`,
+          nominal:        String(nominal),
+          saldo_berjalan: String(lastSaldo + nominal),
+        }])
+      );
 
       if (kasErr) {
         // Kas gagal bukan critical — pembayaran sudah tersimpan, cukup log
@@ -200,11 +210,13 @@ export async function PUT(request: Request) {
     if (!body.id) return NextResponse.json({ success: false, error: 'id record wajib diisi untuk update' }, { status: 400 });
 
     // Ambil record lama untuk perbandingan status (cegah double-insert kas)
-    const { data: existing, error: fetchErr } = await supabase
-      .from('pembayaran_spp')
-      .select('status_bayar, nomor_kwitansi')
-      .eq('id', body.id)
-      .single();
+    const { data: existing, error: fetchErr } = await withTimeout(
+      supabase
+        .from('pembayaran_spp')
+        .select('status_bayar, nomor_kwitansi')
+        .eq('id', body.id)
+        .single()
+    );
 
     if (fetchErr) {
       return NextResponse.json({ success: false, error: `Record tidak ditemukan: ${supabaseErrorMessage(fetchErr)}` }, { status: 404 });
@@ -217,24 +229,26 @@ export async function PUT(request: Request) {
       nomor_kwitansi = nomor;
     }
 
-    const { data: updated, error: updateErr } = await supabase
-      .from('pembayaran_spp')
-      .update({
-        id_anggota:      body.id_anggota,
-        nama_anggota:    body.nama_anggota,
-        cabang_olahraga: body.cabang_olahraga,
-        bulan:           String(body.bulan),
-        tahun:           String(body.tahun),
-        nominal:         String(body.nominal),
-        status_bayar:    body.status_bayar,
-        tanggal_bayar:   body.tanggal_bayar || new Date().toISOString().split('T')[0],
-        metode_bayar:    body.metode_bayar || 'Cash',
-        nomor_kwitansi,
-        catatan:         body.catatan || '',
-      })
-      .eq('id', body.id)
-      .select()
-      .single();
+    const { data: updated, error: updateErr } = await withTimeout(
+      supabase
+        .from('pembayaran_spp')
+        .update({
+          id_anggota:      body.id_anggota,
+          nama_anggota:    body.nama_anggota,
+          cabang_olahraga: body.cabang_olahraga,
+          bulan:           String(body.bulan),
+          tahun:           String(body.tahun),
+          nominal:         String(body.nominal),
+          status_bayar:    body.status_bayar,
+          tanggal_bayar:   body.tanggal_bayar || new Date().toISOString().split('T')[0],
+          metode_bayar:    body.metode_bayar || 'Cash',
+          nomor_kwitansi,
+          catatan:         body.catatan || '',
+        })
+        .eq('id', body.id)
+        .select()
+        .single()
+    );
 
     if (updateErr) {
       const detail = supabaseErrorMessage(updateErr);
@@ -246,26 +260,30 @@ export async function PUT(request: Request) {
     const wasLunas = existing?.status_bayar === 'Lunas';
     const nowLunas = body.status_bayar === 'Lunas';
     if (!wasLunas && nowLunas) {
-      const { data: allKas } = await supabase
-        .from('kas')
-        .select('saldo_berjalan')
-        .order('created_at', { ascending: false })
-        .limit(1);
+      const { data: allKas } = await withTimeout(
+        supabase
+          .from('kas')
+          .select('saldo_berjalan')
+          .order('created_at', { ascending: false })
+          .limit(1)
+      );
 
       const lastSaldo = (allKas && allKas.length > 0) ? parseFloat(String(allKas[0].saldo_berjalan || '0')) : 0;
       const nominal   = parseFloat(String(body.nominal || '0'));
 
-      await supabase.from('kas').insert([{
-        id:             generateId('KAS'),
-        tanggal:        body.tanggal_bayar || new Date().toISOString().split('T')[0],
-        cabang_olahraga: body.cabang_olahraga || '',
-        jenis:          'Masuk',
-        sumber:         'Manual',
-        kategori:       'SPP',
-        keterangan:     `SPP Edit ${body.nama_anggota} ${body.bulan}/${body.tahun}${nomor_kwitansi ? ` (${nomor_kwitansi})` : ''}`,
-        nominal:        String(nominal),
-        saldo_berjalan: String(lastSaldo + nominal),
-      }]);
+      await withTimeout(
+        supabase.from('kas').insert([{
+          id:             generateId('KAS'),
+          tanggal:        body.tanggal_bayar || new Date().toISOString().split('T')[0],
+          cabang_olahraga: body.cabang_olahraga || '',
+          jenis:          'Masuk',
+          sumber:         'Manual',
+          kategori:       'SPP',
+          keterangan:     `SPP Edit ${body.nama_anggota} ${body.bulan}/${body.tahun}${nomor_kwitansi ? ` (${nomor_kwitansi})` : ''}`,
+          nominal:        String(nominal),
+          saldo_berjalan: String(lastSaldo + nominal),
+        }])
+      );
     }
 
     return NextResponse.json({ success: true, message: 'Pembayaran berhasil diperbarui', nomor_kwitansi, data: updated });
@@ -289,7 +307,9 @@ export async function DELETE(request: Request) {
 
     if (!id) return NextResponse.json({ success: false, error: 'Parameter id wajib diisi' }, { status: 400 });
 
-    const { error } = await supabase.from('pembayaran_spp').delete().eq('id', id);
+    const { error } = await withTimeout(
+      supabase.from('pembayaran_spp').delete().eq('id', id)
+    );
     if (error) {
       const detail = supabaseErrorMessage(error);
       return NextResponse.json({ success: false, error: `Gagal menghapus: ${detail}` }, { status: 500 });

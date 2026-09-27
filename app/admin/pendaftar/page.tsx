@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { UserPlus, CheckCircle, XCircle, Eye, Loader2, Filter, RefreshCw, Trash2, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { Pendaftar } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate, fetchWithTimeout } from '@/lib/utils';
+
 
 export default function AdminPendaftarPage() {
   const [data, setData] = useState<Pendaftar[]>([]);
@@ -16,9 +17,12 @@ export default function AdminPendaftarPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/pendaftar${filter ? `?status=${filter}` : ''}`);
+      const res = await fetchWithTimeout(`/api/pendaftar${filter ? `?status=${filter}` : ''}`);
       const json = await res.json();
       if (json.success) setData(json.data || []);
+      else console.error('Gagal memuat pendaftar:', json.error);
+    } catch (err) {
+      console.error('Pendaftar load error:', err instanceof Error ? err.message : err);
     } finally { setLoading(false); }
   }, [filter]);
 
@@ -27,7 +31,7 @@ export default function AdminPendaftarPage() {
   const handleAction = async (id: string, action: 'approve' | 'reject') => {
     setProcessing(id);
     try {
-      const res = await fetch('/api/pendaftar', {
+      const res = await fetchWithTimeout('/api/pendaftar', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, action }),
@@ -36,14 +40,18 @@ export default function AdminPendaftarPage() {
       if (json.success) {
         setSelected(null);
         loadData();
+      } else {
+        alert(`Gagal memproses pendaftar: ${json.error || 'Terjadi kesalahan pada server'}`);
       }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
     } finally { setProcessing(null); }
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus data pendaftar ini?')) return;
     try {
-      const res = await fetch(`/api/pendaftar?id=${id}`, { method: 'DELETE' });
+      const res = await fetchWithTimeout(`/api/pendaftar?id=${id}`, { method: 'DELETE' }, 12000);
       const json = await res.json();
       if (json.success) {
         setSelected(null);
@@ -51,8 +59,8 @@ export default function AdminPendaftarPage() {
       } else {
         alert(json.error || 'Gagal menghapus pendaftar');
       }
-    } catch (err) {
-      alert('Terjadi kesalahan saat menghapus pendaftar');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus pendaftar');
     }
   };
 

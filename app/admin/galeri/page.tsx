@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Camera, Upload, Trash2, Star, StarOff, ArrowUp, ArrowDown, X, Loader2, Plus } from 'lucide-react';
 import { KATEGORI, KATEGORI_LIST, type KategoriType } from '@/lib/constants';
+import { fetchWithTimeout } from '@/lib/utils';
 import ImageCropModal from '@/components/ImageCropModal';
 
 interface GaleriItem {
@@ -47,7 +48,7 @@ export default function AdminGaleriPage() {
 
   const fetchItems = async () => {
     try {
-      const res = await fetch('/api/galeri?limit=50');
+      const res = await fetchWithTimeout('/api/galeri?limit=50', {}, 12000);
       const json = await res.json();
       setItems(json.data || []);
     } catch {
@@ -138,10 +139,10 @@ export default function AdminGaleriPage() {
       // Debug log — konfirmasi kategori yang benar-benar dikirim
       console.log('[Upload] Mengirim kategori:', form.kategori, '| judul:', form.judul.trim());
 
-      const res = await fetch('/api/galeri/upload', {
+      const res = await fetchWithTimeout('/api/galeri/upload', {
         method: 'POST',
         body: formData,
-      });
+      }, 15000);
 
       const json = await res.json();
 
@@ -166,7 +167,7 @@ export default function AdminGaleriPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Hapus foto ini? Tindakan ini tidak dapat dibatalkan.')) return;
     try {
-      const res = await fetch(`/api/galeri/${id}`, { method: 'DELETE' });
+      const res = await fetchWithTimeout(`/api/galeri/${id}`, { method: 'DELETE' }, 12000);
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
         throw new Error(json.error || 'Gagal menghapus foto.');
@@ -180,11 +181,11 @@ export default function AdminGaleriPage() {
 
   const handleToggleFeatured = async (item: GaleriItem) => {
     try {
-      const res = await fetch(`/api/galeri/${item.id}`, {
+      const res = await fetchWithTimeout(`/api/galeri/${item.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_featured: !item.is_featured }),
-      });
+      }, 12000);
       if (!res.ok) throw new Error('Gagal mengubah status unggulan.');
       fetchItems();
     } catch {
@@ -195,11 +196,11 @@ export default function AdminGaleriPage() {
   const handleMoveOrder = async (item: GaleriItem, direction: 'up' | 'down') => {
     const newUrutan = direction === 'up' ? Math.max(0, item.urutan - 1) : item.urutan + 1;
     try {
-      const res = await fetch(`/api/galeri/${item.id}`, {
+      const res = await fetchWithTimeout(`/api/galeri/${item.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ urutan: newUrutan }),
-      });
+      }, 12000);
       if (!res.ok) throw new Error('Gagal mengubah urutan.');
       fetchItems();
     } catch {

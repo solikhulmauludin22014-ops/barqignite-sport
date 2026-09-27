@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Clock, Loader2, Plus, Filter, UserPlus, Trash2, Download, ClipboardCheck, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import type { Anggota, Presensi } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, fetchWithTimeout } from '@/lib/utils';
+
 
 const statusOptions = ['Hadir', 'Izin', 'Sakit', 'Alpa'] as const;
 type StatusHadir = typeof statusOptions[number];
@@ -96,7 +97,7 @@ export default function AdminPresensiPage() {
     setLoading(true);
     try {
       const url = kategoriFilter ? `/api/anggota?status=Aktif&kategori=${kategoriFilter}` : '/api/anggota?status=Aktif';
-      const res = await fetch(url);
+      const res = await fetchWithTimeout(url);
       const json = await res.json();
       if (json.success) {
         const data: Anggota[] = json.data || [];
@@ -107,7 +108,11 @@ export default function AdminPresensiPage() {
           kategori: a.kategori,
           status_hadir: 'Hadir',
         })));
+      } else {
+        console.error('Gagal memuat anggota:', json.error);
       }
+    } catch (err) {
+      console.error('Presensi load anggota error:', err instanceof Error ? err.message : err);
     } finally {
       setLoading(false);
     }
@@ -123,9 +128,12 @@ export default function AdminPresensiPage() {
       if (konfirmasiFilter.tanggal) params.set('tanggal', konfirmasiFilter.tanggal);
       if (konfirmasiFilter.sesi) params.set('sesi', konfirmasiFilter.sesi);
       if (konfirmasiFilter.status) params.set('status', konfirmasiFilter.status);
-      const res = await fetch(`/api/presensi?${params.toString()}`);
+      const res = await fetchWithTimeout(`/api/presensi?${params.toString()}`);
       const json = await res.json();
       if (json.success) setKonfirmasiData(json.data || []);
+      else console.error('Gagal memuat konfirmasi:', json.error);
+    } catch (err) {
+      console.error('Presensi konfirmasi load error:', err instanceof Error ? err.message : err);
     } finally {
       setKonfirmasiLoading(false);
     }
@@ -139,7 +147,7 @@ export default function AdminPresensiPage() {
   const handleKonfirmasi = async (id: string, statusBaru: 'Hadir' | 'Alpa') => {
     setConfirmingIds((prev) => new Set(prev).add(id));
     try {
-      const res = await fetch('/api/presensi', {
+      const res = await fetchWithTimeout('/api/presensi', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status_hadir: statusBaru }),
@@ -150,7 +158,11 @@ export default function AdminPresensiPage() {
         setKonfirmasiData((prev) =>
           prev.map((row) => row.id === id ? { ...row, status_hadir: statusBaru } : row)
         );
+      } else {
+        alert(`Gagal mengkonfirmasi: ${json.error || 'Terjadi kesalahan'}`);
       }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
     } finally {
       setConfirmingIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
     }
@@ -166,7 +178,7 @@ export default function AdminPresensiPage() {
     const ids = pending.map((r) => r.id!);
     ids.forEach((id) => setConfirmingIds((prev) => new Set(prev).add(id)));
     try {
-      const res = await fetch('/api/presensi', {
+      const res = await fetchWithTimeout('/api/presensi', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids, status_hadir: statusBaru }),
@@ -178,7 +190,11 @@ export default function AdminPresensiPage() {
             row.status_hadir === 'Menunggu Konfirmasi' ? { ...row, status_hadir: statusBaru } : row
           )
         );
+      } else {
+        alert(`Gagal batch konfirmasi: ${json.error || 'Terjadi kesalahan'}`);
       }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
     } finally {
       ids.forEach((id) => setConfirmingIds((prev) => { const s = new Set(prev); s.delete(id); return s; }));
     }
@@ -198,7 +214,7 @@ export default function AdminPresensiPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/presensi', {
+      const res = await fetchWithTimeout('/api/presensi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tanggal, sesi, items }),
@@ -207,7 +223,11 @@ export default function AdminPresensiPage() {
       if (json.success) {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
+      } else {
+        alert(`Gagal menyimpan presensi: ${json.error || 'Terjadi kesalahan pada server'}`);
       }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
     } finally {
       setSaving(false);
     }
@@ -222,9 +242,11 @@ export default function AdminPresensiPage() {
       if (rekapFilter.kategori) params.set('kategori', rekapFilter.kategori);
       if (rekapFilter.sesi) params.set('sesi', rekapFilter.sesi);
       if (rekapFilter.status) params.set('status', rekapFilter.status);
-      const res = await fetch(`/api/presensi?${params.toString()}`);
+      const res = await fetchWithTimeout(`/api/presensi?${params.toString()}`, {}, 12000);
       const json = await res.json();
       if (json.success) setRekapData(json.data || []);
+    } catch (err) {
+      console.error('Gagal memuat rekap:', err);
     } finally {
       setRekapLoading(false);
     }
@@ -233,15 +255,15 @@ export default function AdminPresensiPage() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus data presensi ini?')) return;
     try {
-      const res = await fetch(`/api/presensi?id=${id}`, { method: 'DELETE' });
+      const res = await fetchWithTimeout(`/api/presensi?id=${id}`, { method: 'DELETE' }, 12000);
       const json = await res.json();
       if (json.success) {
         loadRekap();
       } else {
         alert(json.error || 'Gagal menghapus presensi');
       }
-    } catch {
-      alert('Terjadi kesalahan saat menghapus presensi');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus presensi');
     }
   };
 

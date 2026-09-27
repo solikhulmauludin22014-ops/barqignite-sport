@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
 
 export async function GET() {
   try {
-    const { data, error } = await supabase.from('pengaturan_pembayaran').select('*').eq('id', 'SETTING-001').single();
+    const { data, error } = await withTimeout(supabase.from('pengaturan_pembayaran').select('*').eq('id', 'SETTING-001').single());
     if (error && error.code !== 'PGRST116') throw error; // PGRST116 is not found
 
     return NextResponse.json({ success: true, data: data || {} });
@@ -24,14 +25,14 @@ export async function PUT(request: Request) {
     const { id, updated_at, ...updateFields } = body;
     
     // Check if exists first
-    const { data: existing } = await supabase.from('pengaturan_pembayaran').select('id').eq('id', 'SETTING-001').single();
+    const { data: existing } = await withTimeout(supabase.from('pengaturan_pembayaran').select('id').eq('id', 'SETTING-001').single());
     
     let error;
     if (existing) {
-      const { error: updateError } = await supabase.from('pengaturan_pembayaran').update({ ...updateFields, updated_at: new Date().toISOString() }).eq('id', 'SETTING-001');
+      const { error: updateError } = await withTimeout(supabase.from('pengaturan_pembayaran').update({ ...updateFields, updated_at: new Date().toISOString() }).eq('id', 'SETTING-001'));
       error = updateError;
     } else {
-      const { error: insertError } = await supabase.from('pengaturan_pembayaran').insert([{ id: 'SETTING-001', ...updateFields }]);
+      const { error: insertError } = await withTimeout(supabase.from('pengaturan_pembayaran').insert([{ id: 'SETTING-001', ...updateFields }]));
       error = insertError;
     }
 

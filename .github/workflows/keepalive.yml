@@ -1,0 +1,34 @@
+name: Supabase Keep-Alive Cron
+
+on:
+  schedule:
+    # Berjalan setiap 3 hari sekali pada jam 03:00 UTC (10:00 WIB)
+    # Jadwal ini memastikan Supabase free tier tidak pernah mencapai batas auto-pause (±7 hari tanpa aktivitas)
+    - cron: '0 3 */3 * *'
+  workflow_dispatch: # Memungkinkan trigger manual dari tab GitHub Actions
+
+jobs:
+  ping-supabase:
+    name: Ping Keep-Alive Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit Keep-Alive Endpoint
+        run: |
+          TARGET_URL="${{ secrets.APP_URL }}"
+          if [ -z "$TARGET_URL" ]; then
+            TARGET_URL="https://barqignite-sport.vercel.app"
+          fi
+          
+          echo "Sending keep-alive ping to: $TARGET_URL/api/keepalive"
+          HTTP_RESPONSE=$(curl -s -o response.json -w "%{http_code}" "$TARGET_URL/api/keepalive")
+          
+          echo "HTTP Status Code: $HTTP_RESPONSE"
+          echo "Response Body:"
+          cat response.json || true
+          echo ""
+
+          if [ "$HTTP_RESPONSE" -ge 200 ] && [ "$HTTP_RESPONSE" -lt 400 ]; then
+            echo "✅ Keep-alive successful! Supabase active."
+          else
+            echo "⚠️ Warning: Keep-alive returned status $HTTP_RESPONSE"
+          fi

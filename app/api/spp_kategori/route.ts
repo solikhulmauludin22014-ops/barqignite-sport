@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
 
 export async function GET(request: Request) {
   try {
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
     if (cabang) query = query.eq('cabang', cabang);
     if (is_active !== null) query = query.eq('is_active', is_active === 'true');
 
-    const { data, error } = await query;
+    const { data, error } = await withTimeout(query);
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     if (!session) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { error } = await supabase.from('spp_kategori').insert([body]);
+    const { error } = await withTimeout(supabase.from('spp_kategori').insert([body]));
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Data berhasil ditambahkan' });
@@ -48,7 +49,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...updateData } = body;
     
-    const { error } = await supabase.from('spp_kategori').update(updateData).eq('id', id);
+    const { error } = await withTimeout(supabase.from('spp_kategori').update(updateData).eq('id', id));
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Data berhasil diperbarui' });
@@ -68,7 +69,7 @@ export async function DELETE(request: Request) {
     
     if (!id) return NextResponse.json({ success: false, error: 'ID tidak ditemukan' }, { status: 400 });
 
-    const { error } = await supabase.from('spp_kategori').delete().eq('id', id);
+    const { error } = await withTimeout(supabase.from('spp_kategori').delete().eq('id', id));
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Data berhasil dihapus' });

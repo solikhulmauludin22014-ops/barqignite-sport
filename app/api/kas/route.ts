@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import type { Kas } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
+
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
     if (jenis) query = query.eq('jenis', jenis);
     if (cabang) query = query.eq('cabang_olahraga', cabang);
 
-    const { data, error } = await query;
+    const { data, error } = await withTimeout(query);
 
     if (error) throw error;
 
@@ -33,8 +35,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data: filteredData });
   } catch (error) {
-    console.error('Kas GET error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal mengambil data kas' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal mengambil data kas';
+    console.error('Kas GET error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -47,11 +50,9 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    const { data: allKas, error: kasError } = await supabase
-      .from('kas')
-      .select('saldo_berjalan')
-      .order('created_at', { ascending: false })
-      .limit(1);
+    const { data: allKas, error: kasError } = await withTimeout(
+      supabase.from('kas').select('saldo_berjalan').order('created_at', { ascending: false }).limit(1)
+    );
 
     if (kasError) throw kasError;
 
@@ -71,16 +72,17 @@ export async function POST(request: Request) {
       saldo_berjalan: String(newSaldo),
     };
 
-    const { error: insertError } = await supabase
-      .from('kas')
-      .insert([newKas]);
+    const { error: insertError } = await withTimeout(
+      supabase.from('kas').insert([newKas])
+    );
 
     if (insertError) throw insertError;
 
     return NextResponse.json({ success: true, data: newKas, message: 'Transaksi kas berhasil dicatat' });
   } catch (error) {
-    console.error('Kas POST error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal mencatat transaksi kas' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Gagal mencatat transaksi kas';
+    console.error('Kas POST error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 

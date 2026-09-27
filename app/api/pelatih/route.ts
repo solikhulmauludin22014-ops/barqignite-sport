@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import type { Pelatih } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { withTimeout } from '@/lib/utils';
+
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -18,15 +20,18 @@ export async function GET(request: Request) {
     let query = supabase.from('pelatih').select('*');
     if (cabang) query = query.eq('cabang_olahraga', cabang);
 
-    const { data, error } = await query.order('urutan', { ascending: true });
+    const { data, error } = await withTimeout(
+      query.order('urutan', { ascending: true })
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Pelatih GET error:', error);
+    const msg = error instanceof Error ? error.message : 'Gagal mengambil data pelatih';
+    console.error('Pelatih GET error:', msg);
     return NextResponse.json(
-      { success: false, error: 'Gagal mengambil data pelatih' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }
@@ -51,10 +56,9 @@ export async function POST(request: Request) {
       urutan: body.urutan || 99,
     };
 
-    const { data, error } = await supabase
-      .from('pelatih')
-      .insert([newPelatih])
-      .select();
+    const { data, error } = await withTimeout(
+      supabase.from('pelatih').insert([newPelatih]).select()
+    );
 
     if (error) throw error;
 
@@ -64,9 +68,10 @@ export async function POST(request: Request) {
       message: 'Pelatih berhasil ditambahkan',
     });
   } catch (error) {
-    console.error('Pelatih POST error:', error);
+    const msg = error instanceof Error ? error.message : 'Gagal menambahkan pelatih';
+    console.error('Pelatih POST error:', msg);
     return NextResponse.json(
-      { success: false, error: 'Gagal menambahkan pelatih' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }

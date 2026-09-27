@@ -9,6 +9,8 @@ import Image from 'next/image';
 import * as XLSX from 'xlsx';
 import type { Pelatih } from '@/types';
 import ImageCropModal from '@/components/ImageCropModal';
+import { fetchWithTimeout } from '@/lib/utils';
+
 
 const emptyForm = {
   nama: '',
@@ -75,7 +77,7 @@ function FotoUploader({ currentUrl, oldUrl, onUploaded, onError }: FotoUploaderP
       fd.append('foto', blob, 'foto-pelatih.jpg');
       if (oldUrl) fd.append('old_path', oldUrl);
 
-      const res = await fetch('/api/pelatih/upload', { method: 'POST', body: fd });
+      const res = await fetchWithTimeout('/api/pelatih/upload', { method: 'POST', body: fd }, 15000);
       const json = await res.json();
 
       if (!json.success) {
@@ -212,9 +214,12 @@ export default function AdminPelatihPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/pelatih');
+      const res = await fetchWithTimeout('/api/pelatih');
       const json = await res.json();
       if (json.success) setData(json.data || []);
+      else console.error('Gagal memuat pelatih:', json.error);
+    } catch (err) {
+      console.error('Pelatih load error:', err instanceof Error ? err.message : err);
     } finally { setLoading(false); }
   }, []);
 
@@ -247,7 +252,7 @@ export default function AdminPelatihPage() {
     try {
       const method = editing ? 'PUT' : 'POST';
       const body = { ...form, urutan: parseInt(form.urutan), ...(editing ? { id: editing.id } : {}) };
-      const res = await fetch('/api/pelatih', {
+      const res = await fetchWithTimeout('/api/pelatih', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -261,6 +266,8 @@ export default function AdminPelatihPage() {
       } else {
         setUploadError(json.error || 'Gagal menyimpan data');
       }
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
     } finally {
       setSaving(false);
     }
@@ -269,11 +276,13 @@ export default function AdminPelatihPage() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus data pelatih ini?')) return;
     try {
-      const res = await fetch(`/api/pelatih?id=${id}`, { method: 'DELETE' });
+      const res = await fetchWithTimeout(`/api/pelatih?id=${id}`, { method: 'DELETE' }, 12000);
       const json = await res.json();
       if (json.success) { loadData(); }
       else { alert(json.error || 'Gagal menghapus pelatih'); }
-    } catch { alert('Terjadi kesalahan saat menghapus pelatih'); }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus pelatih');
+    }
   };
 
   const exportToExcel = () => {
