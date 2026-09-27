@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, Trash2, Pencil, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { formatCurrency, getMonthName, fetchWithTimeout } from '@/lib/utils';
+import { formatCurrency, getMonthName, fetchWithTimeout, formatErrorMessage } from '@/lib/utils';
 import type { Kas } from '@/types';
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
@@ -83,7 +83,7 @@ export default function AdminKasPage() {
         alert(`Gagal menyimpan: ${json.error || 'Terjadi kesalahan pada server'}`);
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
+      alert(formatErrorMessage(err, 'Gagal terhubung ke server — coba lagi.'));
     } finally {
       setSaving(false);
     }
@@ -97,10 +97,10 @@ export default function AdminKasPage() {
       if (json.success) {
         loadData();
       } else {
-        alert(json.error || 'Gagal menghapus transaksi');
+        alert(`Gagal menghapus transaksi: ${json.error || 'Terjadi kesalahan'}`);
       }
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus transaksi');
+      alert(formatErrorMessage(err, 'Terjadi kesalahan saat menghapus transaksi'));
     }
   };
 

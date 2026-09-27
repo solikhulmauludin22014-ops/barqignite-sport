@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { withTimeout } from '@/lib/utils';
+import { formatErrorMessage, withTimeout } from '@/lib/utils';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 // Next.js 15: params adalah Promise
 export async function DELETE(
@@ -8,6 +10,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
 
     // Ambil foto_url untuk hapus dari Storage juga
@@ -28,7 +35,7 @@ export async function DELETE(
     );
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: formatErrorMessage(error, 'Gagal menghapus foto') }, { status: 500 });
     }
 
     // Hapus file dari Supabase Storage jika ada
@@ -44,8 +51,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('[API /galeri/[id] DELETE]', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const msg = formatErrorMessage(err, 'Gagal menghapus foto');
+    console.error('[API /galeri/[id] DELETE]', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
@@ -54,6 +62,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await req.json();
 
@@ -67,12 +80,13 @@ export async function PATCH(
     );
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: formatErrorMessage(error, 'Gagal memperbarui foto') }, { status: 500 });
     }
 
     return NextResponse.json({ data });
   } catch (err) {
-    console.error('[API /galeri/[id] PATCH]', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const msg = formatErrorMessage(err, 'Gagal memperbarui foto');
+    console.error('[API /galeri/[id] PATCH]', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Presensi } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { withTimeout } from '@/lib/utils';
+import { formatErrorMessage, withTimeout } from '@/lib/utils';
 
 
 function generateId(prefix: string = 'ID'): string {
@@ -139,8 +139,9 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Presensi berhasil diperbarui' });
   } catch (error) {
-    console.error('Presensi PUT error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal memperbarui presensi' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal memperbarui presensi');
+    console.error('Presensi PUT error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -163,7 +164,8 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Data presensi berhasil dihapus' });
   } catch (error) {
-    console.error('Presensi DELETE error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menghapus presensi' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal menghapus presensi');
+    console.error('Presensi DELETE error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

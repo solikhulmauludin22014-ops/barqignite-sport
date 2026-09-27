@@ -11,11 +11,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Client untuk browser / public pages (terbatas oleh RLS)
 export const supabasePublic = createClient(supabaseUrl, supabaseAnonKey);
 
-// Client untuk API Routes server-side (bypass RLS dengan service role key)
-// Jika service role key tidak ada, fallback ke anon key (akan terbatas oleh RLS)
-export const supabase = createClient(
+// Client untuk API Routes server-side. Semua route API bergantung pada service
+// role agar tetap dapat bekerja setelah RLS diaktifkan.
+const serverKey = supabaseServiceKey || supabaseAnonKey;
+const serverClient = createClient(
   supabaseUrl,
-  supabaseServiceKey || supabaseAnonKey,
+  serverKey,
   {
     auth: {
       autoRefreshToken: false,
@@ -24,6 +25,20 @@ export const supabase = createClient(
   }
 );
 
+// Jangan biarkan konfigurasi yang salah terlihat seperti bug database biasa.
+// Proxy ini mencegah query server berjalan menggunakan anon key dan gagal
+// belakangan dengan pesan RLS yang kurang membantu.
+export const supabase = new Proxy(serverClient, {
+  get(target, property, receiver) {
+    if (!supabaseServiceKey && (property === 'from' || property === 'storage')) {
+      throw new Error(
+        'SUPABASE_SERVICE_ROLE_KEY belum dikonfigurasi. API admin membutuhkan service role key agar dapat melewati RLS.'
+      );
+    }
+    return Reflect.get(target, property, receiver);
+  },
+});
+
 if (!supabaseServiceKey && typeof window === 'undefined') {
-  console.warn('[Supabase] SUPABASE_SERVICE_ROLE_KEY tidak ditemukan. API Routes mungkin gagal karena RLS.');
+  console.error('[Supabase] SUPABASE_SERVICE_ROLE_KEY tidak ditemukan. Semua API server akan ditolak.');
 }

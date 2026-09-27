@@ -3,8 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Kas } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { withTimeout } from '@/lib/utils';
-
+import { withTimeout, formatErrorMessage } from '@/lib/utils';
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -35,7 +34,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data: filteredData });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Gagal mengambil data kas';
+    const msg = formatErrorMessage(error, 'Gagal mengambil data kas');
     console.error('Kas GET error:', msg);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
@@ -80,7 +79,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: newKas, message: 'Transaksi kas berhasil dicatat' });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Gagal mencatat transaksi kas';
+    const msg = formatErrorMessage(error, 'Gagal mencatat transaksi kas');
     console.error('Kas POST error:', msg);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
@@ -95,26 +94,29 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     
-    const { error: updateError } = await supabase
-      .from('kas')
-      .update({
-        tanggal: body.tanggal,
-        cabang_olahraga: body.cabang_olahraga || '',
-        jenis: body.jenis,
-        sumber: body.sumber || 'Manual',
-        kategori: body.kategori,
-        keterangan: body.keterangan,
-        nominal: body.nominal,
-        saldo_berjalan: body.saldo_berjalan,
-      })
-      .eq('id', body.id);
+    const { error: updateError } = await withTimeout(
+      supabase
+        .from('kas')
+        .update({
+          tanggal: body.tanggal,
+          cabang_olahraga: body.cabang_olahraga || '',
+          jenis: body.jenis,
+          sumber: body.sumber || 'Manual',
+          kategori: body.kategori,
+          keterangan: body.keterangan,
+          nominal: body.nominal,
+          saldo_berjalan: body.saldo_berjalan,
+        })
+        .eq('id', body.id)
+    );
 
     if (updateError) throw updateError;
 
     return NextResponse.json({ success: true, message: 'Transaksi berhasil diperbarui' });
   } catch (error) {
-    console.error('Kas PUT error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal memperbarui transaksi' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal memperbarui transaksi');
+    console.error('Kas PUT error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -132,12 +134,15 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'ID tidak ditemukan' }, { status: 400 });
     }
 
-    const { error } = await supabase.from('kas').delete().eq('id', id);
+    const { error } = await withTimeout(
+      supabase.from('kas').delete().eq('id', id)
+    );
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Data kas berhasil dihapus' });
   } catch (error) {
-    console.error('Kas DELETE error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menghapus kas' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal menghapus kas');
+    console.error('Kas DELETE error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

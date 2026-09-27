@@ -3,8 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Anggota } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { withTimeout } from '@/lib/utils';
-
+import { withTimeout, formatErrorMessage } from '@/lib/utils';
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -31,7 +30,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Gagal mengambil data anggota';
+    const msg = formatErrorMessage(error, 'Gagal mengambil data anggota');
     console.error('Anggota GET error:', msg);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
@@ -67,7 +66,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: data[0], message: 'Anggota berhasil ditambahkan' });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Gagal menambahkan anggota';
+    const msg = formatErrorMessage(error, 'Gagal menambahkan anggota');
     console.error('Anggota POST error:', msg);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
@@ -82,27 +81,30 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     
-    const { error } = await supabase
-      .from('anggota')
-      .update({
-        nama: body.nama,
-        cabang_olahraga: body.cabang_olahraga,
-        tanggal_lahir: body.tanggal_lahir,
-        jenis_kelamin: body.jenis_kelamin,
-        alamat: body.alamat,
-        no_hp: body.no_hp,
-        email: body.email,
-        kategori: body.kategori,
-        status: body.status,
-      })
-      .eq('id', body.id);
+    const { error } = await withTimeout(
+      supabase
+        .from('anggota')
+        .update({
+          nama: body.nama,
+          cabang_olahraga: body.cabang_olahraga,
+          tanggal_lahir: body.tanggal_lahir,
+          jenis_kelamin: body.jenis_kelamin,
+          alamat: body.alamat,
+          no_hp: body.no_hp,
+          email: body.email,
+          kategori: body.kategori,
+          status: body.status,
+        })
+        .eq('id', body.id)
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Anggota berhasil diperbarui' });
   } catch (error) {
-    console.error('Anggota PUT error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal memperbarui anggota' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal memperbarui anggota');
+    console.error('Anggota PUT error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -120,12 +122,15 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'ID tidak ditemukan' }, { status: 400 });
     }
 
-    const { error } = await supabase.from('anggota').delete().eq('id', id);
+    const { error } = await withTimeout(
+      supabase.from('anggota').delete().eq('id', id)
+    );
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Data anggota berhasil dihapus' });
   } catch (error) {
-    console.error('Anggota DELETE error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menghapus anggota' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal menghapus anggota');
+    console.error('Anggota DELETE error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Pendaftar, Anggota } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { withTimeout } from '@/lib/utils';
+import { formatErrorMessage, withTimeout } from '@/lib/utils';
 
 
 function generateId(prefix: string = 'ID'): string {
@@ -144,8 +144,9 @@ export async function PUT(request: Request) {
       message: action === 'approve' ? 'Pendaftar berhasil diterima dan ditambahkan ke anggota' : 'Pendaftar ditolak',
     });
   } catch (error) {
-    console.error('Pendaftar PUT error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal memperbarui status pendaftar' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal memperbarui status pendaftar');
+    console.error('Pendaftar PUT error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -168,7 +169,8 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Data pendaftar berhasil dihapus' });
   } catch (error) {
-    console.error('Pendaftar DELETE error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menghapus pendaftar' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal menghapus pendaftar');
+    console.error('Pendaftar DELETE error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

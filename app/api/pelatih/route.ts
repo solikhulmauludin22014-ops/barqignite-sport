@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Pelatih } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { withTimeout } from '@/lib/utils';
+import { formatErrorMessage, withTimeout } from '@/lib/utils';
 
 
 function generateId(prefix: string = 'ID'): string {
@@ -103,9 +103,10 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Pelatih berhasil diperbarui' });
   } catch (error) {
-    console.error('Pelatih PUT error:', error);
+    const msg = formatErrorMessage(error, 'Gagal memperbarui pelatih');
+    console.error('Pelatih PUT error:', msg);
     return NextResponse.json(
-      { success: false, error: 'Gagal memperbarui pelatih' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }
@@ -130,7 +131,8 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Data pelatih berhasil dihapus' });
   } catch (error) {
-    console.error('Pelatih DELETE error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menghapus pelatih' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal menghapus pelatih');
+    console.error('Pelatih DELETE error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { withTimeout } from '@/lib/utils';
+import { formatErrorMessage, withTimeout } from '@/lib/utils';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 
 export async function GET(req: NextRequest) {
@@ -37,6 +39,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     const { judul, kategori, foto_url, tanggal, is_featured, urutan } = body;
 
@@ -59,7 +66,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (err) {
-    console.error('[API /galeri POST]', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const msg = formatErrorMessage(err, 'Gagal menyimpan data galeri');
+    console.error('[API /galeri POST]', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import type { Jadwal } from '@/types';
+import type { Jadwal, CabangOlahraga } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { withTimeout } from '@/lib/utils';
-
+import { withTimeout, formatErrorMessage } from '@/lib/utils';
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -34,7 +33,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Gagal mengambil jadwal';
+    const msg = formatErrorMessage(error, 'Gagal mengambil jadwal');
     console.error('Jadwal GET error:', msg);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
@@ -48,15 +47,17 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+    const cabang: CabangOlahraga = (body.cabang_olahraga === 'Renang' ? 'Renang' : 'Basket');
+
     const newJadwal: Jadwal = {
       id: generateId('JDW'),
-      cabang_olahraga: body.cabang_olahraga,
-      hari: body.hari,
-      jam_mulai: body.jam_mulai,
-      jam_selesai: body.jam_selesai,
-      kategori: body.kategori,
-      lokasi: body.lokasi,
-      jenis: body.jenis,
+      cabang_olahraga: cabang,
+      hari: body.hari || 'Senin',
+      jam_mulai: body.jam_mulai || '16:00',
+      jam_selesai: body.jam_selesai || '18:00',
+      kategori: body.kategori || 'Junior',
+      lokasi: body.lokasi || '',
+      jenis: body.jenis || 'Latihan',
       tanggal: body.tanggal || '',
       keterangan: body.keterangan || '',
     };
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: data[0], message: 'Jadwal berhasil ditambahkan' });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Gagal menambahkan jadwal';
+    const msg = formatErrorMessage(error, 'Gagal menambahkan jadwal');
     console.error('Jadwal POST error:', msg);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
@@ -83,28 +84,32 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
+    const cabang: CabangOlahraga = (body.cabang_olahraga === 'Renang' ? 'Renang' : 'Basket');
     
-    const { error } = await supabase
-      .from('jadwal')
-      .update({
-        cabang_olahraga: body.cabang_olahraga,
-        hari: body.hari,
-        jam_mulai: body.jam_mulai,
-        jam_selesai: body.jam_selesai,
-        kategori: body.kategori,
-        lokasi: body.lokasi,
-        jenis: body.jenis,
-        tanggal: body.tanggal || '',
-        keterangan: body.keterangan || '',
-      })
-      .eq('id', body.id);
+    const { error } = await withTimeout(
+      supabase
+        .from('jadwal')
+        .update({
+          cabang_olahraga: cabang,
+          hari: body.hari,
+          jam_mulai: body.jam_mulai,
+          jam_selesai: body.jam_selesai,
+          kategori: body.kategori,
+          lokasi: body.lokasi,
+          jenis: body.jenis,
+          tanggal: body.tanggal || '',
+          keterangan: body.keterangan || '',
+        })
+        .eq('id', body.id)
+    );
 
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Jadwal berhasil diperbarui' });
   } catch (error) {
-    console.error('Jadwal PUT error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal memperbarui jadwal' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal memperbarui jadwal');
+    console.error('Jadwal PUT error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -122,12 +127,15 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'ID tidak ditemukan' }, { status: 400 });
     }
 
-    const { error } = await supabase.from('jadwal').delete().eq('id', id);
+    const { error } = await withTimeout(
+      supabase.from('jadwal').delete().eq('id', id)
+    );
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Data jadwal berhasil dihapus' });
   } catch (error) {
-    console.error('Jadwal DELETE error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menghapus jadwal' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal menghapus jadwal');
+    console.error('Jadwal DELETE error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

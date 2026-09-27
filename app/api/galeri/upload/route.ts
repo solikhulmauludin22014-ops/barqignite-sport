@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { KATEGORI, type KategoriType } from '@/lib/constants';
-import { withTimeout } from '@/lib/utils';
+import { formatErrorMessage, withTimeout } from '@/lib/utils';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 const BUCKET = 'galeri-dokumentasi';
 const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -11,6 +13,11 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Parse multipart form data
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
@@ -155,9 +162,10 @@ export async function POST(req: NextRequest) {
     console.log(`[API /galeri/upload] ✅ Berhasil disimpan: id=${record?.id} | kategori="${record?.kategori}" | judul="${record?.judul}"`);
     return NextResponse.json({ data: record, foto_url }, { status: 201 });
   } catch (err) {
-    console.error('[API /galeri/upload] Unexpected error:', err);
+    const msg = formatErrorMessage(err, 'Terjadi kesalahan saat upload galeri');
+    console.error('[API /galeri/upload] Unexpected error:', msg);
     return NextResponse.json(
-      { error: 'Terjadi kesalahan server yang tidak terduga. Silakan coba lagi.' },
+      { error: msg },
       { status: 500 }
     );
   }

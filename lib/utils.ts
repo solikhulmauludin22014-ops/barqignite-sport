@@ -33,6 +33,53 @@ export function withTimeout<T>(promise: PromiseLike<T> | Promise<T>, ms: number 
   return Promise.race([Promise.resolve(promise), timeout]);
 }
 
+// ─── Format Error Message (Universal Error Parser) ───────────────────────────
+// Menangani Postgres/Supabase error ({ code, message, details, hint }),
+// Error instance biasa, string, atau response JSON server tanpa menghilangkan detail teknis.
+export function formatErrorMessage(err: unknown, fallbackMessage: string = 'Terjadi kesalahan sistem'): string {
+  if (!err) return fallbackMessage;
+
+  if (typeof err === 'string') {
+    const trimmed = err.trim();
+    return trimmed || fallbackMessage;
+  }
+
+  if (typeof err === 'object') {
+    const e = err as Record<string, unknown>;
+    const parts: string[] = [];
+
+    if (e.code && typeof e.code === 'string') {
+      parts.push(`[${e.code}]`);
+    }
+    if (e.message && typeof e.message === 'string' && e.message.trim()) {
+      parts.push(e.message.trim());
+    }
+    if (e.details && typeof e.details === 'string' && e.details.trim()) {
+      parts.push(`Detail: ${e.details.trim()}`);
+    }
+    if (e.hint && typeof e.hint === 'string' && e.hint.trim()) {
+      parts.push(`Hint: ${e.hint.trim()}`);
+    }
+
+    if (parts.length > 0) {
+      return parts.join(' — ');
+    }
+
+    if (err instanceof Error && err.message) {
+      return err.message;
+    }
+
+    try {
+      const jsonStr = JSON.stringify(err);
+      if (jsonStr && jsonStr !== '{}') return jsonStr;
+    } catch {
+      // ignore
+    }
+  }
+
+  return fallbackMessage;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

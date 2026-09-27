@@ -186,10 +186,13 @@ export default function AdminGaleriPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_featured: !item.is_featured }),
       }, 12000);
-      if (!res.ok) throw new Error('Gagal mengubah status unggulan.');
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || `Gagal mengubah status unggulan (HTTP ${res.status}).`);
+      }
       fetchItems();
-    } catch {
-      setError('Gagal mengubah status unggulan.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal mengubah status unggulan.');
     }
   };
 
@@ -201,10 +204,13 @@ export default function AdminGaleriPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ urutan: newUrutan }),
       }, 12000);
-      if (!res.ok) throw new Error('Gagal mengubah urutan.');
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || `Gagal mengubah urutan (HTTP ${res.status}).`);
+      }
       fetchItems();
-    } catch {
-      setError('Gagal mengubah urutan foto.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal mengubah urutan foto.');
     }
   };
 

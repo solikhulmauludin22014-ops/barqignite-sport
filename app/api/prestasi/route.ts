@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Prestasi } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { withTimeout } from '@/lib/utils';
+import { formatErrorMessage, withTimeout } from '@/lib/utils';
 
 
 export async function GET(request: Request) {
@@ -177,9 +177,10 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Prestasi berhasil diperbarui' });
   } catch (error) {
-    console.error('Prestasi PUT error:', error);
+    const msg = formatErrorMessage(error, 'Gagal memperbarui prestasi');
+    console.error('Prestasi PUT error:', msg);
     return NextResponse.json(
-      { success: false, error: 'Gagal memperbarui prestasi' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }
@@ -215,7 +216,8 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Data prestasi berhasil dihapus' });
   } catch (error) {
-    console.error('Prestasi DELETE error:', error);
-    return NextResponse.json({ success: false, error: 'Gagal menghapus prestasi' }, { status: 500 });
+    const msg = formatErrorMessage(error, 'Gagal menghapus prestasi');
+    console.error('Prestasi DELETE error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

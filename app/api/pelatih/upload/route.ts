@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { formatErrorMessage } from '@/lib/utils';
 
 const BUCKET = 'pelatih-photos';
 const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -82,7 +83,8 @@ export async function POST(request: Request) {
       path: uploadData.path,
     });
   } catch (err) {
-    console.error('Upload foto pelatih error:', err);
-    return NextResponse.json({ success: false, error: 'Gagal upload foto' }, { status: 500 });
+    const msg = formatErrorMessage(err, 'Gagal upload foto');
+    console.error('Upload foto pelatih error:', msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
