@@ -9,6 +9,7 @@ import basketLogo from '@/LOGO BARQIGNITE BASKETBALL.jpeg';
 import swimLogo from '@/LOGO BARQIGNITE SWIM.png';
 import CounterStats from '@/components/public/CounterStats';
 import GallerySection from '@/components/public/GallerySection';
+import { getMemberStats, getPrestasiCount as getSharedPrestasiCount } from '@/lib/stats';
 export const metadata: Metadata = {
   title: 'Beranda — Barqignite Private Sport Sidoarjo',
   description: 'Club olahraga Basket & Renang terbaik di Sidoarjo. Bergabunglah dan raih prestasi bersama Barqignite Private Sport.',
@@ -28,16 +29,13 @@ async function getBranding() {
 
 async function getStats() {
   try {
-    const { count: basket } = await supabase.from('pendaftar').select('*', { count: 'exact', head: true }).eq('status_pendaftaran', 'Diterima').eq('cabang_olahraga', 'Basket');
-    const { count: renang } = await supabase.from('pendaftar').select('*', { count: 'exact', head: true }).eq('status_pendaftaran', 'Diterima').eq('cabang_olahraga', 'Renang');
-    return { basket: basket || 0, renang: renang || 0, total: (basket || 0) + (renang || 0) };
+    return await getMemberStats();
   } catch { return { basket: 0, renang: 0, total: 0 }; }
 }
 
 async function getPrestasiCount() {
   try {
-    const { count } = await supabase.from('prestasi').select('*', { count: 'exact', head: true });
-    return count || 0;
+    return await getSharedPrestasiCount();
   } catch { return 0; }
 }
 

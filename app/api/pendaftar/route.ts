@@ -4,6 +4,7 @@ import type { Pendaftar, Anggota } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { formatErrorMessage, withTimeout } from '@/lib/utils';
+import { revalidatePublicStats } from '@/lib/revalidation';
 
 
 function generateId(prefix: string = 'ID'): string {
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
+    revalidatePublicStats();
     return NextResponse.json({ success: true, data: data[0], message: 'Pendaftaran berhasil dikirim!' });
   } catch (error) {
     const msg = error instanceof Error ? error.message : JSON.stringify(error);
@@ -139,6 +141,7 @@ export async function PUT(request: Request) {
       if (insertError) throw insertError;
     }
 
+    revalidatePublicStats();
     return NextResponse.json({
       success: true,
       message: action === 'approve' ? 'Pendaftar berhasil diterima dan ditambahkan ke anggota' : 'Pendaftar ditolak',
@@ -167,6 +170,7 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('pendaftar').delete().eq('id', id);
     if (error) throw error;
 
+    revalidatePublicStats();
     return NextResponse.json({ success: true, message: 'Data pendaftar berhasil dihapus' });
   } catch (error) {
     const msg = formatErrorMessage(error, 'Gagal menghapus pendaftar');

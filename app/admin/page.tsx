@@ -14,14 +14,13 @@ export default function AdminDashboard() {
   const tahunIni = new Date().getFullYear();
 
   // SWR dengan polling 10 detik untuk data real-time
-  const { data: anggotaBasket } = useSWR('/api/anggota?status=Aktif&cabang=Basket', fetcher, { refreshInterval: 10000 });
-  const { data: anggotaRenang } = useSWR('/api/anggota?status=Aktif&cabang=Renang', fetcher, { refreshInterval: 10000 });
+  const { data: statsRes } = useSWR('/api/stats', fetcher, { refreshInterval: 10000 });
   const { data: pendaftarRes } = useSWR('/api/pendaftar?status=Pending', fetcher, { refreshInterval: 10000 });
   const { data: kasRes } = useSWR('/api/kas', fetcher, { refreshInterval: 10000 });
   const { data: pembayaranRes } = useSWR(`/api/pembayaran?bulan=${bulanIni}&tahun=${tahunIni}`, fetcher, { refreshInterval: 5000 }); // 5 detik untuk realtime
 
-  const basketAktif = anggotaBasket?.data?.length || 0;
-  const renangAktif = anggotaRenang?.data?.length || 0;
+  const basketAktif = statsRes?.data?.basket || 0;
+  const renangAktif = statsRes?.data?.renang || 0;
   const pendaftarBaru = pendaftarRes?.data?.length || 0;
 
   const kasData = kasRes?.data || [];

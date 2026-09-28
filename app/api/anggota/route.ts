@@ -4,6 +4,7 @@ import type { Anggota } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { withTimeout, formatErrorMessage } from '@/lib/utils';
+import { revalidatePublicStats } from '@/lib/revalidation';
 
 function generateId(prefix: string = 'ID'): string {
   const timestamp = Date.now();
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
+    revalidatePublicStats();
     return NextResponse.json({ success: true, data: data[0], message: 'Anggota berhasil ditambahkan' });
   } catch (error) {
     const msg = formatErrorMessage(error, 'Gagal menambahkan anggota');
@@ -100,6 +102,7 @@ export async function PUT(request: Request) {
 
     if (error) throw error;
 
+    revalidatePublicStats();
     return NextResponse.json({ success: true, message: 'Anggota berhasil diperbarui' });
   } catch (error) {
     const msg = formatErrorMessage(error, 'Gagal memperbarui anggota');
@@ -127,6 +130,7 @@ export async function DELETE(request: Request) {
     );
     if (error) throw error;
 
+    revalidatePublicStats();
     return NextResponse.json({ success: true, message: 'Data anggota berhasil dihapus' });
   } catch (error) {
     const msg = formatErrorMessage(error, 'Gagal menghapus anggota');

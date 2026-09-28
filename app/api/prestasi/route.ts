@@ -4,6 +4,7 @@ import type { Prestasi } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { formatErrorMessage, withTimeout } from '@/lib/utils';
+import { revalidatePublicStats } from '@/lib/revalidation';
 
 
 export async function GET(request: Request) {
@@ -91,6 +92,7 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
+    revalidatePublicStats();
     return NextResponse.json({
       success: true,
       data: data[0],
@@ -175,6 +177,7 @@ export async function PUT(request: Request) {
 
     if (error) throw error;
 
+    revalidatePublicStats();
     return NextResponse.json({ success: true, message: 'Prestasi berhasil diperbarui' });
   } catch (error) {
     const msg = formatErrorMessage(error, 'Gagal memperbarui prestasi');
@@ -214,6 +217,7 @@ export async function DELETE(request: Request) {
       }
     }
 
+    revalidatePublicStats();
     return NextResponse.json({ success: true, message: 'Data prestasi berhasil dihapus' });
   } catch (error) {
     const msg = formatErrorMessage(error, 'Gagal menghapus prestasi');
