@@ -14,6 +14,7 @@ import { fetchWithTimeout } from '@/lib/utils';
 
 const emptyForm = {
   nama: '',
+  cabang_olahraga: 'Basket' as 'Basket' | 'Renang',
   foto_url: '',
   spesialisasi: '',
   sertifikasi: '',
@@ -236,10 +237,11 @@ export default function AdminPelatihPage() {
     setEditing(p);
     setForm({
       nama: p.nama,
+      cabang_olahraga: p.cabang_olahraga || 'Basket',
       foto_url: p.foto_url || '',
       spesialisasi: p.spesialisasi,
       sertifikasi: p.sertifikasi || '',
-      pengalaman: p.pengalaman,
+      pengalaman: p.pengalaman || '',
       urutan: String(p.urutan),
     });
     setUploadError('');
@@ -248,14 +250,29 @@ export default function AdminPelatihPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploadError('');
+
+    // Validasi minimal
+    if (!form.nama.trim()) { setUploadError('Nama pelatih wajib diisi.'); return; }
+    if (!form.spesialisasi.trim()) { setUploadError('Spesialisasi wajib diisi.'); return; }
+
     setSaving(true);
     try {
       const method = editing ? 'PUT' : 'POST';
-      const body = { ...form, urutan: parseInt(form.urutan), ...(editing ? { id: editing.id } : {}) };
+      const payload = {
+        nama: form.nama.trim(),
+        cabang_olahraga: form.cabang_olahraga,
+        foto_url: form.foto_url || '',
+        spesialisasi: form.spesialisasi.trim(),
+        sertifikasi: form.sertifikasi.trim(),
+        pengalaman: form.pengalaman.trim(),
+        urutan: parseInt(form.urutan) || 99,
+        ...(editing ? { id: editing.id } : {}),
+      };
       const res = await fetchWithTimeout('/api/pelatih', {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (json.success) {
@@ -264,24 +281,38 @@ export default function AdminPelatihPage() {
         setShowForm(false);
         loadData();
       } else {
-        setUploadError(json.error || 'Gagal menyimpan data');
+        // Tampilkan error Supabase selengkap mungkin
+        const detail = json.error || 'Gagal menyimpan data pelatih';
+        console.error('[Pelatih save]', detail);
+        setUploadError(detail);
       }
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.');
+      const msg = err instanceof Error ? err.message : 'Gagal terhubung ke server — coba lagi.';
+      console.error('[Pelatih save error]', err);
+      setUploadError(msg);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus data pelatih ini?')) return;
+  const handleDelete = async (id: string, fotoUrl?: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data pelatih ini? Foto juga akan dihapus.')) return;
     try {
-      const res = await fetchWithTimeout(`/api/pelatih?id=${id}`, { method: 'DELETE' }, 12000);
+      // Kirim foto_url agar server bisa hapus file dari Storage sekaligus
+      const url = `/api/pelatih?id=${id}${fotoUrl ? `&foto_url=${encodeURIComponent(fotoUrl)}` : ''}`;
+      const res = await fetchWithTimeout(url, { method: 'DELETE' }, 12000);
       const json = await res.json();
-      if (json.success) { loadData(); }
-      else { alert(json.error || 'Gagal menghapus pelatih'); }
+      if (json.success) {
+        loadData();
+      } else {
+        const detail = json.error || 'Gagal menghapus pelatih';
+        console.error('[Pelatih delete]', detail);
+        alert(detail);
+      }
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus pelatih');
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus pelatih';
+      console.error('[Pelatih delete error]', err);
+      alert(msg);
     }
   };
 
@@ -353,7 +384,7 @@ export default function AdminPelatihPage() {
                   <button onClick={() => openEdit(pelatih)} className="p-2 text-neutral-light/40 hover:text-neutral-light rounded-lg hover:bg-neutral-light/10">
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => handleDelete(pelatih.id!)} className="p-2 text-red-400/70 hover:text-red-400 rounded-lg hover:bg-red-500/10">
+                  <button onClick={() => handleDelete(pelatih.id!, pelatih.foto_url)} className="p-2 text-red-400/70 hover:text-red-400 rounded-lg hover:bg-red-500/10">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -392,6 +423,29 @@ export default function AdminPelatihPage() {
                 <div className="col-span-2">
                   <label className="form-label">Nama Pelatih *</label>
                   <input value={form.nama} onChange={setField('nama')} placeholder="Nama lengkap" className="form-input" required />
+                </div>
+
+                {/* Cabang Olahraga */}
+                <div className="col-span-2">
+                  <label className="form-label">Cabang Olahraga *</label>
+                  <div className="flex gap-2 mt-1">
+                    {(['Basket', 'Renang'] as const).map((cab) => (
+                      <button
+                        key={cab}
+                        type="button"
+                        onClick={() => setForm(prev => ({ ...prev, cabang_olahraga: cab }))}
+                        className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider rounded-xl border transition-all duration-200 ${
+                          form.cabang_olahraga === cab
+                            ? cab === 'Basket'
+                              ? 'bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20'
+                              : 'bg-cyan-500 text-white border-cyan-500 shadow-lg shadow-cyan-500/20'
+                            : 'text-neutral-light/50 border-arena-500/50 hover:border-neutral-light/30'
+                        }`}
+                      >
+                        {cab === 'Basket' ? '🏀' : '🏊'} {cab}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Spesialisasi & Sertifikasi */}
