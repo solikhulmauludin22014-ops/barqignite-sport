@@ -13,13 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Hit Keep-Alive Endpoint
-        env:
-          APP_URL: ${{ secrets.APP_URL }}
         run: |
-          TARGET_URL="$APP_URL"
-          if [ -z "$TARGET_URL" ]; then
-            TARGET_URL="https://barqignite-sport.vercel.app"
-          fi
+          TARGET_URL="https://barqignite-sport.vercel.app"
           
           echo "Sending keep-alive ping to: $TARGET_URL/api/keepalive"
           HTTP_RESPONSE=$(curl -s -o response.json -w "%{http_code}" "$TARGET_URL/api/keepalive")
